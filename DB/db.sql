@@ -1,0 +1,1 @@
+select nama FROM users
