@@ -4,7 +4,6 @@
   <?php include "head.inc.php"; ?>
   <title>OLAMS - User List</title>
 </head>
-
 <body>
   <div class="wrapper">
     <?php include "components/sidebar.inc.php"; ?>
@@ -25,7 +24,7 @@
                         <label for="inputSearch" class="ms-3 me-2">Search</label>
                         <input type="text" name="search" id="inputSearch" placeholder="Enter fullname, username, email" class="form-control form-control-sm">
                         <label for="inputRole" class="mx-2">Role</label>
-                        <select name="filter_role" id="inputRole" class="form-control form-control-sm" style="width: 200px;">
+                        <select name="filter_role" id="inputRole" class="form-select form-control-sm" style="width: 200px;">
                           <option value="">Select Role</option>
                           <option value="">User</option>
                           <option value="">Leader</option>
@@ -103,6 +102,61 @@
                       </tr>
                       <tr>
                         <th scope="row">5</th>
+                        <td>Fazri Alfauzi</td>
+                        <td>Fazri</td>
+                        <td>fazri@gmail.com</td>
+                        <td>Software Development</td>
+                        <td>
+                          <a href="userlist_update.php" class="text-warning"><i class="align-middle" data-feather="edit"></i></a>
+                          <a href="userlist_delete.php" class="text-danger"><i class="align-middle ms-3" data-feather="trash-2"></i></a>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th scope="row">6</th>
+                        <td>Fazri Alfauzi</td>
+                        <td>Fazri</td>
+                        <td>fazri@gmail.com</td>
+                        <td>Software Development</td>
+                        <td>
+                          <a href="userlist_update.php" class="text-warning"><i class="align-middle" data-feather="edit"></i></a>
+                          <a href="userlist_delete.php" class="text-danger"><i class="align-middle ms-3" data-feather="trash-2"></i></a>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th scope="row">7</th>
+                        <td>Fazri Alfauzi</td>
+                        <td>Fazri</td>
+                        <td>fazri@gmail.com</td>
+                        <td>Software Development</td>
+                        <td>
+                          <a href="userlist_update.php" class="text-warning"><i class="align-middle" data-feather="edit"></i></a>
+                          <a href="userlist_delete.php" class="text-danger"><i class="align-middle ms-3" data-feather="trash-2"></i></a>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th scope="row">8</th>
+                        <td>Fazri Alfauzi</td>
+                        <td>Fazri</td>
+                        <td>fazri@gmail.com</td>
+                        <td>Software Development</td>
+                        <td>
+                          <a href="userlist_update.php" class="text-warning"><i class="align-middle" data-feather="edit"></i></a>
+                          <a href="userlist_delete.php" class="text-danger"><i class="align-middle ms-3" data-feather="trash-2"></i></a>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th scope="row">9</th>
+                        <td>Fazri Alfauzi</td>
+                        <td>Fazri</td>
+                        <td>fazri@gmail.com</td>
+                        <td>Software Development</td>
+                        <td>
+                          <a href="userlist_update.php" class="text-warning"><i class="align-middle" data-feather="edit"></i></a>
+                          <a href="userlist_delete.php" class="text-danger"><i class="align-middle ms-3" data-feather="trash-2"></i></a>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th scope="row">10</th>
                         <td>Fazri Alfauzi</td>
                         <td>Fazri</td>
                         <td>fazri@gmail.com</td>
