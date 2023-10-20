@@ -1,9 +1,9 @@
 <?php
+session_start();
 include __DIR__ . "/include/conn.inc.php";
 include __DIR__ . "/include/csrf_token.inc.php";
 include __DIR__ . "/include/baseUrl.inc.php";
 
-session_start();
 if(!isset( $_SESSION["user_id"])){
     header("Location: login/login.php");
     exit();
@@ -93,7 +93,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 <head>
     <?php include "head.inc.php"; ?>
-    <title>OLAMS - Add project</title>
+    <title>OLAMS - Edit project</title>
 </head>
 
 <body>
@@ -103,7 +103,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <?php include "components/navbar.inc.php"; ?>
             <main class="content">
                 <div class="container-fluid p-0">
-                    <h1 class="h1 mb-3"><strong>Add Project</strong></h1>
+                    <h1 class="h1 mb-3"><strong>Edit Project</strong></h1>
                     <div class="row">
                         <div class="col-12">
                             <div class="card">
