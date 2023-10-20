@@ -1,6 +1,5 @@
-<?php 
-$baseUrl = isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] != 'off' ? 'https' : 'http' .
-"://".$_SERVER['SERVER_NAME'].
-$_SERVER['PHP_SELF'];
+<?php
+$baseUrl = "http://localhost/olams";
+
 // var_dump($baseUrl);
 ?>
