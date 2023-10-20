@@ -20,69 +20,73 @@ $fullnameErr = $usernameErr = $passwordErr = $emailErr = $roleErr = "";
 $fullname = $username = $email = $password = $role = NULL;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $fullname = isset($_POST['name']) ? cleanValue($_POST['name']) : NULL;
-  $username = isset($_POST['username']) ? cleanValue($_POST['username']) : NULL;
-  $email = isset($_POST['email']) ? cleanValue($_POST['email']) : NULL;
-  $password = isset($_POST['password']) ? cleanValue($_POST['password']) : NULL;
-  $role = isset($_POST['role_id']) ? cleanValue($_POST['role_id']) : null;
+  if (isset($_POST['csrf_token']) && isCsrfTokenValid($_POST['csrf_token'])) {
+    $fullname = isset($_POST['name']) ? cleanValue($_POST['name']) : NULL;
+    $username = isset($_POST['username']) ? cleanValue($_POST['username']) : NULL;
+    $email = isset($_POST['email']) ? cleanValue($_POST['email']) : NULL;
+    $password = isset($_POST['password']) ? cleanValue($_POST['password']) : NULL;
+    $role = isset($_POST['role_id']) ? cleanValue($_POST['role_id']) : null;
 
-  if (empty($fullname)) {
-    $fullnameErr = "Nama harus diisi.";
-  } elseif (!preg_match("/^[A-Za-z.' ]*$/", $fullname) || strlen($fullname) < 3 || strlen($fullname) > 60) {
-    $fullnameErr = "Nama harus terdiri dari 3 hingga 60 karakter huruf, tanda kutip, dan titik diperbolehkan.";
-  }
+    if (empty($fullname)) {
+      $fullnameErr = "Nama harus diisi.";
+    } elseif (!preg_match("/^[A-Za-z.' ]*$/", $fullname) || strlen($fullname) < 3 || strlen($fullname) > 60) {
+      $fullnameErr = "Nama harus terdiri dari 3 hingga 60 karakter huruf, tanda kutip, dan titik diperbolehkan.";
+    }
 
-  if (empty($username)) {
-    $usernameErr = "Username harus diisi.";
-  } elseif (!preg_match("/^[A-Za-z.' ]*$/", $username) || strlen($username) < 3 || strlen($username) > 60) {
-    $usernameErr = "Username harus terdiri dari 3 hingga 60 karakter huruf, tanda kutip, dan titik.";
-  }
+    if (empty($username)) {
+      $usernameErr = "Username harus diisi.";
+    } elseif (!preg_match("/^[A-Za-z.' ]*$/", $username) || strlen($username) < 3 || strlen($username) > 60) {
+      $usernameErr = "Username harus terdiri dari 3 hingga 60 karakter huruf, tanda kutip, dan titik.";
+    }
 
-  if (empty($email)) {
-    $emailErr = "Email tidak boleh kosong.";
-  } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) < 6 || strlen($email) > 30) {
-    $emailErr = "Email tidak valid. Harus memiliki panjang antara 6 hingga 30 karakter.";
-  }
+    if (empty($email)) {
+      $emailErr = "Email tidak boleh kosong.";
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) < 6 || strlen($email) > 30) {
+      $emailErr = "Email tidak valid. Harus memiliki panjang antara 6 hingga 30 karakter.";
+    }
 
-  if (empty($password)) {
-    $passwordErr = 'Password harus diisi.';
-  } elseif (strlen($password) < 8) {
-    $passwordErr = 'Password minimal harus terdiri dari 8 karakter.';
-  } elseif (!preg_match("/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/", $password)) {
-    $passwordErr = 'Password harus mengandung setidaknya satu huruf kecil, satu huruf besar, dan satu angka.';
+    if (empty($password)) {
+      $passwordErr = 'Password harus diisi.';
+    } elseif (strlen($password) < 8) {
+      $passwordErr = 'Password minimal harus terdiri dari 8 karakter.';
+    } elseif (!preg_match("/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/", $password)) {
+      $passwordErr = 'Password harus mengandung setidaknya satu huruf kecil, satu huruf besar, dan satu angka.';
+    } else {
+      // Hash password 
+      $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+    }
+
+    if (empty($role)) {
+      $roleErr = "Anda harus memilih (role).";
+    }
+
+
+    $checkEmail = "SELECT email FROM users WHERE email='$email' LIMIT 1";
+    $resulCheckEmail = mysqli_query($conn, $checkEmail);
+    $emailSudahAda = mysqli_num_rows($resulCheckEmail) > 0;
+    if ($emailSudahAda) {
+      echo "<script>alert('Email Sudah Digunakan')</script>";
+    }
+
+    if (empty($fullnameErr) && empty($usernameErr) && empty($emailErr) && empty($passwordErr) && empty($roleErr) && !$emailSudahAda) {
+      $queryInsert = "INSERT INTO users (name, username, email, password, role_id) VALUES (?, ?, ?, ?, ?)";
+      $stmt = mysqli_prepare($conn, $queryInsert);
+      mysqli_stmt_bind_param(
+        $stmt,
+        "sssss",
+        $fullname,
+        $username,
+        $email,
+        $hashedPassword,
+        $role
+      );
+
+      mysqli_stmt_execute($stmt);
+      echo "<script>alert('Data berhasil ditambahkan')</script>";
+      echo "<script>window.location.replace('userlist.php')</script>";
+    }
   } else {
-    // Hash password 
-    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-  }
-
-  if (empty($role)) {
-    $roleErr = "Anda harus memilih (role).";
-  }
-
-
-  $checkEmail = "SELECT email FROM users WHERE email='$email' LIMIT 1";
-  $resulCheckEmail = mysqli_query($conn, $checkEmail);
-  $emailSudahAda = mysqli_num_rows($resulCheckEmail) > 0;
-  if ($emailSudahAda) {
-    echo "<script>alert('Email Sudah Digunakan')</script>";
-  }
-
-  if (empty($fullnameErr) && empty($usernameErr) && empty($emailErr) && empty($passwordErr) && empty($roleErr) && !$emailSudahAda) {
-    $queryInsert = "INSERT INTO users (name, username, email, password, role_id) VALUES (?, ?, ?, ?, ?)";
-    $stmt = mysqli_prepare($conn, $queryInsert);
-    mysqli_stmt_bind_param(
-      $stmt,
-      "sssss",
-      $fullname,
-      $username,
-      $email,
-      $hashedPassword,
-      $role
-    );
-
-    mysqli_stmt_execute($stmt);
-    echo "<script>alert('Data berhasil ditambahkan')</script>";
-    echo "<script>window.location.replace('userlist.php')</script>";
+    $TokenErr = "Invalid CSRF token";
   }
 }
 ?>
