@@ -1,12 +1,13 @@
 <?php
+session_start();
 include __DIR__ . "/include/baseUrl.inc.php";
 include __DIR__ . "/include/conn.inc.php";
 include __DIR__ . "/include/csrf_token.inc.php";
 
-// if (!isset($_SESSION['user_id'])) {
-//   header("Location: login/login.php");
-//   exit;
-// }
+if (!isset($_SESSION['user_id'])) {
+  header("Location: login/login.php");
+  exit;
+}
 
 $limit = 5;
 $halaman_aktif = isset($_GET['page']) ? $_GET['page'] : 1;
@@ -76,9 +77,9 @@ $jumlah_halaman = ceil($jumlah_semua_data / $limit);
                   <div class="col-md-6">
                     <div class="d-flex align-items-center">
                       <form action="<?= cleanValue($_SERVER['PHP_SELF']); ?>" method="get" class="d-flex">
-                        <label for="inputSearch" class="ms-3 me-2">Search</label>
+                        <label for="inputSearch" class="ms-3 me-2 mt-1">Search</label>
                         <input type="text" name="search" id="inputSearch" placeholder="Enter fullname, username, email" class="form-control form-control-sm" value="<?= $search ?>">
-                        <label for="inputRole" class="mx-2">Role</label>
+                        <label for="inputRole" class="mx-2 mt-1">Role</label>
                         <select name="filter_role" id="inputRole" class="form-select form-control-sm" style="width: 200px;">
                           <option value="">Select Role</option>
                           <?php foreach ($roleOptions as $option) : ?>
@@ -88,12 +89,12 @@ $jumlah_halaman = ceil($jumlah_semua_data / $limit);
                             </option>
                           <?php endforeach; ?>
                         </select>
-                        <button type="submit" class="btn btn-sm btn-primary ms-2">Search</button>
-                        <a href="<?= cleanValue($_SERVER['PHP_SELF']); ?>" class="btn btn-sm btn-warning ms-1 text-white text-decoration-none">Reset</a>
+                        <button type="submit" class="btn btn-sm btn-primary ms-2 mt-1">Search</button>
+                        <a href="<?php echo cleanValue($_SERVER['PHP_SELF']);?>" class="btn btn-warning btn-sm ms-2 mt-1">Reset</a>
                       </form>
                     </div>
                   </div>
-                  <div class="col-md-6 text-end">
+                  <div class="col-md-6 text-end mt-2">
                     <a href="userlist_add.php" class="btn-sm btn-success me-3 text-white text-decoration-none">+ Add User</a>
                   </div>
                 </div>
@@ -141,7 +142,7 @@ $jumlah_halaman = ceil($jumlah_semua_data / $limit);
                         <?php if ($halaman_aktif > 1) : ?>
                           <?php $prevPage = $halaman_aktif - 1; ?>
                           <li class="page-item">
-                            <a class="page-link text-decoration-none" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $prevPage; ?><?php if (!empty($search)) {echo '&search=' . $search;} ?>
+                            <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $prevPage; ?><?php if (!empty($search)) {echo '&search=' . $search;} ?>
                               <?php if (!empty($filter_role)) {
                             echo '&filter_role=' . $filter_role;
                           } ?>">Previous</a>
@@ -154,7 +155,7 @@ $jumlah_halaman = ceil($jumlah_semua_data / $limit);
 
                         <?php for ($i = 1; $i <= $jumlah_halaman; $i++) : ?>
                           <li class="page-item<?= $i == $halaman_aktif ? ' active' : '' ?>">
-                            <a class="page-link text-decoration-none" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $i; ?><?php if (!empty($search)) {echo '&search=' . $search;} ?>
+                            <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $i; ?><?php if (!empty($search)) {echo '&search=' . $search;} ?>
                             <?php if (!empty($filter_role)) {
                             echo '&filter_role=' . $filter_role;
                           } ?>"><?= $i ?></a>
@@ -164,7 +165,7 @@ $jumlah_halaman = ceil($jumlah_semua_data / $limit);
                         <?php if ($halaman_aktif < $jumlah_halaman) : ?>
                           <?php $nextPage = $halaman_aktif + 1; ?>
                           <li class="page-item">
-                            <a class="page-link text-decoration-none" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $nextPage; ?><?php if (!empty($search)) {echo '&search=' . $search;} ?>
+                            <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $nextPage; ?><?php if (!empty($search)) {echo '&search=' . $search;} ?>
                             <?php if (!empty($filter_role)) {
                             echo '&filter_role=' . $filter_role;
                           } ?>">Next</a>
