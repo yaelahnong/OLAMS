@@ -31,7 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 				if ($user && password_verify($password, $user["password"])) {
 					// Password cocok, login berhasil
 					$_SESSION['user_id'] = $user['user_id'];
-					header("Location: dashboard.php");
+					header("Location: ../userlist.php");
 					exit;
 				} else {
 					$error = "Username dan Password salah!!";
@@ -59,7 +59,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 	<title>Sign In | Olams</title>
 
-	<link href="../template/css/app.css" rel="stylesheet">
+	<link href="../styles/app.css" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 
 	<style>
@@ -132,7 +132,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 		</div>
 	</main>
 
-	<script src="../template/js/app.js"></script>
+	<script src="../style/app.js"></script>
 
 </body>
 
