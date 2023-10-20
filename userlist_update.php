@@ -4,6 +4,11 @@ include __DIR__ . "/include/baseUrl.inc.php";
 include __DIR__ . "/include/conn.inc.php";
 include __DIR__ . "/include/csrf_token.inc.php";
 
+if (!isset($_SESSION['user_id'])) {
+  header("Location: login/login.php");
+  exit;
+}
+
 $roleQuery = "SELECT role_id, name FROM m_roles";
 $roleData = mysqli_prepare($conn, $roleQuery);
 mysqli_stmt_execute($roleData);
@@ -123,7 +128,7 @@ if (isset($_GET['id'])) {
       <?php include "components/navbar.inc.php"; ?>
       <main class="content">
         <div class="container-fluid p-0">
-          <h1 class="h1 mb-3"><strong>Edit User</strong></h1>
+          <h1 class="h1 mb-3"><strong>Update User</strong></h1>
           <div class="row">
             <div class="col-12">
               <div class="card">
