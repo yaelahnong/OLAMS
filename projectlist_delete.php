@@ -4,8 +4,11 @@ include __DIR__ . "/include/conn.inc.php";
 include __DIR__ . "/include/csrf_token.inc.php";
 include __DIR__ . "/include/baseUrl.inc.php";
 
-// var_dump("way");
-// exit;
+session_start();
+if (!isset($_SESSION["user_id"])) {
+    header("Location: login/login.php");
+    exit();
+}
 
 $sekarang = strval(date("Y-m-d H:i:s"));
 if (isset($_GET['id']) && isset($_SESSION['user_id'])) {

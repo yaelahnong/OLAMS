@@ -103,7 +103,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <?php include "components/navbar.inc.php"; ?>
             <main class="content">
                 <div class="container-fluid p-0">
-                    <h1 class="h1 mb-3"><strong>Add Project</strong></h1>
+                    <h1 class="h1 mb-3"><strong>Edit Project</strong></h1>
                     <div class="row">
                         <div class="col-12">
                             <div class="card">

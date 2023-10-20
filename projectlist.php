@@ -120,7 +120,7 @@ $data = mysqli_fetch_all($result2, MYSQLI_ASSOC);
                       <?php if (count($data) > 0) : ?>
                         <?php foreach ($data as $key => $row) : ?>
                           <tr>
-                            <th scope="row"><?= $key + 1; ?></th>
+                            <th scope="row"><?= $key + 1 + $offset ; ?></th>
                             <td><?= $row['project_name']; ?></td>
                             <td>
                               <a href="projectlist_update.php?id=<?= $row['project_id']; ?>" class="text-warning"><i class="align-middle" data-feather="edit"></i></a>
