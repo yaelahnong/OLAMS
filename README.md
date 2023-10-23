@@ -1,6 +1,18 @@
 # OLAMS
 Overtime, Leave, Attendance Management System
 
+technology STACK
+*client-side
+1.HTML 5
+2.CSS3 + Bootstrap5
+3.JavaScript ES6 
+
+*Server-Side
+1.PHP 8.1.23 + Apache 2.4.56
+
+*Database
+1.MYSQL 5.6
+
 template
 https://adminkit.io/docs/getting-started/introduction/
 
