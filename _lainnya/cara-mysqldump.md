@@ -1,0 +1,1 @@
+mysqldump -u root -p --databases sewa_lapangan --result-file=/var/www/backupdb/backup_sewa_lapangan_`date '+%Y-%m-%d@%H:%M'`.sql

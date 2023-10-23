@@ -5,6 +5,13 @@ include __DIR__ . "/include/csrf_token.inc.php";
 include __DIR__ . "/include/baseUrl.inc.php";
 
 // var_dump($baseUrl);
+function isUserLoggedIn() {
+    return isset($_SESSION["user_id"]);
+}
+if (isUserLoggedIn()) {
+    header("Location: userlist.php");
+    exit();
+}
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
