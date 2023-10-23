@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 		$password = cleanValue($_POST["password"]);
 
 		if (empty($username) || empty($password)) {
-			$error = "username dan password harus di isi.";
+			$error = "Username dan password harus di isi.";
 		} else {
 			// Mencari pengguna berdasarkan username
 			$query = "SELECT user_id, username, password FROM users WHERE username = ?";
@@ -31,7 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 				if ($user && password_verify($password, $user["password"])) {
 					// Password cocok, login berhasil
 					$_SESSION['user_id'] = $user['user_id'];
-					header("Location: ../userlist.php");
+					header("Location: userlist.php");
 					exit;
 				} else {
 					$error = "Username dan Password salah!!";
@@ -62,7 +62,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 						<div class="text-center mt-4">
 							<h1 class="h2">Welcome Back To OLAMS</h1>
 							<p class="lead">
-								Sign in to your account to continue
+								Sign in with your account to continue
 							</p>
 						</div>
 						<div class="card">
@@ -76,15 +76,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 									</div>
 								<?php } ?>
 								<div class="m-sm-3">
-									<form method="post" action="login.php">
+									<form method="post" action="<?= cleanValue($_SERVER['PHP_SELF']); ?>">
 										<input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
 										<div class="mb-3">
 											<label class="form-label">Username</label>
-											<input class="form-control form-control-lg" type="text" name="username" placeholder="Enter your Username"/>
+											<input class="form-control form-control-lg" type="text" name="username" placeholder="Enter your Username" />
 										</div>
 										<div class="mb-3">
 											<label class="form-label">Password</label>
-											<input class="form-control form-control-lg" type="password" name="password" placeholder="Enter your Password"/>
+											<input class="form-control form-control-lg" type="password" name="password" placeholder="Enter your Password" />
 										</div>
 										<div class="d-grid gap-2 mt-3">
 											<button type="submit" class="btn btn-lg btn-success">Login</button>
