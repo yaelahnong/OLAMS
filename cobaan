@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <?php include "head.inc.php"; ?>
+  <title>OLAMS - User List</title>
+</head>
+
+<body>
+  <div class="wrapper">
+    <?php include "components/sidebar.inc.php"; ?>
+    <div class="main">
+      <?php include "components/navbar.inc.php"; ?>
+      <main class="content">
+        <div class="container-fluid p-0">
+          <h1 class="h1 mb-3 judul_halaman"><strong>Dashboard</strong></h1>
+          <div class="row">
+            <div class="col-sm-3">
+              <div class="card ml-auto">
+                <!-- ... Konten card pertama ... -->
+              </div>
+              <div class="card">
+                <!-- ... Konten card kedua ... -->
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <div class="card ml-auto">
+                <!-- ... Konten card ketiga ... -->
+              </div>
+              <div class="card">
+                <!-- ... Konten card keempat ... -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+      <?php include "components/footer.inc.php"; ?>
+    </div>
+  </div>
+  <?php include "script.inc.php"; ?>
+</body>
+
+</html>
