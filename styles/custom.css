@@ -33,3 +33,24 @@
 .judul-halaman {
   color: red;
 }
+
+.alert-danger:not(.alert-outline):not(.alert-outline-coloured) {
+  background: #f8d7da;
+}
+
+.alert {
+  color: #212529;
+  display: flex;
+  padding: 0;
+}
+
+.alert-danger {
+  --bs-alert-color: var(--bs-danger-text-emphasis);
+  --bs-alert-bg: var(--bs-danger-bg-subtle);
+  --bs-alert-border-color: var(--bs-danger-border-subtle);
+  --bs-alert-link-color: var(--bs-danger-text-emphasis);
+}
+
+.alert-dismissible {
+  padding-right: 2.85rem;
+}
