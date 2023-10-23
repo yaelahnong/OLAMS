@@ -1,8 +1,8 @@
 <?php
 session_start();
-include __DIR__ . "/../include/conn.inc.php";
-include __DIR__ . "/../include/csrf_token.inc.php";
-include __DIR__ . "/../include/baseUrl.inc.php";
+include __DIR__ . "/include/conn.inc.php";
+include __DIR__ . "/include/csrf_token.inc.php";
+include __DIR__ . "/include/baseUrl.inc.php";
 
 // var_dump($baseUrl);
 
@@ -49,41 +49,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html lang="en">
 
 <head>
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<meta name="description" content="Responsive Admin &amp; Dashboard Template based on Bootstrap 5">
-	<meta name="author" content="AdminKit">
-	<meta name="keywords" content="adminkit, bootstrap, bootstrap 5, admin, dashboard, template, responsive, css, sass, html, theme, front-end, ui kit, web">
-	<link rel="canonical" href="../template/css/app.css" />
-
+	<?php include "head.inc.php"; ?>
 	<title>Sign In | Olams</title>
-
-	<link href="../styles/app.css" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-
-	<style>
-		.alert-danger:not(.alert-outline):not(.alert-outline-coloured) {
-			background: #f8d7da;
-		}
-
-		.alert {
-			color: #212529;
-			display: flex;
-			padding: 0;
-		}
-
-		.alert-danger {
-			--bs-alert-color: var(--bs-danger-text-emphasis);
-			--bs-alert-bg: var(--bs-danger-bg-subtle);
-			--bs-alert-border-color: var(--bs-danger-border-subtle);
-			--bs-alert-link-color: var(--bs-danger-text-emphasis);
-		}
-
-		.alert-dismissible {
-			padding-right: 2.85rem;
-		}
-	</style>
 </head>
 
 <body>
@@ -113,11 +80,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 										<input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
 										<div class="mb-3">
 											<label class="form-label">Username</label>
-											<input class="form-control form-control-lg" type="text" name="username" placeholder="Enter your Username" required/>
+											<input class="form-control form-control-lg" type="text" name="username" placeholder="Enter your Username"/>
 										</div>
 										<div class="mb-3">
 											<label class="form-label">Password</label>
-											<input class="form-control form-control-lg" type="password" name="password" placeholder="Enter your Password" required/>
+											<input class="form-control form-control-lg" type="password" name="password" placeholder="Enter your Password"/>
 										</div>
 										<div class="d-grid gap-2 mt-3">
 											<button type="submit" class="btn btn-lg btn-success">Login</button>
@@ -131,9 +98,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 			</div>
 		</div>
 	</main>
-
-	<script src="../style/app.js"></script>
-
+	<?php include "script.inc.php"; ?>
 </body>
 
 </html>
