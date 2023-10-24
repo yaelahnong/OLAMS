@@ -103,7 +103,7 @@ $jumlah_halaman = ceil($jumlah_semua_data / $limit);
                                         </div>
                                     </div>
                                     <div class="col-md-5 text-end">
-                                        <a href="attendance_add.php" class="btn-sm btn-success me-3 text-white text-decoration-none">+ Add User</a>
+                                        <a href="attendance_add.php" class="btn-sm btn-success me-3 text-white text-decoration-none">+ Add Attendance</a>
                                     </div>
                                 </div>
                                 <div class="table-responsive">

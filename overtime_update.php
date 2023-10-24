@@ -28,10 +28,34 @@ mysqli_stmt_execute($projectData);
 $resultProject = mysqli_stmt_get_result($projectData);
 $resultProject = mysqli_fetch_all($resultProject, MYSQLI_ASSOC);
 
+if (isset($_GET['id'])) {
+    $overtimeId = cleanValue($_GET['id']);
+    // Query untuk mendapatkan data overtime berdasarkan ID
+    $queryOvertime = "SELECT user_id, project_id, divisi_id, category, type, reason, start_date, finish_date FROM overtimes WHERE overtime_id = ?";
+    $stmt = mysqli_prepare($conn, $queryOvertime);
+    mysqli_stmt_bind_param($stmt, "i", $overtimeId);
+    mysqli_stmt_execute($stmt);
+    $resultOvertime = mysqli_stmt_get_result($stmt);
+    $row = mysqli_fetch_assoc($resultOvertime);
+
+    if ($row) {
+        $user_id = $row['user_id'];
+        $project_id = $row['project_id'];
+        $divisi_id = $row['divisi_id'];
+        $category = $row['category'];
+        $type = $row['type'];
+        $reason = $row['reason'];
+        $start_date = date('Y-m-d\TH:i', strtotime($row['start_date']));
+        $finish_date = date('Y-m-d\TH:i', strtotime($row['finish_date']));
+    }
+}
+
+
 $fullnameErr = $divisionErr = $reasonErr = $typeErr = $start_dateErr = $finish_dateErr = $categoryErr = $projectErr = "";
 $fullname = $division = $reason = $type = $startDate = $finishDate = $category = $project = NULL;
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if (isset($_POST['update']) && isset($_POST['overtime_id'])) {
     if (isset($_POST['csrf_token']) && isCsrfTokenValid($_POST['csrf_token'])) {
+        $overtimeId = cleanValue($_POST['overtime_id']);
         $fullname = isset($_POST["user_id"]) ? cleanValue($_POST["user_id"]) : NULL;
         $project_id = isset($_POST["project_id"]) ? cleanValue($_POST["project_id"]) : NULL;
         $divisi_id = isset($_POST["divisi_id"]) ? cleanValue($_POST["divisi_id"]) : NULL;
@@ -40,7 +64,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $reason = isset($_POST["reason"]) ? cleanValue($_POST["reason"]) : NULL;
         $start_date = isset($_POST["start_date"]) ? cleanValue($_POST["start_date"]) : NULL;
         $finish_date = isset($_POST["finish_date"]) ? cleanValue($_POST["finish_date"]) : NULL;
-        // $effective_time = isset($_POST["effective_time"]) ? cleanValue($_POST["effective_time"]) : NULL;
 
         if (empty($fullname)) {
             $fullnameErr = "Full Name is required";
@@ -68,20 +91,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         if (empty($fullnameErr) && empty($projectErr) && empty($divisionErr) && empty($categoryErr) && empty($typeErr) && empty($start_dateErr) && empty($finish_dateErr) && empty($reasonErr)) {
-            $insertQuery = "INSERT INTO overtimes (user_id, project_id, divisi_id, category, type, start_date, finish_date, reason, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            $updateQuery = "UPDATE overtimes SET user_id = ?, project_id = ?, divisi_id = ?, category = ?, type = ?, start_date = ?, finish_date = ?, reason = ?, updated_by = ? WHERE overtime_id = ?";
+            $updateStatement = mysqli_prepare($conn, $updateQuery);
 
-            $insertStatement = mysqli_prepare($conn, $insertQuery);
-            mysqli_stmt_bind_param($insertStatement, "iiisssssi", $fullname, $project_id, $divisi_id, $category, $type, $start_date, $finish_date, $reason, $user_id);
+            mysqli_stmt_bind_param($updateStatement, "iiisssssii", $fullname, $project_id, $divisi_id, $category, $type, $start_date, $finish_date, $reason, $user_id, $overtimeId);
 
-            if (mysqli_stmt_execute($insertStatement)) {
-                echo "<script>alert('Overtime data added successfully.')</script>";
+            if (mysqli_stmt_execute($updateStatement)) {
+                echo "<script>alert('Overtime data updated successfully.')</script>";
                 echo "<script>window.location.href = 'overtimelist.php'</script>";
                 exit();
             } else {
-                echo "Failed to save data.";
+                echo "Failed to update data.";
             }
 
-            mysqli_stmt_close($insertStatement);
+            mysqli_stmt_close($updateStatement);
         }
     } else {
         $TokenErr = "Invalid CSRF token";
@@ -105,7 +128,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <?php include "components/navbar.inc.php"; ?>
             <main class="content">
                 <div class="container-fluid p-0">
-                    <h1 class="h1 mb-3"><strong>Add Overtime</strong></h1>
+                    <h1 class="h1 mb-3"><strong>Update Overtime</strong></h1>
                     <div class="row">
                         <div class="col-12">
                             <div class="card">
@@ -114,23 +137,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 <div class="card-body">
                                     <form action="<?= cleanValue($_SERVER['PHP_SELF']) ?>" method="post">
                                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                                        <input type="hidden" name="overtime_id" value="<?= $overtimeId; ?>">
                                         <div class="row">
                                             <div class="mb-3 col-md-6">
                                                 <label class="form-label" for="inputUser">User</label>
                                                 <select name="user_id" id="inputUser" class="form-select">
                                                     <option value="">Select User</option>
                                                     <?php foreach ($resultUsers as $user) : ?>
-                                                        <option value="<?= $user['user_id'] ?>"><?= $user['name'] ?></option>
+                                                        <option value="<?= $user['user_id'] ?>" <?= $user['user_id'] == $user_id ? 'selected' : '' ?>>
+                                                            <?= $user['name'] ?>
+                                                        </option>
                                                     <?php endforeach; ?>
                                                 </select>
                                                 <span class="error" style="color: red;"> <?= $fullnameErr; ?> </span>
                                             </div>
+
                                             <div class="mb-3 col-md-6">
                                                 <label class="form-label" for="inputProject">Project</label>
                                                 <select name="project_id" id="inputProject" class="form-select">
                                                     <option value="">Select Project</option>
                                                     <?php foreach ($resultProject as $project) : ?>
-                                                        <option value="<?= $project['project_id'] ?>"><?= $project['project_name'] ?></option>
+                                                        <option value="<?= $project['project_id'] ?>" <?= $project['project_id'] == $project_id ? 'selected' : '' ?>><?= $project['project_name'] ?></option>
                                                     <?php endforeach; ?>
                                                 </select>
                                                 <span class="error" style="color: red;"> <?= $projectErr; ?> </span>
@@ -142,17 +169,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                                 <select name="divisi_id" id="inputDivision" class="form-select">
                                                     <option value="">Select Division</option>
                                                     <?php foreach ($resultDivision as $division) : ?>
-                                                        <option value="<?= $division['division_id'] ?>"><?= $division['division_name'] ?></option>
+                                                        <option value="<?= $division['division_id'] ?>" <?= $division['division_id'] == $divisi_id ? 'selected' : '' ?>><?= $division['division_name'] ?></option>
                                                     <?php endforeach; ?>
                                                 </select>
                                                 <span class="error" style="color: red;"> <?= $divisionErr; ?> </span>
                                             </div>
                                             <div class="mb-3 col-md-6">
                                                 <label class="form-label">Category</label>
-                                                <?php $categoryOptions = ["Weekend", "Weekday"];
-                                                foreach ($categoryOptions as $categoryOption) : ?>
+                                                <?php $categoryOptions = ["Weekend", "Weekday"]; ?>
+                                                <?php foreach ($categoryOptions as $categoryOption) : ?>
                                                     <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="category" id="category_<?= $categoryOption ?>" value="<?= $categoryOption ?>" <?= $category == $categoryOption ? 'checked' : '' ?>>
+                                                        <input class="form-check-input" type="radio" name="category" id="category_<?= $categoryOption ?>" value="<?= $categoryOption ?>" <?= $category == $categoryOption ? 'checked' : ($row['category'] == $categoryOption ? 'checked' : '') ?>>
                                                         <label class="form-check-label" for="category_<?= $categoryOption ?>"><?= $categoryOption ?></label>
                                                     </div>
                                                 <?php endforeach; ?>
@@ -162,10 +189,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         <div class="row">
                                             <div class="mb-3 col-md-6">
                                                 <label class="form-label">Type</label>
-                                                <?php $typeOptions = ["Normal", "Urgent", "Business Trip"];
-                                                foreach ($typeOptions as $typeOption) : ?>
+                                                <?php $typeOptions = ["Normal", "Urgent", "Business Trip"]; ?>
+                                                <?php foreach ($typeOptions as $typeOption) : ?>
                                                     <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="type" id="type_<?= $typeOption ?>" value="<?= $typeOption ?>" <?= $type == $typeOption ? 'checked' : '' ?>>
+                                                        <input class="form-check-input" type="radio" name="type" id="type_<?= $typeOption ?>" value="<?= $typeOption ?>" <?= $type == $typeOption ? 'checked' : ($row['type'] == $typeOption ? 'checked' : '') ?>>
                                                         <label class="form-check-label" for="type_<?= $typeOption ?>"><?= $typeOption ?></label>
                                                     </div>
                                                 <?php endforeach; ?>
@@ -184,13 +211,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                             </div>
                                             <div class="mb-3 col-md-6">
                                                 <label class="form-label" for="inputReason">Reason</label>
-                                                <textarea class="form-control" name="reason" id="inputReason" placeholder="Enter Reason"><?= $reason; ?></textarea>
+                                                <textarea class="form-control" name="reason" id="inputReason" placeholder="Enter Reason"><?= $reason; ?><?php echo $row['reason'] ?></textarea>
                                                 <span class="error" style="color: red;"> <?= $reasonErr; ?> </span>
                                             </div>
                                         </div>
                                         <div class="row">
                                             <div class="col">
-                                                <button type="submit" class="btn btn-primary">Submit</button>
+                                                <button type="submit" name="update" class="btn btn-primary">Update</button>
                                                 <a href="overtimelist.php" class="btn btn-danger text-white text-decoration-none">Cancel</a>
                                             </div>
                                         </div>

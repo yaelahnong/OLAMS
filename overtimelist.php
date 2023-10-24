@@ -1,12 +1,14 @@
 <?php
 session_start();
 include __DIR__ . "/include/conn.inc.php";
-
+include __DIR__ . "/include/csrf_token.inc.php";
 
 if (!isset($_SESSION["user_id"])) {
     header("Location: login/login.php");
     exit();
 }
+
+$user_id = $_SESSION["user_id"];
 
 $limit = 5;
 $halaman_aktif = isset($_GET['page']) ? $_GET['page'] : 1;
@@ -23,8 +25,7 @@ overtimes.finish_date
 FROM overtimes
 LEFT JOIN users ON overtimes.user_id = users.user_id
 LEFT JOIN m_projects ON overtimes.project_id = m_projects.project_id
-LEFT JOIN m_divisions ON overtimes.divisi_id = m_divisions.division_id
-";
+LEFT JOIN m_divisions ON overtimes.divisi_id = m_divisions.division_id";
 
 $userQuery = "SELECT user_id, name FROM users";
 $userData = mysqli_prepare($conn, $userQuery);
@@ -43,6 +44,16 @@ $projectData = mysqli_prepare($conn, $projectQuery);
 mysqli_stmt_execute($projectData);
 $projectData = mysqli_stmt_get_result($projectData);
 $projectOptions = mysqli_fetch_all($projectData, MYSQLI_ASSOC);
+
+$roleQuery = "SELECT m_roles.role_id FROM users
+JOIN m_roles ON users.role_id = m_roles.role_id
+WHERE users.user_id = ?";
+
+$roleStatement = mysqli_prepare($conn, $roleQuery);
+mysqli_stmt_bind_param($roleStatement, "i", $user_id);
+mysqli_stmt_execute($roleStatement);
+$roleData = mysqli_stmt_get_result($roleStatement);
+$userRole = mysqli_fetch_row($roleData)[0];
 
 $filter_division = "";
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['filter_division']) && !empty($_GET['filter_division'])) {
@@ -65,7 +76,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['search']) && !empty($_G
     $show_overtime .= " ( users.name LIKE '%$search%' OR overtimes.type LIKE '%$search%')";
 }
 
-
 $show_overtime .= " ORDER BY overtimes.overtime_id DESC";
 
 $jumlah_semua_data = mysqli_num_rows(mysqli_query($conn, $show_overtime));
@@ -73,6 +83,52 @@ $show_overtime .= " LIMIT $limit OFFSET $offset ";
 $data = mysqli_query($conn, $show_overtime);
 $karyawanArray = mysqli_fetch_all($data, MYSQLI_ASSOC);
 $jumlah_halaman = ceil($jumlah_semua_data / $limit);
+
+$updateStatement = null;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
+    if (isset($_POST['csrf_token']) && isCsrfTokenValid($_POST['csrf_token'])) {
+        if (isset($_POST['overtime_id']) && is_numeric($_POST['overtime_id'])) {
+            $overtimeId = cleanValue($_POST['overtime_id']);
+            $updateQuery = "";
+
+            if ($userRole === 3) { // Jika peran adalah "admin"
+                $updateQuery = "UPDATE overtimes SET sent_by_admin = NOW(), submitted_by_admin = ?, updated_by = ? WHERE overtime_id = ?";
+            } elseif ($userRole === 2) { // Jika peran adalah "leader"
+                $updateQuery = "UPDATE overtimes SET checked_by_leader_at = NOW(), checked_by_leader = ?, updated_by = ? WHERE overtime_id = ?";
+            } else {
+                echo "<script>alert('Overtime data failed to be modified.')</script>";
+                echo "<script>window.location.href = 'overtimelist.php'</script>";
+                exit();
+            }
+
+            if ($updateQuery) {
+                if ($updateStatement) {
+                    mysqli_stmt_close($updateStatement);
+                }
+
+
+                $updateStatement = mysqli_prepare($conn, $updateQuery);
+
+                if ($updateStatement) { // Periksa apakah persiapan berhasil
+                    mysqli_stmt_bind_param($updateStatement, "iii", $user_id, $user_id, $overtimeId);
+
+                    if (mysqli_stmt_execute($updateStatement)) {
+                        echo "<script>alert('Overtime data Updated successfully.')</script>";
+                        echo "<script>window.location.href = 'overtimelist.php'</script>";
+                        exit();
+                    } else {
+                        echo "Gagal menyimpan data.";
+                    }
+                } else {
+                    echo "Gagal menyiapkan perintah.";
+                }
+            }
+        }
+    } else {
+        $TokenErr = "Invalid CSRF token";
+    }
+}
 ?>
 
 
@@ -129,7 +185,7 @@ $jumlah_halaman = ceil($jumlah_semua_data / $limit);
                                         </div>
                                     </div>
                                     <div class="col-md-3 text-end">
-                                        <a href="overtime_add.php" class="btn-sm btn-success me-3 text-white text-decoration-none">+ Add User</a>
+                                        <a href="overtime_add.php" class="btn-sm btn-success me-3 text-white text-decoration-none">+ Add Overtime</a>
                                     </div>
                                 </div>
                                 <div class="table-responsive">
@@ -158,17 +214,34 @@ $jumlah_halaman = ceil($jumlah_semua_data / $limit);
                                                         <td><?= $value['start_date'] ?></td>
                                                         <td><?= $value['finish_date'] ?></td>
                                                         <td>
-                                                            <div class="d-inline">
-                                                                <a href="#" class="btn btn-danger">Reject</a>
-                                                                <a href="#" class="btn btn-primary">Detail</a>
-                                                                <a href="#" class="btn btn-success">Submit</a>
+                                                            <div class="d-flex">
+                                                                <?php if ($userRole === 3) : // Cek apakah peran sama dengan admin ?>
+                                                                    <a href="overtime_detail.php?id=<?= $value['overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
+                                                                    <form method="post" action="<?= cleanValue($_SERVER['PHP_SELF']); ?>" style="display: inline;">
+                                                                        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                                                                        <input type="hidden" name="overtime_id" value="<?= $value['overtime_id'] ?>">
+                                                                        <button type="submit" name="submit" class="btn btn-success btn-sm ms-2">Submit</button>
+                                                                    </form>
+                                                                <?php elseif ($userRole === 1) : // Cek apakah peran sama dengan user?>
+                                                                    <a href="overtime_delete.php?id=<?= $value['overtime_id']; ?>" class="btn btn-danger btn-sm ms-2" onclick="return confirm('Apakah kamu yakin?')">Deleted</a>
+                                                                    <a href="overtime_detail.php?id=<?= $value['overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
+                                                                    <a href="overtime_update.php?id=<?= $value['overtime_id'] ?>" class="btn btn-warning btn-sm ms-2">Edit</a>
+                                                                <?php elseif ($userRole === 2 || $userRole === 4) : //cek apakah peran sama dengan leader dan supervisor ?>
+                                                                    <a href="#" class="btn btn-danger btn-sm ms-2">Reject</a>
+                                                                    <a href="overtime_detail.php?id=<?= $value['overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
+                                                                    <form method="post" action="<?= cleanValue($_SERVER['PHP_SELF']); ?>" style="display: inline;">
+                                                                        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                                                                        <input type="hidden" name="overtime_id" value="<?= $value['overtime_id'] ?>">
+                                                                        <button type="submit" name="submit" class="btn btn-success btn-sm ms-2">Submit</button>
+                                                                    </form>
+                                                                <?php endif; ?>
                                                             </div>
                                                         </td>
                                                     </tr>
                                                 <?php endforeach; ?>
                                             <?php else : ?>
                                                 <tr>
-                                                    <td colspan="7" style="text-align: center;">Data tidak ada!!</td>
+                                                    <td colspan="8" style="text-align: center;">Data tidak ada!!</td>
                                                 </tr>
                                             <?php endif; ?>
                                         </tbody>
@@ -189,7 +262,7 @@ $jumlah_halaman = ceil($jumlah_semua_data / $limit);
                                             <?php endif; ?>
                                             <?php for ($i = 1; $i <= $jumlah_halaman; $i++) : ?>
                                                 <li class="page-item<?= $i == $halaman_aktif ? ' active' : ''; ?>">
-                                                    <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $i . ($search ? '&search=' . $search : '') . ($filter_division ? '&filter_division=' . $filter_division : '') . ($filter_project? '&filter_project=' . $filter_project : ''); ?>"><?= $i ?></a>
+                                                    <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $i . ($search ? '&search=' . $search : '') . ($filter_division ? '&filter_division=' . $filter_division : '') . ($filter_project ? '&filter_project=' . $filter_project : ''); ?>"><?= $i ?></a>
                                                 </li>
                                             <?php endfor; ?>
 
