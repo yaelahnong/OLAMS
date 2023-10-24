@@ -71,8 +71,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $finishDateErr = "Finish Date cannot be earlier than Start Date.";
         }
 
-        // ...
-
         // Validasi nama dan tanggal sebelum penyisipan
         if (empty($fullnameErr) && empty($divisionErr) && empty($reasonErr) && empty($typeErr) && empty($startDateErr) && empty($finishDateErr)) {
             // Query untuk memeriksa apakah data dengan nama yang sama dan tanggal yang sama sudah ada
