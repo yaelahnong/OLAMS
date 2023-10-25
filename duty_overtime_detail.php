@@ -54,7 +54,7 @@ if (isset($_GET["id"])) {
 
 <head>
     <?php include "head.inc.php"; ?>
-    <title>OLAMS - Overtime Detail</title>
+    <title>OLAMS - Detail Duty Overtime</title>
 </head>
 
 <body>
@@ -64,7 +64,7 @@ if (isset($_GET["id"])) {
             <?php include "components/navbar.inc.php"; ?>
             <main class="content">
                 <div class="container-fluid p-0">
-                    <h1 class="h1 mb-3 judul_halaman"><strong>Overtime Detail</strong></h1>
+                    <h1 class="h1 mb-3 judul_halaman"><strong>Detail Duty Overtime</strong></h1>
                     <div class="row">
                         <div class="col-12">
                             <div class="card">

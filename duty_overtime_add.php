@@ -30,31 +30,6 @@ $resultProject = mysqli_fetch_all($resultProject, MYSQLI_ASSOC);
 
 $fullnameErr = $divisionErr = $noteErr = $customerCountErr = $leadCountErr = $projectErr = "";
 $fullname = $division = $note = $customerCount = $leadCount = $project = NULL;
-
-// Get the duty overtime data to be updated (You need to provide the duty_overtime_id)
-if (isset($_GET['id'])) {
-    $duty_overtime_id = cleanValue($_GET['id']);
-    // Fetch the existing data from the database and populate the form
-    $queryDutyOvertime = "SELECT * FROM duty_overtimes WHERE duty_overtime_id = ?";
-    $dutyOvertimeData = mysqli_prepare($conn, $queryDutyOvertime);
-    mysqli_stmt_bind_param($dutyOvertimeData, "i", $duty_overtime_id);
-    mysqli_stmt_execute($dutyOvertimeData);
-    $resultDutyOvertime = mysqli_stmt_get_result($dutyOvertimeData);
-    $row = mysqli_fetch_assoc($resultDutyOvertime);
-
-    if ($row) {
-        $fullname = $row['user_id'];
-        $project = $row['project_id'];
-        $division = $row['division_id'];
-        $leadCount = $row['lead_count'];
-        $customerCount = $row['customer_count'];
-        $note = $row['note'];
-    } else {
-        echo "Duty overtime data not found."; // Handle data not found case
-        exit();
-    }
-}
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     if (isset($_POST['csrf_token']) && isCsrfTokenValid($_POST['csrf_token'])) {
         $fullname = isset($_POST["user_id"]) ? cleanValue($_POST["user_id"]) : NULL;
@@ -91,17 +66,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
         }
 
         if (empty($fullnameErr) && empty($projectErr) && empty($divisionErr) && empty($leadCountErr) && empty($customerCountErr) && empty($noteErr)) {
-            // Perform the update operation with the provided data
-            $updateQuery = "UPDATE duty_overtimes SET user_id = ?, project_id = ?, division_id = ?, lead_count = ?, customer_count = ?, note = ? WHERE duty_overtime_id = ?";
-            $updateStatement = mysqli_prepare($conn, $updateQuery);
-            mysqli_stmt_bind_param($updateStatement, "iiiiisi", $user_id, $project, $division, $lead_count, $customer_count, $note, $duty_overtime_id);
+            $insertQuery = "INSERT INTO duty_overtimes (user_id, project_id, division_id, lead_count, customer_count, note, created_by)
+                            VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-            if (mysqli_stmt_execute($updateStatement)) {
-                echo "<script>alert('Duty overtime data updated successfully.')</script>";
+            $insertStatement = mysqli_prepare($conn, $insertQuery);
+            mysqli_stmt_bind_param($insertStatement, "iiiiiss", $fullname, $project, $division, $lead_count, $customer_count, $note, $user_id);
+
+            if (mysqli_stmt_execute($insertStatement)) {
+                echo "<script>alert('Duty overtime data added successfully.')</script>";
                 echo "<script>window.location.href = 'duty_overtimelist.php'</script>";
                 exit();
             } else {
-                echo "Failed to update data.";
+                echo "Failed to save data.";
             }
         }
     } else {
@@ -114,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
 
 <head>
     <?php include "head.inc.php"; ?>
-    <title>OLAMS - Update Duty Overtime</title>
+    <title>OLAMS - Add Duty Overtime</title>
 </head>
 
 <body>
@@ -124,7 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
             <?php include "components/navbar.inc.php"; ?>
             <main class="content">
                 <div class="container-fluid p-0">
-                    <h1 class="h1 mb-3 judul_halaman"><strong>Update Duty Overtime</strong></h1>
+                    <h1 class="h1 mb-3 judul_halaman"><strong>Add Duty Overtime</strong></h1>
                     <div class="row">
                         <div class="col-12">
                             <div class="card">
@@ -140,9 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                 <select name="user_id" id="inputUser" class="form-select">
                                                     <option value="">Select User</option>
                                                     <?php foreach ($resultUsers as $user) : ?>
-                                                        <option value="<?= $user['user_id'] ?>" <?php if ($fullname == $user['user_id']) echo 'selected'; ?>>
-                                                            <?= $user['name'] ?>
-                                                        </option>
+                                                        <option value="<?= $user['user_id'] ?>"><?= $user['name'] ?></option>
                                                     <?php endforeach; ?>
                                                 </select>
                                                 <span class="error" style="color: red;"> <?= $fullnameErr; ?> </span>
@@ -153,9 +127,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                 <select name="project_id" id="inputProject" class="form-select">
                                                     <option value="">Select Project</option>
                                                     <?php foreach ($resultProject as $project) : ?>
-                                                        <option value="<?= $project['project_id'] ?>" <?php if ($project == $project['project_id']) echo 'selected'; ?>>
-                                                            <?= $project['project_name'] ?>
-                                                        </option>
+                                                        <option value="<?= $project['project_id'] ?>"><?= $project['project_name'] ?></option>
                                                     <?php endforeach; ?>
                                                 </select>
                                                 <span class="error" style="color: red;"> <?= $projectErr; ?> </span>
@@ -168,9 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                 <select name="divisi_id" id="inputDivision" class="form-select">
                                                     <option value="">Select Division</option>
                                                     <?php foreach ($resultDivision as $division) : ?>
-                                                        <option value="<?= $division['division_id'] ?>" <?php if ($division == $division['division_id']) echo 'selected'; ?>>
-                                                            <?= $division['division_name'] ?>
-                                                        </option>
+                                                        <option value="<?= $division['division_id'] ?>"><?= $division['division_name'] ?></option>
                                                     <?php endforeach; ?>
                                                 </select>
                                                 <span class="error" style="color: red;"> <?= $divisionErr; ?> </span>
@@ -178,7 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                             <div class="mb-3 col-md-6">
                                                 <label for="lead_count" class="form-label">Lead Count</label>
                                                 <span style="color: red">*</span>
-                                                <input type="number" name="lead_count" id="lead_count" class="form-control" value="<?= $leadCount; ?>">
+                                                <input type="number" name="lead_count" id="lead_count" class="form-control">
                                                 <span class="error" style="color: red;"> <?= $leadCountErr; ?> </span>
                                             </div>
                                         </div>
@@ -186,16 +156,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                             <div class="mb-3 col-md-6">
                                                 <label for="customer_count" class="form-label">Customer Count</label>
                                                 <span style="color: red">*</span>
-                                                <input type="number" name="customer_count" id="customer_count" class="form-control" value="<?= $customerCount; ?>">
+                                                <input type="number" name="customer_count" id="customer_count" class="form-control">
                                                 <span class="error" style="color: red;"> <?= $customerCountErr; ?> </span>
                                             </div>
                                             <div class="mb-3 col-md-6">
                                                 <label for="note" class="form-label">Note</label>
-                                                <textarea name="note" id="note" class="form-control"><?= $note; ?></textarea>
+                                                <textarea name="note" id="note" class="form-control"></textarea>
                                                 <span class="error" style="color: red;"> <?= $noteErr; ?> </span>
                                             </div>
                                         </div>
-                                        <button type="submit" name="submit" class="btn btn-primary">Update</button>
+                                        <button type="submit" name="submit" class="btn btn-primary">Submit</button>
                                         <a href="duty_overtimelist.php" class="btn btn-danger text-white text-decoration-none">Cancel</a>
                                     </form>
                                 </div>
