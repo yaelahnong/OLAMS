@@ -134,7 +134,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
 
 <head>
     <?php include "head.inc.php"; ?>
-    <title>OLAMS - Overtime List</title>
+    <title>OLAMS - Duty Overtime List</title>
 </head>
 
 <body>
@@ -144,7 +144,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
             <?php include "components/navbar.inc.php"; ?>
             <main class="content">
                 <div class="container-fluid p-0">
-                    <h1 class="h1 mb-3 judul_halaman"><strong>Overtime List</strong></h1>
+                    <h1 class="h1 mb-3 judul_halaman"><strong>Duty Overtime List</strong></h1>
                     <div class="row">
                         <div class="col-12">
                             <div class="card">
