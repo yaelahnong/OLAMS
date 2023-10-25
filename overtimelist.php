@@ -16,6 +16,7 @@ $offset = ($halaman_aktif - 1) * $limit;
 
 $show_overtime = "SELECT
 overtimes.overtime_id,
+overtimes.user_id,
 users.name AS name,
 m_projects.project_name AS project_name, 
 m_divisions.division_name AS division_name, 
@@ -90,6 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     if (isset($_POST['csrf_token']) && isCsrfTokenValid($_POST['csrf_token'])) {
         if (isset($_POST['overtime_id']) && is_numeric($_POST['overtime_id'])) {
             $overtimeId = cleanValue($_POST['overtime_id']);
+            $userId = cleanValue($_POST['user_id']);
 
             $typeQuery = "SELECT overtime_id, type FROM overtimes WHERE overtime_id = ?";
             $typeStatement = mysqli_prepare($conn, $typeQuery);
@@ -102,71 +104,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                 echo "Data tidak ditemukan";
             }
 
-            // Periksa peran pengguna
-            if ($userRole === 3) { // Jika peran adalah "admin"
-                $updateQuery = "UPDATE overtimes SET sent_by_admin = NOW(), submitted_by_admin = ?, updated_by = ? WHERE overtime_id = ?";
-            } elseif ($userRole === 2) { // Jika peran adalah "leader"
-                // Periksa tipe lembur
-                if ($type === "Urgent" && isset($_POST['submit']) && $_POST['submit'] === "Approve") {
-                    $updateQuery = "UPDATE overtimes SET status = 'Approved', status_updated_by = ?, status_updated_at = NOW() WHERE overtime_id = ?";
-                }elseif ($type === "Urgent" && isset($_POST['submit']) && $_POST['submit'] === "Reject") {
-                    $updateQuery = "UPDATE overtimes SET status = 'Rejected', status_updated_by = ?, status_updated_at = NOW() WHERE overtime_id = ?";
-                }else {
-                    $updateQuery = "UPDATE overtimes SET checked_by_leader_at = NOW(), checked_by_leader = ?, updated_by = ? WHERE overtime_id = ?";
-                }
-            } elseif ($userRole === 4) { // jika peran adalah "supervisor"
-                if (isset($_POST['submit']) && $_POST['submit'] === "Reject") {
-                    $updateQuery = "UPDATE overtimes SET status = 'Rejected', status_updated_at = NOW(), status_updated_by = ? WHERE overtime_id = ?";
-                } elseif (isset($_POST['submit']) && $_POST['submit'] === "Approve") {
-                    $updateQuery = "UPDATE overtimes SET status = 'Approved', status_updated_by = ?, status_updated_at = NOW() WHERE overtime_id = ?";
-                }
-            } else {
-                echo "<script>alert('Overtime data failed to be modified.')</script>";
-                echo "<script>window.location.href = 'overtimelist.php'</script>";
-                exit();
-            }
-            // var_dump($_POST);
-            // exit;
-            $updateStatement = mysqli_prepare($conn, $updateQuery);
-
-            if ($updateStatement) {
-                if ($userRole === 4) {
-                    mysqli_stmt_bind_param($updateStatement, "ii", $user_id, $overtimeId);
-                } elseif ($userRole === 2 && $type === "Urgent") {
-                    mysqli_stmt_bind_param($updateStatement, "ii", $user_id, $overtimeId);
-                } else {
-                    mysqli_stmt_bind_param($updateStatement, "iii", $user_id, $user_id, $overtimeId);
-                }
-                if (isset($_POST['submit']) && ($_POST['submit'] === "Reject" || $_POST['submit'] === "Approve")) {
+            if (isset($_POST['submit']) && ($_POST['submit'] === "Reject" || $_POST['submit'] === "Approve" || $_POST['submit'] === "Check")) {
+                if ($userRole === 4) { // jika peran adalah "supervisor"
                     $newStatus = ($_POST['submit'] === "Reject") ? 'Rejected' : 'Approved';
-
                     $updateQuery = "UPDATE overtimes SET status = ?, status_updated_by = ?, status_updated_at = NOW() WHERE overtime_id = ?";
+                } elseif ($userRole === 2) { // Jika peran adalah "leader"
+                    // Periksa tipe lembur
+                    $newStatus = ($_POST['submit'] === "Reject") ? 'Rejected' : 'Approved';
+                    if ($type === "Urgent") {
+                        $updateQuery = "UPDATE overtimes SET status = ?, status_updated_by = ?, status_updated_at = NOW() WHERE overtime_id = ?";
+                    } else {
+                        $updateQuery = "UPDATE overtimes SET checked_by_leader_at = NOW(), checked_by_leader = ?, updated_by = ? WHERE overtime_id = ?";
+                    }
+                } elseif ($userRole === 3) { // Jika peran adalah "admin"
+                    $newStatus = ($_POST['submit'] === "Reject") ? 'Rejected' : 'Approved';
+                    $updateQuery = "UPDATE overtimes SET sent_by_admin = NOW(), submitted_by_admin = ?, updated_by = ? WHERE overtime_id = ?";
+                } else {
+                    echo "<script>alert('Overtime data failed to be modified.')</script>";
+                    echo "<script>window.location.href = 'overtimelist.php'</script>";
+                    exit();
+                }
+                $updateStatement = mysqli_prepare($conn, $updateQuery);
 
-                    $updateStatement = mysqli_prepare($conn, $updateQuery);
-
-                    if ($updateStatement) {
-                        
+                if ($updateStatement) {
+                    if ($userRole === 4) {
                         mysqli_stmt_bind_param($updateStatement, "sii", $newStatus, $user_id, $overtimeId);
+                    } elseif ($userRole === 2 && $type === "Urgent") {
+                        mysqli_stmt_bind_param($updateStatement, "sii", $newStatus, $user_id, $overtimeId);
+                    } else {
+                        mysqli_stmt_bind_param($updateStatement, "iii", $user_id, $user_id, $overtimeId);
+                    }
 
-                        $updateHistoryQuery = "UPDATE overtimes_histories SET status = ?, updated_by = ? WHERE overtime_id = ?";
-                        $updateHistoryStatement = mysqli_prepare($conn, $updateHistoryQuery);
+                    $insertHistoryQuery = "INSERT INTO overtimes_histories (overtime_id, user_id, status, created_by, updated_at, updated_by) VALUES (?, ?, ?, ?, NOW(), ?)";
+                    $insertHistoryStatement = mysqli_prepare($conn, $insertHistoryQuery);
 
-                        if ($updateHistoryStatement) {
-                            mysqli_stmt_bind_param($updateHistoryStatement, "sii", $newStatus, $user_id, $overtimeId);
+                    if ($insertHistoryStatement) {
 
-                            if (mysqli_stmt_execute($updateStatement) && mysqli_stmt_execute($updateHistoryStatement)) {
-                                echo "<script>alert('Overtime data Updated successfully.')</script>";
-                                echo "<script>window.location.href = 'overtimelist.php'</script>";
-                                exit();
-                            } else {
-                                echo "Gagal memperbarui data lembur atau riwayat data lembur.";
-                            }
+                        mysqli_stmt_bind_param($insertHistoryStatement, "iisii", $overtimeId, $userId, $newStatus, $userId, $user_id);
+
+                        if (mysqli_stmt_execute($insertHistoryStatement) && mysqli_stmt_execute($updateStatement)) {
+                            echo "<script>alert('Data lembur Diperbarui dengan sukses.')</script>";
+                            echo "<script>window.location.href = 'overtimelist.php'</script>";
+                            exit();
                         } else {
-                            echo "Gagal menyiapkan perintah untuk tabel histori.";
+                            echo "Gagal menyisipkan data ke overtimes_histories atau memperbarui data lembur.";
                         }
                     } else {
-                        echo "Gagal menyiapkan perintah.";
+                        echo "Gagal menyiapkan pernyataan untuk tabel histori.";
                     }
+                } else {
+                    echo "Gagal menyiapkan pernyataan utama.";
                 }
             }
         }
@@ -265,7 +252,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                                     <form method="post" action="<?= cleanValue($_SERVER['PHP_SELF']); ?>" style="display: inline;">
                                                                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
                                                                         <input type="hidden" name="overtime_id" value="<?= $value['overtime_id'] ?>">
-                                                                        <button type="submit" name="submit" class="btn btn-success btn-sm ms-2">Submit</button>
+                                                                        <input type="hidden" name="user_id" value="<?= $value['user_id'] ?>">
+                                                                        <button type="submit" name="submit" value="Check" class="btn btn-success btn-sm ms-2">Submit</button>
                                                                     </form>
                                                                 <?php elseif ($userRole === 1) : // Cek apakah peran sama dengan user
                                                                 ?>
@@ -278,6 +266,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                                     <form method="post" action="<?= cleanValue($_SERVER['PHP_SELF']); ?>" class="d-flex">
                                                                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
                                                                         <input type="hidden" name="overtime_id" value="<?= $value['overtime_id'] ?>">
+                                                                        <input type="hidden" name="user_id" value="<?= $value['user_id'] ?>">
                                                                         <button type="submit" name="submit" value="Approve" class="btn btn-success btn-sm ms-2">Approve</button>
                                                                         <button type="submit" name="submit" value="Reject" class="btn btn-danger btn-sm ms-2">Reject</button>
                                                                     </form>
@@ -287,10 +276,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                                     <form method="post" action="<?= cleanValue($_SERVER['PHP_SELF']); ?>" class="d-flex">
                                                                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
                                                                         <input type="hidden" name="overtime_id" value="<?= $value['overtime_id'] ?>">
+                                                                        <input type="hidden" name="user_id" value="<?= $value['user_id'] ?>">
                                                                         <?php if ($userRole === 2 && $value['type'] === 'Urgent') : ?>
                                                                             <button type="submit" name="submit" value="Approve" class="btn btn-success btn-sm ms-2">Approve</button>
                                                                         <?php else : ?>
-                                                                            <button type="submit" name="submit" name="check" class="btn btn-success btn-sm ms-2">Submit</button>
+                                                                            <button type="submit" name="submit" value="Check" class="btn btn-success btn-sm ms-2">Submit</button>
                                                                         <?php endif; ?>
                                                                         <button type="submit" name="submit" value="Reject" class="btn btn-danger btn-sm ms-2">Reject</button>
                                                                     </form>
