@@ -4,7 +4,7 @@ include __DIR__ . "/include/conn.inc.php";
 
 // Periksa apakah pengguna sudah masuk atau belum
 if (!isset($_SESSION["user_id"])) {
-    header("Location: login/login.php");
+    header("Location: login.php");
     exit();
 }
 

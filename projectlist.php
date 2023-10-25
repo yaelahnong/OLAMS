@@ -4,7 +4,7 @@ include __DIR__ . "/include/conn.inc.php";
 
 
 if (!isset($_SESSION["user_id"])) {
-  header("Location: login/login.php");
+  header("Location: login.php");
   exit();
 }
 
@@ -130,7 +130,7 @@ $data = mysqli_fetch_all($result2, MYSQLI_ASSOC);
                         <?php endforeach; ?>
                       <?php else : ?>
                         <tr>
-                          <td colspan="7" style="text-align: center;">No records found.</td>
+                          <td colspan="7" style="text-align: center;">No records found!.</td>
                         </tr>
                       <?php endif; ?>
                     </tbody>

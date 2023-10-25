@@ -5,7 +5,7 @@ include __DIR__ ."/include/csrf_token.inc.php";
 include __DIR__ ."/include/baseUrl.inc.php";
 
 if (!isset($_SESSION["user_id"])) {
-    header("Location: login/login.php");
+    header("Location: login.php");
     exit();
 }
 
@@ -139,7 +139,7 @@ $jumlah_halaman = ceil($jumlah_semua_data / $limit);
                                                 <?php endforeach; ?>
                                             <?php else : ?>
                                                 <tr>
-                                                    <td colspan="7" style="text-align: center;">Data tidak ada!!</td>
+                                                    <td colspan="7" style="text-align: center;">No records found!.</td>
                                                 </tr>
                                             <?php endif; ?>
                                         </tbody>

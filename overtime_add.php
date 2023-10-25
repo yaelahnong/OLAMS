@@ -197,7 +197,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         <div class="row">
                                             <div class="col">
                                                 <button type="submit" class="btn btn-primary">Submit</button>
-                                                <a href="overtimelist.php" class="btn btn-danger text-white text-decoration-none">Cancel</a>
+                                                <a href="overtimelist.php" class="btn btn-light text-dark text-decoration-none">Cancel</a>
                                             </div>
                                         </div>
                                     </form>

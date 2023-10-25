@@ -4,11 +4,12 @@ include __DIR__ . "/include/conn.inc.php";
 include __DIR__ . "/include/csrf_token.inc.php";
 
 if (!isset($_SESSION["user_id"])) {
-  header("location: login/login.php");
+  header("location: login.php");
   exit;
 }
 
 $user_id = $_SESSION["user_id"];
+
 $formatted_total_basic_salary = ""; // Inisialisasi variabel
 
 // Ambil data pengguna dari database
@@ -105,7 +106,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           <h1 class="h1 mb-3"><strong>Update Basic Salary</strong></h1>
           <div class="row">
             <div class="col-12">
-              <div class "card">
+              <div class= "card">
                 <div class="card-header">
                 </div>
                 <div class="card-body">

@@ -6,7 +6,7 @@ include __DIR__ . "/include/baseUrl.inc.php";
 
 
 if (!isset($_SESSION['user_id'])) {
-  header("Location: login/login.php");
+  header("Location: login.php");
   exit;
 }
 
@@ -488,7 +488,7 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
                       <h1 class="mt-1 mb-3 text-white"><?= $namaKaryawanPalingBanyakLembur ?></h1>
                       <div class="mb-0">
                         <span class="text-white"> <i class="mdi mdi-arrow-bottom-right"></i> <?= $jumlahLemburPalingBanyak ?></span>
-                        <span class="text-white">Overtime</span>
+                        <span class="text-white">Total Overtime</span>
                       </div>
                     </div>
                   </div>
@@ -522,7 +522,14 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
                                     <td><?= $key + 1 + $offset ?></td>
                                     <td><?= $value['name'] ?></td>
                                     <td><?= $value['division_name'] ?></td>
-                                    <td><?= $value['reason'] ?></td>
+                                    <td>
+                                      <?php if (!empty($value['reason'])) {
+                                        echo $value['reason'];
+                                      } else {
+                                        echo "-";
+                                      }
+                                      ?>
+                                    </td>
                                     <td><?= $value['type'] ?></td>
                                     <td><?= $value['start_date'] ?></td>
                                     <td><?= $value['finish_date'] ?></td>
@@ -586,7 +593,7 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
                                       }
 
                                       ?>
-                                      <button class="btn btn-sm <?= $statusClass ;?>" disabled >
+                                      <button class="btn btn-sm <?= $statusClass; ?>" disabled>
                                         <?= $value['status'] ?>
                                       </button>
                                     </td>
@@ -637,7 +644,14 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
                                     <td><?= $value['division_name'] ?></td>
                                     <td><?= $value['type'] ?></td>
                                     <td><?= $value['overtimeStart'] ?></td>
-                                    <td><?= $value['overtimeFinish'] ?></td>
+                                    <td>
+                                      <?php if (!empty($value['overtimeFinish'])) {
+                                        echo $value['overtimeFinish'];
+                                      } else {
+                                        echo "-";
+                                      }
+                                      ?>
+                                    </td>
                                     <td><?= $value['categoryOvertime'] ?></td>
                                     <td><?= $value['reasonOvertime'] ?></td>
                                     <td>

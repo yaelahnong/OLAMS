@@ -9,7 +9,7 @@ function isUserLoggedIn() {
     return isset($_SESSION["user_id"]);
 }
 if (isUserLoggedIn()) {
-    header("Location: userlist.php");
+    header("Location: dashboard.php");
     exit();
 }
 
@@ -38,7 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 				if ($user && password_verify($password, $user["password"])) {
 					// Password cocok, login berhasil
 					$_SESSION['user_id'] = $user['user_id'];
-					header("Location: userlist.php");
+					header("Location: dashboard.php");
 					exit;
 				} else {
 					$error = "Username dan Password salah!!";
