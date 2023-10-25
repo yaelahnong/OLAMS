@@ -74,6 +74,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             mysqli_stmt_bind_param($insertStatement, "iiisssssi", $fullname, $project_id, $divisi_id, $category, $type, $start_date, $finish_date, $reason, $user_id);
 
             if (mysqli_stmt_execute($insertStatement)) {
+                $overtime_id = mysqli_insert_id($conn);
+                $insertHistoryQuery = "INSERT INTO overtimes_histories (overtime_id, user_id, created_by) VALUES (?, ?, ?)";
+                $insertHistoryStatement = mysqli_prepare($conn, $insertHistoryQuery);
+                mysqli_stmt_bind_param($insertHistoryStatement, "iii", $overtime_id, $fullname, $user_id);
+                mysqli_stmt_execute($insertHistoryStatement);
+
                 echo "<script>alert('Overtime data added successfully.')</script>";
                 echo "<script>window.location.href = 'overtimelist.php'</script>";
                 exit();
