@@ -10,32 +10,32 @@
         Menu
       </li>
 
-      <li class="sidebar-item active">
-        <a class="sidebar-link" href="index.html">
+      <li class="sidebar-item <?= (basename($_SERVER['PHP_SELF']) == 'dashboard.php') ? 'active' : ''; ?>">
+        <a class="sidebar-link" href="dashboard.php">
           <i class="align-middle" data-feather="grid"></i> <span class="align-middle">Dashboard</span>
         </a>
       </li>
 
-      <li class="sidebar-item">
-        <a class="sidebar-link" href="pages-profile.html">
+      <li class="sidebar-item  <?= (basename($_SERVER['PHP_SELF']) == 'overtimelist.php') ? 'active' : ''; ?>">
+        <a class="sidebar-link" href="overtimelist.php">
           <i class="align-middle" data-feather="clock"></i> <span class="align-middle">Overtime</span>
         </a>
       </li>
 
-      <li class="sidebar-item">
-        <a class="sidebar-link" href="pages-sign-in.html">
+      <li class="sidebar-item  <?= (basename($_SERVER['PHP_SELF']) == 'leavelist.php') ? 'active' : ''; ?>">
+        <a class="sidebar-link" href="leavelist.php">
           <i class="align-middle" data-feather="calendar"></i> <span class="align-middle">Leave</span>
         </a>
       </li>
 
-      <li class="sidebar-item">
-        <a class="sidebar-link" href="pages-sign-up.html">
+      <li class="sidebar-item  <?= (basename($_SERVER['PHP_SELF']) == 'attendancelist.php') ? 'active' : ''; ?>">
+        <a class="sidebar-link" href="attendancelist.php">
           <i class="align-middle" data-feather="file-text"></i> <span class="align-middle">Attendance</span>
         </a>
       </li>
 
-      <li class="sidebar-item">
-        <a class="sidebar-link" href="pages-blank.html">
+      <li class="sidebar-item  <?= (basename($_SERVER['PHP_SELF']) == 'report.php') ? 'active' : ''; ?>">
+        <a class="sidebar-link" href="report.php">
           <i class="align-middle" data-feather="clipboard"></i> <span class="align-middle">Report</span>
         </a>
       </li>
@@ -44,20 +44,20 @@
         Master Data
       </li>
 
-      <li class="sidebar-item">
-        <a class="sidebar-link" href="ui-buttons.html">
+      <li class="sidebar-item  <?= (basename($_SERVER['PHP_SELF']) == 'projectlist.php') ? 'active' : ''; ?>">
+        <a class="sidebar-link" href="projectlist.php">
           <i class="align-middle" data-feather="square"></i> <span class="align-middle">Master Project</span>
         </a>
       </li>
 
-      <li class="sidebar-item">
-        <a class="sidebar-link" href="ui-forms.html">
+      <li class="sidebar-item  <?= (basename($_SERVER['PHP_SELF']) == 'divisionlist.php') ? 'active' : ''; ?>">
+        <a class="sidebar-link" href="divisionlist.php">
           <i class="align-middle" data-feather="check-square"></i> <span class="align-middle">Master Division</span>
         </a>
       </li>
 
-      <li class="sidebar-item">
-        <a class="sidebar-link" href="ui-cards.html">
+      <li class="sidebar-item  <?= (basename($_SERVER['PHP_SELF']) == 'basicsalary.php') ? 'active' : ''; ?>">
+        <a class="sidebar-link" href="basicsalary.php">
           <i class="align-middle" data-feather="grid"></i> <span class="align-middle">Master Basic Salary</span>
         </a>
       </li>
@@ -66,7 +66,7 @@
         User Management
       </li>
 
-      <li class="sidebar-item">
+      <li class="sidebar-item  <?= (basename($_SERVER['PHP_SELF']) == 'userlist.php') ? 'active' : ''; ?>">
         <a class="sidebar-link" href="userlist.php">
           <i class="align-middle" data-feather="user-plus"></i> <span class="align-middle">User List</span>
         </a>

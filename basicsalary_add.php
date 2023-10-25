@@ -4,7 +4,7 @@ include __DIR__ . "/include/conn.inc.php";
 include __DIR__ . "/include/csrf_token.inc.php";
 
 if (!isset($_SESSION["user_id"])) {
-  header("location: login/login.php");
+  header("location: login.php");
   exit;
 }
 

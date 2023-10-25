@@ -5,7 +5,7 @@ include __DIR__ . "/include/conn.inc.php";
 include __DIR__ . "/include/csrf_token.inc.php";
 
 if (!isset($_SESSION['user_id'])) {
-  header("Location: login/login.php");
+  header("Location: login.php");
   exit;
 }
 
@@ -123,13 +123,13 @@ $jumlah_halaman = ceil($jumlah_semua_data / $limit);
                             <td> <?= $value['role_name'] ?></td>
                             <td>
                               <a href="userlist_update.php?id=<?= $value['user_id'] ?>" class="text-warning"><i class="align-middle" data-feather="edit"></i></a>
-                              <a href="userlist_delete.php?id=<?= $value['user_id'] ?>" onclick="return confirm('Apakah anda yakin ingin menghapus data ini?')" class="text-danger"><i class="align-middle ms-3" data-feather="trash-2"></i></a>
+                              <a href="userlist_delete.php?id=<?= $value['user_id'] ?>" onclick="return confirm('Are you sure?')" class="text-danger"><i class="align-middle ms-3" data-feather="trash-2"></i></a>
                             </td>
                           </tr>
                         <?php endforeach; ?>
                       <?php else : ?>
                         <tr>
-                          <td colspan="6" style="text-align: center;">Data tidak ada!!</td>
+                          <td colspan="6" style="text-align: center;">No records found!.</td>
                         </tr>
                       <?php endif; ?>
                     </tbody>

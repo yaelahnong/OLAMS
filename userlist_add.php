@@ -6,9 +6,11 @@ include __DIR__ . "/include/csrf_token.inc.php";
 
 
 if (!isset($_SESSION['user_id'])) {
-  header("Location: login/login.php");
+  header("Location: login.php");
   exit;
 }
+
+$user_id = $_SESSION["user_id"];
 
 $roleQuery = "SELECT role_id, name FROM m_roles";
 $roleData = mysqli_prepare($conn, $roleQuery);
@@ -82,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       );
 
       mysqli_stmt_execute($stmt);
-      echo "<script>alert('Data berhasil ditambahkan')</script>";
+      echo "<script>alert('Data user added successfully')</script>";
       echo "<script>window.location.replace('userlist.php')</script>";
     }
   } else {
@@ -156,7 +158,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="row">
                       <div class="col">
                         <button type="submit" class="btn btn-primary">Submit</button>
-                        <a href="userlist.php" class="btn btn-danger text-white text-decoration-none">Cancel</a>
+                        <a href="userlist.php" class="btn btn-light text-dark text-decoration-none">Cancel</a>
                       </div>
                     </div>
                   </form>
