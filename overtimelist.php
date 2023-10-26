@@ -22,7 +22,8 @@ m_projects.project_name AS project_name,
 m_divisions.division_name AS division_name, 
 overtimes.type, 
 overtimes.start_date, 
-overtimes.finish_date
+overtimes.finish_date,
+overtimes.status
 FROM overtimes
 LEFT JOIN users ON overtimes.user_id = users.user_id
 LEFT JOIN m_projects ON overtimes.project_id = m_projects.project_id
@@ -230,6 +231,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                 <th scope="col">Type</th>
                                                 <th scope="col">Start Date</th>
                                                 <th scope="col">Finish Date</th>
+                                                <th scope="col">Status</th>
                                                 <th scope="col">Action</th>
                                             </tr>
                                         </thead>
@@ -244,6 +246,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                         <td><?= $value['type'] ?></td>
                                                         <td><?= $value['start_date'] ?></td>
                                                         <td><?= $value['finish_date'] ?></td>
+                                                        <td>
+                                                            <?php
+                                                            if ($value['status'] === 'Pending') {
+                                                                $statusClass = 'badge bg-warning'; // Status "pending"
+                                                            } elseif ($value['status'] === 'Rejected') {
+                                                                $statusClass = 'badge bg-danger'; // Status "reject"
+                                                            } elseif ($value['status'] === 'Approved') {
+                                                                $statusClass = 'badge bg-success'; // Status "approved"
+                                                            }
+                                                            ?>
+                                                            <button class="btn btn-sm text-white <?= $statusClass ?>" disabled>
+                                                                <?= $value['status'] ?>
+                                                            </button>
+                                                        </td>
                                                         <td>
                                                             <div class="d-flex">
                                                                 <?php if ($userRole === 3) : // Cek apakah peran sama dengan admin 
@@ -280,7 +296,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                                         <?php if ($userRole === 2 && $value['type'] === 'Urgent') : ?>
                                                                             <button type="submit" name="submit" value="Approve" class="btn btn-success btn-sm ms-2">Approve</button>
                                                                         <?php else : ?>
-                                                                            <button type="submit" name="submit" value="Check" class="btn btn-success btn-sm ms-2">Submit</button>
+                                                                            <button type="submit" name="submit" value="Check" class="btn btn-success btn-sm ms-2">Check</button>
                                                                         <?php endif; ?>
                                                                         <button type="submit" name="submit" value="Reject" class="btn btn-danger btn-sm ms-2">Reject</button>
                                                                     </form>
