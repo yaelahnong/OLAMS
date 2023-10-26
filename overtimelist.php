@@ -217,24 +217,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                         </div>
                                     </div>
                                     <div class="col-md-3 text-end">
-                                      <?php if ($userRole == 1) : ?>  
-                                        <a href="overtime_add.php" class="btn-sm btn-success me-3 text-white text-decoration-none">+ Add Overtime</a>
-                                      <?php endif ; ?>
-                                      </div>
+                                        <?php if ($userRole == 1) : ?>
+                                            <a href="overtime_add.php" class="btn-sm btn-success me-3 text-white text-decoration-none">+ Add Overtime</a>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
                                 <div class="table-responsive">
                                     <table class="table mb-0 mt-3">
                                         <thead>
                                             <tr>
                                                 <th scope="col">No</th>
-                                                <th scope="col">Full Name</th>
-                                                <th scope="col">Project</th>
-                                                <th scope="col">Division</th>
+                                                <th scope="col" style="min-width : 200px;">Full Name</th>
+                                                <th scope="col" style="min-width : 200px;">Project</th>
+                                                <th scope="col" style="min-width : 200px;">Division</th>
                                                 <th scope="col">Type</th>
-                                                <th scope="col">Start Date</th>
-                                                <th scope="col">Finish Date</th>
+                                                <th scope="col" style="min-width : 200px;">Start Date</th>
+                                                <th scope="col" style="min-width : 200px;">Finish Date</th>
                                                 <th scope="col">Status</th>
-                                                <th scope="col">Action</th>
+                                                <th scope="col" style="min-width : 210px;">Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -275,7 +275,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                                     </form>
                                                                 <?php elseif ($userRole === 1) : // Cek apakah peran sama dengan user
                                                                 ?>
-                                                                    <a href="overtime_delete.php?id=<?= $value['overtime_id']; ?>" class="btn btn-danger btn-sm ms-2" onclick="return confirm('Apakah kamu yakin?')">Delete</a>
+                                                                    <?php if ($value['status'] !== 'Approved') : ?>
+                                                                        <a href="overtime_delete.php?id=<?= $value['overtime_id']; ?>" class="btn btn-danger btn-sm ms-2" onclick="return confirm('Apakah kamu yakin?')">Delete</a>
+                                                                    <?php endif; ?>
                                                                     <a href="overtime_detail.php?id=<?= $value['overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
                                                                     <a href="overtime_update.php?id=<?= $value['overtime_id'] ?>" class="btn btn-warning btn-sm ms-2">Edit</a>
                                                                 <?php elseif ($userRole === 4) : // Cek apakah peran sama dengan supervisor 
