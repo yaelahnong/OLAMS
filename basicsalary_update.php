@@ -9,7 +9,7 @@ if (!isset($_SESSION["login"])) {
 }
 
 // membatasi Hak Akses User
-if ($_SESSION["role_id"] != 3 || $_SESSION["role_id"] != 4) {
+if ($_SESSION["role_id"] != 3 && $_SESSION["role_id"] != 4) {
   header("Location: dashboard.php");
   exit();
 }
