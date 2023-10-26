@@ -116,7 +116,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                                     </tr>
                                     <tr>
                                         <td><strong>Effective Time</strong></td>
-                                        <td><?= $overtimeDetails['effective_time'] ?></td>
+                                        <td><?= $overtimeDetails['effective_time'] ?> hours</td>
                                     </tr>
                                     <tr>
                                         <td><strong>Reason</strong></td>
