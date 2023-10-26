@@ -217,8 +217,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                         </div>
                                     </div>
                                     <div class="col-md-3 text-end">
+                                      <?php if ($userRole == 1) : ?>  
                                         <a href="overtime_add.php" class="btn-sm btn-success me-3 text-white text-decoration-none">+ Add Overtime</a>
-                                    </div>
+                                      <?php endif ; ?>
+                                      </div>
                                 </div>
                                 <div class="table-responsive">
                                     <table class="table mb-0 mt-3">
@@ -244,8 +246,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                         <td><?= $value['project_name'] ?></td>
                                                         <td><?= $value['division_name'] ?></td>
                                                         <td><?= $value['type'] ?></td>
-                                                        <td><?= $value['start_date'] ?></td>
-                                                        <td><?= $value['finish_date'] ?></td>
+                                                        <td><?= date('d-M-Y H:i', strtotime($value['start_date'])) ?></td>
+                                                        <td><?= date('d-M-Y H:i', strtotime($value['finish_date'])) ?></td>
                                                         <td>
                                                             <?php
                                                             if ($value['status'] === 'Pending') {

@@ -530,8 +530,8 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
                                       ?>
                                     </td>
                                     <td><?= $value['type'] ?></td>
-                                    <td><?= $value['start_date'] ?></td>
-                                    <td><?= $value['finish_date'] ?></td>
+                                    <td><?= date('d-M-Y H:i', strtotime($value['start_date'])) ?></td>
+                                    <td><?= date('d-M-Y H:i', strtotime($value['finish_date'])) ?></td>
                                   </tr>
                                 <?php endforeach; ?>
                               <?php else : ?>
@@ -578,8 +578,8 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
                                     <td><?= $value['division_name'] ?></td>
                                     <td><?= $value['reason'] ?></td>
                                     <td><?= $value['category'] ?></td>
-                                    <td><?= $value['leaveStart'] ?></td>
-                                    <td><?= $value['leaveFinish'] ?></td>
+                                    <td><?= date('d-M-Y H:i', strtotime($value['leaveStart'])) ?></td>
+                                    <td><?= date('d-M-Y H:i', strtotime($value['leaveFinish'])) ?></td>
                                     <td>
                                       <?php
 
@@ -642,10 +642,10 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
                                     <td><?= $value['name'] ?></td>
                                     <td><?= $value['division_name'] ?></td>
                                     <td><?= $value['type'] ?></td>
-                                    <td><?= $value['overtimeStart'] ?></td>
+                                    <td><?= date('d-M-Y H:i', strtotime($value['overtimeStart'])) ?></td>
                                     <td>
                                       <?php if (!empty($value['overtimeFinish'])) {
-                                        echo $value['overtimeFinish'];
+                                        echo date('d-M-Y H:i', strtotime($value['overtimeFinish']));
                                       } else {
                                         echo "-";
                                       }
@@ -784,8 +784,8 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
                                     <td><?= $value['division_name'] ?></td>
                                     <td><?= $value['reason'] ?></td>
                                     <td><?= $value['type'] ?></td>
-                                    <td><?= $value['start_date'] ?></td>
-                                    <td><?= $value['finish_date'] ?></td>
+                                    <td><?= date('d-M-Y H:i', strtotime($value['start_date'])) ?></td>
+                                    <td><?= date('d-M-Y H:i', strtotime($value['finish_date'])) ?></td>
                                   </tr>
                                 <?php endforeach; ?>
                               <?php else : ?>
@@ -830,10 +830,21 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
                                     <td><?= $value['division_name'] ?></td>
                                     <td><?= $value['reason'] ?></td>
                                     <td><?= $value['category'] ?></td>
-                                    <td><?= $value['leaveStart'] ?></td>
-                                    <td><?= $value['leaveFinish'] ?></td>
+                                    <td><?= date('d-M-Y H:i', strtotime($value['leaveStart'])) ?></td>
+                                    <td><?= date('d-M-Y H:i', strtotime($value['leaveFinish'])) ?></td>
                                     <td>
-                                      <button class="btn btn-sm btn-success">
+                                      <?php
+
+                                      if ($value['status'] === 'Pending') {
+                                        $statusClass = 'btn-warning'; // Status "pending"
+                                      } elseif ($value['status'] === 'Reject') {
+                                        $statusClass = 'btn-danger'; // Status "reject"
+                                      } elseif ($value['status'] === 'Approved') {
+                                        $statusClass = 'btn-success'; // Status "approved"
+                                      }
+
+                                      ?>
+                                      <button class="btn btn-sm <?= $statusClass; ?>" disabled>
                                         <?= $value['status'] ?>
                                       </button>
                                     </td>
@@ -881,12 +892,23 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
                                     <td><?= $value['name'] ?></td>
                                     <td><?= $value['division_name'] ?></td>
                                     <td><?= $value['type'] ?></td>
-                                    <td><?= $value['overtimeStart'] ?></td>
-                                    <td><?= $value['overtimeFinish'] ?></td>
+                                    <td><?= date('d-M-Y H:i', strtotime($value['overtimeStart'])) ?></td>
+                                    <td><?= date('d-M-Y H:i', strtotime($value['overtimeFinish'])) ?></td>
                                     <td><?= $value['categoryOvertime'] ?></td>
                                     <td><?= $value['reasonOvertime'] ?></td>
                                     <td>
-                                      <button class="btn btn-sm btn-success">
+                                      <?php
+
+                                      if ($value['statusOvertime'] === 'Pending') {
+                                        $statusClass = 'btn-warning'; // Status "pending"
+                                      } elseif ($value['statusOvertime'] === 'Reject') {
+                                        $statusClass = 'btn-danger'; // Status "reject"
+                                      } elseif ($value['statusOvertime'] === 'Approved') {
+                                        $statusClass = 'btn-success'; // Status "approved"
+                                      }
+
+                                      ?>
+                                      <button class="btn btn-sm <?= $statusClass ?>" disabled>
                                         <?= $value['statusOvertime'] ?>
                                       </button>
                                     </td>

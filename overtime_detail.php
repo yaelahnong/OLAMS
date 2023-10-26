@@ -104,11 +104,11 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                                     </tr>
                                     <tr>
                                         <td><strong>Start Date</strong></td>
-                                        <td><?= $overtimeDetails['start_date'] ?></td>
+                                        <td><?= date('d-M-Y H:i', strtotime($overtimeDetails['start_date'])) ?></td>
                                     </tr>
                                     <tr>
                                         <td><strong>Finish Date</strong></td>
-                                        <td><?= $overtimeDetails['finish_date'] ?></td>
+                                        <td><?= date('d-M-Y H:i', strtotime($overtimeDetails['finish_date'])) ?></td>
                                     </tr>
                                     <tr>
                                         <td><strong>Category</strong></td>

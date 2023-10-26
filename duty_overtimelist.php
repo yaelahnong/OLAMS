@@ -182,8 +182,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                         </div>
                                     </div>
                                     <div class="col-md-3 text-end">
+                                      <?php if ($userRole == 1) : ?>
                                         <a href="duty_overtime_add.php" class="btn-sm btn-success me-3 text-white text-decoration-none">+ Add Duty Overtime</a>
-                                    </div>
+                                      <?php endif; ?>
+                                      </div>
                                 </div>
                                 <div class="table-responsive">
                                     <table class="table mb-0 mt-3">

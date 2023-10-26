@@ -75,11 +75,12 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                                     </tr>
                                     <tr>
                                         <td><strong>Start Date</strong></td>
-                                        <td><?= $leaveDetails['start_date'] ?></td>
+                                        <td><?= date('d-M-Y H:i', strtotime($leaveDetails['start_date'])) ?></td>
+
                                     </tr>
                                     <tr>
                                         <td><strong>Finish Date</strong></td>
-                                        <td><?= $leaveDetails['finish_date'] ?></td>
+                                        <td><?= date('d-M-Y H:i', strtotime($leaveDetails['finish_date'])) ?></td>
                                     </tr>
                                     <tr>
                                         <td><strong>Status</strong></td>

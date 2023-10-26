@@ -246,7 +246,7 @@ if (isset($_POST['update']) && isset($_POST['overtime_id'])) {
                                         <?php elseif (isset($status) && ($status === 'Approved')) : ?>
                                             <div class="row">
                                                 <div class="mb-3 col-md-6">
-                                                    <label class="form-label" for="inputEffectiveTime">Effective Time</label>
+                                                    <label class="form-label" for="inputEffectiveTime">Effective Time (Hours)</label>
                                                     <input type="number" class="form-control" name="effective_time" id="inputEffectiveTime" placeholder="Enter effective time..." value="<?= $effective_time; ?>">
                                                     <span class="error" style="color: red;"> <?= $effective_timeErr; ?> </span>
                                                 </div>
@@ -256,7 +256,7 @@ if (isset($_POST['update']) && isset($_POST['overtime_id'])) {
                                         <div class="row">
                                             <div class="col">
                                                 <button type="submit" name="update" class="btn btn-primary">Update</button>
-                                                <a href="overtimelist.php" class="btn btn-danger text-white text-decoration-none">Cancel</a>
+                                                <a href="overtimelist.php" class="btn btn-light text-dark text-decoration-none">Cancel</a>
                                             </div>
                                         </div>
                                     </form>
