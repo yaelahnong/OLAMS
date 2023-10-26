@@ -153,28 +153,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                                 </select>
                                                 <span class="error" style="color: red;"> <?= $divisionErr; ?> </span>
                                             </div>
-                                            <div class="mb-3 col-md-6">
+                                            <div class="col-md-6">
                                                 <label class="form-label">Category</label>
-                                                <?php $categoryOptions = ["Weekend", "Weekday"];
-                                                foreach ($categoryOptions as $categoryOption) : ?>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="category" id="category_<?= $categoryOption ?>" value="<?= $categoryOption ?>" <?= $category == $categoryOption ? 'checked' : '' ?>>
-                                                        <label class="form-check-label" for="category_<?= $categoryOption ?>"><?= $categoryOption ?></label>
-                                                    </div>
-                                                <?php endforeach; ?>
-                                                <span class="error" style="color: red;"> <?= $categoryErr; ?> </span>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="category" id="category_weekend" value="Weekend" <?php if (isset($category) && $category === "Weekend") echo "checked"; ?>>
+                                                    <label class="form-check-label" for="category_weekend">Weekend</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="category" id="category_weekday" value="Weekday" <?php if (isset($category) && $category === "Weekday") echo "checked"; ?>>
+                                                    <label class="form-check-label" for="category_weekday">Weekday</label>
+                                                </div>
+                                                <span class="error" style="color: red;"><?= $categoryErr; ?></span>
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <div class="mb-3 col-md-6">
+                                            <div class="col-md-6">
                                                 <label class="form-label">Type</label>
-                                                <?php $typeOptions = ["Normal", "Urgent", "Business Trip"];
-                                                foreach ($typeOptions as $typeOption) : ?>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="type" id="type_<?= $typeOption ?>" value="<?= $typeOption ?>" <?= $type == $typeOption ? 'checked' : '' ?>>
-                                                        <label class="form-check-label" for="type_<?= $typeOption ?>"><?= $typeOption ?></label>
-                                                    </div>
-                                                <?php endforeach; ?>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="type" id="type_Normal" value="Normal" <?php if (isset($type) && $type === "Normal") echo "checked"; ?>>
+                                                    <label class="form-check-label" for="type_Normal">Normal</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="type" id="type_Urgent" value="Urgent" <?php if (isset($type) && $type === "Urgent") echo "checked"; ?>>
+                                                    <label class="form-check-label" for="type_Urgent">Urgent</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="type" id="type_BusinessTrip" value="Business Trip" <?php if (isset($type) && $type === "Business Trip") echo "checked"; ?>>
+                                                    <label class="form-check-label" for="type_BusinessTrip">Business Trip</label>
+                                                </div>
+                                                <span class="error" style="color: red;"><?= $typeErr; ?></span>
                                             </div>
                                             <div class="mb-3 col-md-6">
                                                 <label class="form-label" for="inputStartDate">Start Date</label>
