@@ -9,6 +9,13 @@ if (!isset($_SESSION["login"])) {
     exit();
 }
 
+// membatasi Hak Akses User
+if ($_SESSION["role_id"] != 3 || $_SESSION["role_id"] != 4) {
+    header("Location: dashboard.php");
+    exit();
+  }
+  
+
 $projectData = [];
 if (isset($_GET['id'])) {
     $project_id = cleanValue($_GET['id']);

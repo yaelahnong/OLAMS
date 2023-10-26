@@ -9,6 +9,13 @@ if (!isset($_SESSION["login"])) {
   exit();
 }
 
+// membatasi Hak Akses User
+if ($_SESSION["role_id"] != 3 || $_SESSION["role_id"] != 4) {
+  header("Location: dashboard.php");
+  exit();
+}
+
+
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id']) && is_numeric($_GET['id'])) {
     $user_id = $_GET['id'];
 

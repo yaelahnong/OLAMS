@@ -9,6 +9,12 @@ if (!isset($_SESSION["login"])) {
   exit();
 }
 
+// membatasi Hak Akses User
+if ($_SESSION["role_id"] != 3 || $_SESSION["role_id"] != 4) {
+  header("Location: dashboard.php");
+  exit();
+}
+
 $limit = 5;
 $halaman_aktif = isset($_GET['page']) ? $_GET['page'] : 1;
 $offset = ($halaman_aktif - 1) * $limit;

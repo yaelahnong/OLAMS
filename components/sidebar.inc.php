@@ -1,6 +1,6 @@
 <nav id="sidebar" class="sidebar js-sidebar">
   <div class="sidebar-content js-simplebar">
-    <a class="sidebar-brand" href="index.html">
+    <a class="sidebar-brand" href="dashboard.php">
     <img src="images/photos/logo.png" class="avatar img-fluid rounded-5 me-1" alt="Charles Hall" style="width: 60px; height: 40px;"/>
       <span class="align-middle">OLAMS</span>
     </a>

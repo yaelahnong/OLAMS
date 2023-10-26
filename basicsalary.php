@@ -7,6 +7,12 @@ if (!isset($_SESSION["login"])) {
   exit();
 }
 
+// membatasi Hak Akses User
+if ($_SESSION["role_id"] != 3 || $_SESSION["role_id"] != 4) {
+  header("Location: dashboard.php");
+  exit();
+}
+
 $show_basic_salary = "SELECT bs.basic_salary_id, u.name, bs.total_basic_salary, bs.created_at
                      FROM m_basic_salaries bs
                      INNER JOIN users u ON bs.user_id = u.user_id";

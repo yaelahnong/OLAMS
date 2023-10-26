@@ -8,6 +8,12 @@ if (!isset($_SESSION["login"])) {
   exit();
 }
 
+// membatasi Hak Akses User
+if ($_SESSION["role_id"] != 3 || $_SESSION["role_id"] != 4) {
+  header("Location: dashboard.php");
+  exit();
+}
+
 // query 1
 $show_project = "SELECT COUNT(project_id) AS jumlah_semua_data FROM m_projects WHERE is_deleted = 'N'";
 
