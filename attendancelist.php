@@ -103,8 +103,10 @@ $jumlah_halaman = ceil($jumlah_semua_data / $limit);
                                         </div>
                                     </div>
                                     <div class="col-md-5 text-end">
+                                      <?php if ($_SESSION['role_id'] == 3) : ?>
                                         <a href="attendance_add.php" class="btn-sm btn-success me-3 text-white text-decoration-none">+ Add Attendance</a>
-                                    </div>
+                                      <?php endif ; ?>
+                                      </div>
                                 </div>
                                 <div class="table-responsive">
                                     <table class="table mb-0 mt-3">
@@ -129,11 +131,12 @@ $jumlah_halaman = ceil($jumlah_semua_data / $limit);
                                                         <td><?= $value['division_name'] ?></td>
                                                         <td><?= $value['reason'] ?></td>
                                                         <td><?= $value['type'] ?></td>
-                                                        <td><?= $value['start_date'] ?></td>
-                                                        <td><?= $value['finish_date'] ?></td>
+                                                        <td><?= date('d-M-Y H:i', strtotime($value['start_date'])) ?></td>
+                                                        <td><?= date('d-M-Y H:i', strtotime($value['finish_date'])) ?></td>
+
                                                         <td>
-                                                            <a href="attendance_update.php?id=<?= $value['attendance_id']; ?>" class="text-warning"><i class="align-middle" data-feather="edit"></i></a>
-                                                            <a href="attendance_delete.php?id=<?= $value['attendance_id']; ?>" class="text-danger"><i class="align-middle ms-3" data-feather="trash-2" onclick="return confirm('Apakah kamu yakin?')"></i></a>
+                                                            <a href="attendance_update.php?id=<?= $value['attendance_id']; ?>" class="btn btn-warning btn-sm">Edit</a>
+                                                            <a href="attendance_delete.php?id=<?= $value['attendance_id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a>
                                                         </td>
                                                     </tr>
                                                 <?php endforeach; ?>

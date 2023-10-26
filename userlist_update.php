@@ -43,16 +43,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $emailErr = "Email tidak valid. Harus memiliki panjang antara 6 hingga 30 karakter.";
     }
 
-    if (empty($password)) {
-      $passwordErr = 'Password harus diisi.';
-    } elseif (strlen($password) < 8) {
-      $passwordErr = 'Password minimal harus terdiri dari 8 karakter.';
-    } elseif (!preg_match("/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/", $password)) {
-      $passwordErr = 'Password harus mengandung setidaknya satu huruf kecil, satu huruf besar, dan satu angka.';
-    } else {
-      // Hash password 
-      $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-    }
+    if (!empty($password)) {
+      if (strlen($password) < 8) {
+          $passwordErr = 'Password minimal harus terdiri dari 8 karakter.';
+      } elseif (!preg_match("/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/", $password)) {
+          $passwordErr = 'Password harus mengandung setidaknya satu huruf kecil, satu huruf besar, dan satu angka.';
+      } else {
+          // Hash password 
+          $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+      }
+  }
 
     if (empty($role)) {
       $roleErr = "Anda harus memilih (role).";
@@ -79,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_GET['id']
       );
       mysqli_stmt_execute($stmt);
-      echo "<script>alert('Data berhasil diupdate')</script>";
+      echo "<script>alert('Data updated successfully')</script>";
       echo "<script>window.location.replace('userlist.php')</script>";
     }
   } else {

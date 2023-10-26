@@ -90,7 +90,7 @@ $data = mysqli_fetch_all($result2, MYSQLI_ASSOC);
                     <div class="d-flex align-items-center">
                       <form action="<?= cleanValue($_SERVER['PHP_SELF']); ?>" method="get" class="d-flex">
                         <label for="inputSearch" class="ms-3 me-2">Search</label>
-                        <input type="text" name="search" id="inputSearch" placeholder="Enter user name " class="form-control form-control-sm" value="<?php echo $search_basic_salary ?? ''; ?>">
+                        <input type="text" name="search" id="inputSearch" placeholder="Enter name " class="form-control form-control-sm" value="<?php echo $search_basic_salary ?? ''; ?>">
                         <button type="submit" class="btn btn-sm btn-primary ms-2">Search</button>
                         <a class="btn btn-sm btn-warning mx-2" href="<?php echo cleanValue($_SERVER['PHP_SELF']); ?>">Reset</a>
                       </form>
@@ -106,7 +106,7 @@ $data = mysqli_fetch_all($result2, MYSQLI_ASSOC);
                     <thead>
                       <tr>
                         <th scope="col">No</th>
-                        <th scope="col">Fullname</th>
+                        <th scope="col">Full Name</th>
                         <th scope="col">Total Basic Salary</th>
                         <th scope="col">Actions</th>
                       </tr>
@@ -120,8 +120,8 @@ $data = mysqli_fetch_all($result2, MYSQLI_ASSOC);
                             <td><?= number_format($row['total_basic_salary']); ?></td>
                             <td>
                               <!-- Link to Update and Delete Basic Salary -->
-                              <a href="basicsalary_update.php?id=<?= $row['basic_salary_id']; ?>" class="text-warning"><i class="align-middle" data-feather="edit"></i></a>
-                              <a href="basicsalary_delete.php?id=<?= $row['basic_salary_id']; ?>" class="text-danger"><i class="align-middle ms-3" data-feather="trash-2" onclick="return confirm('Are you sure?')"></i></a>
+                              <a href="basicsalary_update.php?id=<?= $row['basic_salary_id']; ?>" class="btn btn-warning btn-sm">Edit</a>
+                              <a href="basicsalary_delete.php?id=<?= $row['basic_salary_id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a>
                             </td>
                           </tr>
                         <?php endforeach; ?>

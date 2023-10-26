@@ -119,8 +119,8 @@ $data = mysqli_fetch_all($result2, MYSQLI_ASSOC);
                             <th scope="row"><?= $key + 1 + $offset ; ?></th>
                             <td><?= $row['division_name']; ?></td>
                             <td>
-                              <a href="divisionlist_update.php?id=<?= $row['division_id']; ?>" class="text-warning"><i class="align-middle" data-feather="edit"></i></a>
-                              <a href="divisionlist_delete.php?id=<?= $row['division_id']; ?>" class="text-danger"><i class="align-middle ms-3" data-feather="trash-2" onclick="return confirm('Are you sure you want to delete this data?')"></i></a>
+                              <a href="divisionlist_update.php?id=<?= $row['division_id']; ?>" class="btn btn-warning btn-sm">Edit</a>
+                              <a href="divisionlist_delete.php?id=<?= $row['division_id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this data?')">Delete</a>
                             </td>
                           </tr>
                         <?php endforeach; ?>

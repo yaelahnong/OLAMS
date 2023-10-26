@@ -103,7 +103,7 @@ $jumlah_halaman = ceil($jumlah_semua_data / $limit);
                     <thead>
                       <tr>
                         <th scope="col">No</th>
-                        <th scope="col">Fullname</th>
+                        <th scope="col">Full Name</th>
                         <th scope="col">Username</th>
                         <th scope="col">Email</th>
                         <th scope="col">Role</th>
@@ -122,8 +122,8 @@ $jumlah_halaman = ceil($jumlah_semua_data / $limit);
                             </td>
                             <td> <?= $value['role_name'] ?></td>
                             <td>
-                              <a href="userlist_update.php?id=<?= $value['user_id'] ?>" class="text-warning"><i class="align-middle" data-feather="edit"></i></a>
-                              <a href="userlist_delete.php?id=<?= $value['user_id'] ?>" onclick="return confirm('Are you sure?')" class="text-danger"><i class="align-middle ms-3" data-feather="trash-2"></i></a>
+                              <a href="userlist_update.php?id=<?= $value['user_id'] ?>" class="btn btn-warning btn-sm">Edit</a>
+                              <a href="userlist_delete.php?id=<?= $value['user_id'] ?>" onclick="return confirm('Are you sure?')" class="btn btn-danger btn-sm">Delete</a>
                             </td>
                           </tr>
                         <?php endforeach; ?>

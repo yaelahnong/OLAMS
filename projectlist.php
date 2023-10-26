@@ -97,7 +97,7 @@ $data = mysqli_fetch_all($result2, MYSQLI_ASSOC);
                     <div class="d-flex align-items-center">
                       <form action="<?= cleanValue($_SERVER['PHP_SELF']); ?>" method="get" class="d-flex">
                         <label for="inputSearch" class="ms-3 me-2">Search</label>
-                        <input type="text" name="search" id="inputSearch" placeholder="Enter name project" class="form-control form-control-sm" value="<?php echo $search_project ?? ''; ?>">
+                        <input type="text" name="search" id="inputSearch" placeholder="Enter project name" class="form-control form-control-sm" value="<?php echo $search_project ?? ''; ?>">
                         <button type="submit" class="btn btn-sm btn-primary ms-2">Search</button>
                         <a class="btn btn-sm btn-warning mx-2" href="<?php echo cleanValue($_SERVER['PHP_SELF']);?>">Reset</a>
                       </form>
@@ -123,8 +123,8 @@ $data = mysqli_fetch_all($result2, MYSQLI_ASSOC);
                             <th scope="row"><?= $key + 1 + $offset ; ?></th>
                             <td><?= $row['project_name']; ?></td>
                             <td>
-                              <a href="projectlist_update.php?id=<?= $row['project_id']; ?>" class="text-warning"><i class="align-middle" data-feather="edit"></i></a>
-                              <a href="projectlist_delete.php?id=<?= $row['project_id']; ?>" class="text-danger"><i class="align-middle ms-3" data-feather="trash-2" onclick="return confirm('Apakah kamu yakin?')"></i></a>
+                              <a href="projectlist_update.php?id=<?= $row['project_id']; ?>" class="btn btn-warning btn-sm">Edit</a>
+                              <a href="projectlist_delete.php?id=<?= $row['project_id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a>
                             </td>
                           </tr>
                         <?php endforeach; ?>
