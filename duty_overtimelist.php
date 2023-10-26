@@ -21,7 +21,8 @@ m_projects.project_name AS project_name,
 m_divisions.division_name AS division_name, 
 duty_overtimes.lead_count, 
 duty_overtimes.customer_count, 
-duty_overtimes.note
+duty_overtimes.note,
+duty_overtimes.status
 FROM duty_overtimes
 LEFT JOIN users ON duty_overtimes.user_id = users.user_id
 LEFT JOIN m_projects ON duty_overtimes.project_id = m_projects.project_id
@@ -94,7 +95,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
             $updateQuery = "";
 
             if ($userRole === 3) { // Cek jika peran adalah "admin"
-                $updateQuery = "UPDATE duty_overtimes SET approved_by = ?, updated_by = ? WHERE duty_overtime_id = ?";
+                $status = ($_POST['submit'] === "Approve") ? 'Approved' : null;
+                $updateQuery = "UPDATE duty_overtimes SET status = ?, approved_by = ?, updated_by = ? WHERE duty_overtime_id = ?";
             } else {
                 echo "Anda tidak memiliki izin untuk menyetujui overtime.";
             }
@@ -107,7 +109,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                 $updateStatement = mysqli_prepare($conn, $updateQuery);
 
                 if ($updateStatement) {
-                    mysqli_stmt_bind_param($updateStatement, "iii", $user_id, $user_id, $overtimeId);
+                    mysqli_stmt_bind_param($updateStatement, "siii", $status, $user_id, $user_id, $overtimeId);
 
                     if (mysqli_stmt_execute($updateStatement)) {
                         echo "<script>alert('Duty overtime data Updated successfully.')</script>";
@@ -192,13 +194,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                         <thead>
                                             <tr>
                                                 <th scope="col">No</th>
-                                                <th scope="col">Full Name</th>
-                                                <th scope="col">Project</th>
-                                                <th scope="col">Division</th>
+                                                <th scope="col" style="min-width : 200px;">Full Name</th>
+                                                <th scope="col" style="min-width : 200px;">Project</th>
+                                                <th scope="col" style="min-width : 200px;">Division</th>
                                                 <th scope="col">Lead Count</th>
                                                 <th scope="col">Customer Count</th>
-                                                <th scope="col">Note</th>
-                                                <th scope="col">Action</th>
+                                                <th scope="col" style="min-width : 200px;">Note</th>
+                                                <th scope="col">Status</th>
+                                                <th scope="col" style="min-width : 210px;">Action</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -213,15 +216,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                         <td><?= $value['customer_count'] ?></td>
                                                         <td><?= empty($value['note']) ? '-' : $value['note'] ?></td>
                                                         <td>
-                                                            <?php if ($userRole === 3) : // Admin ?>
+                                                            <?php
+                                                            if ($value['status'] === 'Pending') {
+                                                                $statusClass = 'badge bg-warning'; // Status "pending"
+                                                            } elseif ($value['status'] === 'Rejected') {
+                                                                $statusClass = 'badge bg-danger'; // Status "reject"
+                                                            } elseif ($value['status'] === 'Approved') {
+                                                                $statusClass = 'badge bg-success'; // Status "approved"
+                                                            }
+                                                            ?>
+                                                            <button class="btn btn-sm text-white <?= $statusClass ?>" disabled>
+                                                                <?= $value['status'] ?>
+                                                            </button>
+                                                        </td>
+                                                        <td>
+                                                            <?php if ($userRole === 3) : // Admin 
+                                                            ?>
                                                                 <a href="duty_overtime_detail.php?id=<?= $value['duty_overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
                                                                 <form method="post" action="<?= cleanValue($_SERVER['PHP_SELF']); ?>" class="d-inline">
                                                                     <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
                                                                     <input type="hidden" name="duty_overtime_id" value="<?= $value['duty_overtime_id'] ?>">
-                                                                    <button type="submit" name="submit" class="btn btn-success btn-sm ms-2">Submit</button>
+                                                                    <button type="submit" name="submit" value="Approve" class="btn btn-success btn-sm ms-2">Submit</button>
                                                                 </form>
-                                                            <?php elseif($userRole === 1) : // User ?>
-                                                                <a href="duty_overtime_delete.php?id=<?= $value['duty_overtime_id'] ?>" class="btn btn-danger btn-sm ms-2" onclick="return confirm('Apakah kamu yakin?')">Delete</a>
+                                                            <?php elseif ($userRole === 1) : // User 
+                                                            ?>
+                                                                <?php if ($value['status'] !== 'Approved') :?>
+                                                                    <a href="duty_overtime_delete.php?id=<?= $value['duty_overtime_id'] ?>" class="btn btn-danger btn-sm ms-2" onclick="return confirm('Apakah kamu yakin?')">Delete</a>
+                                                                <?php endif; ?>
                                                                 <a href="duty_overtime_detail.php?id=<?= $value['duty_overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
                                                                 <a href="duty_overtime_update.php?id=<?= $value['duty_overtime_id'] ?>" class="btn btn-warning btn-sm ms-2">Edit</a>
                                                             <?php endif; ?>
