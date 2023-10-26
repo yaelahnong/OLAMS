@@ -337,19 +337,18 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
       <?php include "components/navbar.inc.php"; ?>
       <main class="content">
         <?php if ($userRole === 2 || $userRole === 3 || $userRole === 4) : ?>
-          <main class="content">
             <div class="container-fluid p-0">
               <h1 class="h1 mb-3 judul_halaman"><strong>Dashboard</strong></h1>
               <div class="row">
                 <div class="col-md-3">
-                  <div class="card mt-2">
+                  <div class="card">
                     <div class="card-body">
                       <h5 class="card-title">Filter Laporan</h5>
                       <form action="<?= cleanValue($_SERVER['PHP_SELF']) ?>" method="get">
                         <div class="form-group row">
-                          <div class="col mt-1">
+                          <div class="col-12">
                             <label for="monthSelect">Pilih Bulan:</label>
-                            <select id="monthSelect" name="month" class="form-control">
+                            <select id="monthSelect" name="month" class="form-select">
                               <option value="this_month" <?= ($selectedMonth === 'this_month') ? 'selected' : '' ?>>Bulan Ini</option>
                               <option value="last_month" <?= ($selectedMonth === 'last_month') ? 'selected' : '' ?>>Bulan Kemarin</option>
                             </select>
@@ -412,7 +411,7 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
                 </div>
               </div>
               <div class="col-12 d-flex flex-row">
-                <div class="col-sm-4 px-3">
+                <div class="col-sm-4 pe-3">
                   <div class="card bg-secondary">
                     <div class="card-body">
                       <div class="row">
@@ -466,7 +465,7 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
                     </div>
                   </div>
                 </div>
-                <div class="col-sm-4 px-3">
+                <div class="col-sm-4 ps-3">
                   <div class="card bg-secondary">
                     <div class="card-body">
                       <div class="row">
@@ -494,7 +493,7 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
                   </div>
                 </div>
               </div>
-              <main class="content">
+              <div class="content px-0">
                 <div class="container-fluid p-0">
                   <div class="row">
                     <div class="col-12">
@@ -547,8 +546,8 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
                     </div>
                   </div>
                 </div>
-              </main>
-              <main class="content">
+              </div>
+              <div class="">
                 <div class="container-fluid p-0">
                   <div class="row">
                     <div class="col-12">
@@ -611,8 +610,8 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
                     </div>
                   </div>
                 </div>
-              </main>
-              <main class="content">
+              </div>
+              <div class="">
                 <div class="container-fluid p-0">
                   <div class="row">
                     <div class="col-12">
@@ -684,12 +683,10 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
                     </div>
                   </div>
                 </div>
-              </main>
+              </div>
             </div>
-          </main>
         <?php elseif ($userRole === 1) : ?>
           <!-- Tampilan untuk User -->
-          <main class="content">
             <div class="container-fluid p-0">
               <h1 class="h1 mb-3 judul_halaman"><strong>Dashboard</strong></h1>
               <div class="row">
@@ -758,7 +755,6 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
                   </div>
                 </div>
               </div>
-              <main class="content">
                 <div class="container-fluid p-0">
                   <div class="row">
                     <div class="col-12">
@@ -804,8 +800,6 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
                     </div>
                   </div>
                 </div>
-              </main>
-              <main class="content">
                 <div class="container-fluid p-0">
                   <div class="row">
                     <div class="col-12">
@@ -857,8 +851,6 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
                     </div>
                   </div>
                 </div>
-              </main>
-              <main class="content">
                 <div class="container-fluid p-0">
                   <div class="row">
                     <div class="col-12">
@@ -912,9 +904,7 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
                     </div>
                   </div>
                 </div>
-              </main>
             </div>
-          </main>
         <?php else : ?>
           <div class="col-md-12">
             <div class="alert alert-warning">
