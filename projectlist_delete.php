@@ -9,6 +9,12 @@ if (!isset($_SESSION["login"])) {
     exit();
 }
 
+// membatasi Hak Akses User
+if ($_SESSION['role_id'] != 3 && $_SESSION['role_id'] != 4 && $_SESSION['role_id'] != 2) {
+    header("Location: dashboard.php");
+    exit();
+}
+  
 $sekarang = strval(date("Y-m-d H:i:s"));
 if (isset($_GET['id']) && isset($_SESSION['user_id'])) {
     $project_id = cleanValue($_GET['id']);
@@ -28,4 +34,3 @@ if (isset($_GET['id']) && isset($_SESSION['user_id'])) {
 } else {
     echo "Parameter tidak valid.";
 }
-?>

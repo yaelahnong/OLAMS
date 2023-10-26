@@ -9,6 +9,12 @@ if (!isset($_SESSION["login"])) {
   exit();
 }
 
+// membatasi Hak Akses User
+if ($_SESSION["role_id"] != 3 && $_SESSION["role_id"] != 4) {
+  header("Location: dashboard.php");
+  exit();
+}
+
 if (isset($_GET['id']) && isset($_SESSION['user_id'])) {
   $basic_salary_id = cleanValue($_GET['id']);
   $user_id = $_SESSION["user_id"];
