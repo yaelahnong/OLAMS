@@ -22,7 +22,8 @@ if (isset($_GET["id"])) {
         m_divisions.division_name AS division_name, 
         duty_overtimes.lead_count, 
         duty_overtimes.customer_count, 
-        duty_overtimes.note
+        duty_overtimes.note,
+        duty_overtimes.status
     FROM duty_overtimes
     LEFT JOIN users ON duty_overtimes.user_id = users.user_id
     LEFT JOIN m_projects ON duty_overtimes.project_id = m_projects.project_id
@@ -91,6 +92,10 @@ if (isset($_GET["id"])) {
                                         <tr>
                                             <td><strong>Customer Count</strong></td>
                                             <td><?= $detail['customer_count'] ?></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>status</strong></td>
+                                            <td><?= $detail['status'] ?></td>
                                         </tr>
                                         <tr>
                                             <td><strong>Note</strong></td>
