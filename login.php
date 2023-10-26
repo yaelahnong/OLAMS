@@ -17,8 +17,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 	//mememeriksa apakah token csrf valid atau tidak
 	if (isset($_POST['csrf_token']) && isCsrfTokenValid($_POST['csrf_token'])) {
-		// var_dump(generateToken());
-		// exit;
 		// Mengambil data yang dikirimkan dari form
 		$username = cleanValue($_POST["username"]);
 		$password = cleanValue($_POST["password"]);
@@ -27,7 +25,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 			$error = "Username dan password harus di isi.";
 		} else {
 			// Mencari pengguna berdasarkan username
-			$query = "SELECT user_id, username, password FROM users WHERE username = ?";
+			$query = "SELECT user_id, username, password, name, role_id FROM users WHERE username = ?";
 			$stmt = mysqli_prepare($conn, $query);
 			mysqli_stmt_bind_param($stmt, "s", $username);
 			mysqli_stmt_execute($stmt);
@@ -37,7 +35,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 			if ($user) {
 				if ($user && password_verify($password, $user["password"])) {
 					// Password cocok, login berhasil
+					$_SESSION['login'] = true;
 					$_SESSION['user_id'] = $user['user_id'];
+					$_SESSION['name'] = $user['name'];
+					$_SESSION['role_id'] = $user['role_id'];
 					header("Location: dashboard.php");
 					exit;
 				} else {

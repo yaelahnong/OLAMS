@@ -3,7 +3,7 @@ session_start();
 include __DIR__ . "/include/conn.inc.php";
 include __DIR__ . "/include/csrf_token.inc.php";
 
-if (!isset($_SESSION["user_id"])) {
+if (!isset($_SESSION["login"])) {
     header("Location: login/login.php");
     exit();
 }

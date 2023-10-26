@@ -4,8 +4,8 @@ include __DIR__ . "/include/conn.inc.php";
 include __DIR__ . "/include/csrf_token.inc.php";
 include __DIR__ . "/include/baseUrl.inc.php";
 
-if (!isset($_SESSION["user_id"])) {
-    header("Location: login/login.php");
+if (!isset($_SESSION["login"])) {
+    header("Location: login.php");
     exit();
 }
 $user_id = $_SESSION["user_id"];
