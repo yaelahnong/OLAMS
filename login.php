@@ -6,7 +6,7 @@ include __DIR__ . "/include/baseUrl.inc.php";
 
 // var_dump($baseUrl);
 function isUserLoggedIn() {
-    return isset($_SESSION["user_id"]);
+    return isset($_SESSION["login"]);
 }
 if (isUserLoggedIn()) {
     header("Location: dashboard.php");
