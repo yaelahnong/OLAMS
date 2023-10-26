@@ -3,7 +3,7 @@ session_start();
 include __DIR__ . "/include/conn.inc.php";
 
 // Periksa apakah pengguna sudah masuk atau belum
-if (!isset($_SESSION["user_id"])) {
+if (!isset($_SESSION["login"])) {
     header("Location: login.php");
     exit();
 }

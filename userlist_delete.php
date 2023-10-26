@@ -4,9 +4,9 @@ include __DIR__ . "/include/baseUrl.inc.php";
 include __DIR__ . "/include/conn.inc.php";
 include __DIR__ . "/include/csrf_token.inc.php";
 
-if (!isset($_SESSION['user_id'])) {
+if (!isset($_SESSION["login"])) {
   header("Location: login.php");
-  exit;
+  exit();
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id']) && is_numeric($_GET['id'])) {

@@ -28,17 +28,20 @@
         </a>
       </li>
 
+      <li class="sidebar-item  <?= (basename($_SERVER['PHP_SELF']) == 'duty_overtimelist.php') ? 'active' : ''; ?>">
+        <a class="sidebar-link" href="duty_overtimelist.php">
+          <i class="align-middle" data-feather="clock"></i> <span class="align-middle">Duty Overtime</span>
+        </a>
+      </li>
+
+      
       <li class="sidebar-item  <?= (basename($_SERVER['PHP_SELF']) == 'attendancelist.php') ? 'active' : ''; ?>">
         <a class="sidebar-link" href="attendancelist.php">
           <i class="align-middle" data-feather="file-text"></i> <span class="align-middle">Attendance</span>
         </a>
       </li>
 
-      <li class="sidebar-item  <?= (basename($_SERVER['PHP_SELF']) == 'report.php') ? 'active' : ''; ?>">
-        <a class="sidebar-link" href="report.php">
-          <i class="align-middle" data-feather="clipboard"></i> <span class="align-middle">Report</span>
-        </a>
-      </li>
+      <?php if($_SESSION['role_id'] === 3 || $_SESSION['role_id'] === 4) : ?>
 
       <li class="sidebar-header">
         Master Data
@@ -71,6 +74,24 @@
           <i class="align-middle" data-feather="user-plus"></i> <span class="align-middle">User List</span>
         </a>
       </li>
+
+      <?php elseif($_SESSION['role_id'] === 2) : ?>
+      <li class="sidebar-header">
+        Master Data
+      </li>
+
+      <li class="sidebar-item  <?= (basename($_SERVER['PHP_SELF']) == 'projectlist.php') ? 'active' : ''; ?>">
+        <a class="sidebar-link" href="projectlist.php">
+          <i class="align-middle" data-feather="square"></i> <span class="align-middle">Master Project</span>
+        </a>
+      </li>
+
+      <li class="sidebar-item  <?= (basename($_SERVER['PHP_SELF']) == 'divisionlist.php') ? 'active' : ''; ?>">
+        <a class="sidebar-link" href="divisionlist.php">
+          <i class="align-middle" data-feather="check-square"></i> <span class="align-middle">Master Division</span>
+        </a>
+      </li>
+      <?php endif; ?>
     </ul>
 
   </div>
