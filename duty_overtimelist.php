@@ -14,7 +14,7 @@ $limit = 5;
 $halaman_aktif = isset($_GET['page']) ? $_GET['page'] : 1;
 $offset = ($halaman_aktif - 1) * $limit;
 
-$show_overtime = "SELECT
+$show_duty_overtime = "SELECT
 duty_overtimes.duty_overtime_id,
 users.name AS name,
 m_projects.project_name AS project_name, 
@@ -57,32 +57,36 @@ mysqli_stmt_execute($roleStatement);
 $roleData = mysqli_stmt_get_result($roleStatement);
 $userRole = mysqli_fetch_row($roleData)[0];
 
+if ($userRole === 1) {
+    $show_duty_overtime .= " WHERE duty_overtimes.user_id = $user_id";
+}
+
 $filter_division = "";
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['filter_division']) && !empty($_GET['filter_division'])) {
     $filter_division = cleanValue($_GET['filter_division']);
-    $show_overtime .= (strpos($show_overtime, 'WHERE') === false) ? " WHERE" : " AND";
-    $show_overtime .= " m_divisions.division_id = '$filter_division'";
+    $show_duty_overtime .= (strpos($show_duty_overtime, 'WHERE') === false) ? " WHERE" : " AND";
+    $show_duty_overtime .= " m_divisions.division_id = '$filter_division'";
 }
 
 $filter_project = "";
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['filter_project']) && !empty($_GET['filter_project'])) {
     $filter_project = cleanValue($_GET['filter_project']);
-    $show_overtime .= (strpos($show_overtime, 'WHERE') === false) ? " WHERE" : " AND";
-    $show_overtime .= " m_projects.project_id = '$filter_project'";
+    $show_duty_overtime .= (strpos($show_duty_overtime, 'WHERE') === false) ? " WHERE" : " AND";
+    $show_duty_overtime .= " m_projects.project_id = '$filter_project'";
 }
 
 $search = "";
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['search']) && !empty($_GET['search'])) {
     $search = cleanValue($_GET['search']);
-    $show_overtime .= (strpos($show_overtime, 'WHERE') === false) ? " WHERE" : " AND";
-    $show_overtime .= " ( users.name LIKE '%$search%')";
+    $show_duty_overtime .= (strpos($show_duty_overtime, 'WHERE') === false) ? " WHERE" : " AND";
+    $show_duty_overtime .= " ( users.name LIKE '%$search%')";
 }
 
-$show_overtime .= " ORDER BY duty_overtimes.duty_overtime_id DESC";
+$show_duty_overtime .= " ORDER BY duty_overtimes.duty_overtime_id DESC";
 
-$jumlah_semua_data = mysqli_num_rows(mysqli_query($conn, $show_overtime));
-$show_overtime .= " LIMIT $limit OFFSET $offset ";
-$data = mysqli_query($conn, $show_overtime);
+$jumlah_semua_data = mysqli_num_rows(mysqli_query($conn, $show_duty_overtime));
+$show_duty_overtime .= " LIMIT $limit OFFSET $offset ";
+$data = mysqli_query($conn, $show_duty_overtime);
 $karyawanArray = mysqli_fetch_all($data, MYSQLI_ASSOC);
 $jumlah_halaman = ceil($jumlah_semua_data / $limit);
 
@@ -184,79 +188,163 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                         </div>
                                     </div>
                                     <div class="col-md-3 text-end">
-                                      <?php if ($userRole == 1) : ?>
-                                        <a href="duty_overtime_add.php" class="btn-sm btn-success me-3 text-white text-decoration-none">+ Add Duty Overtime</a>
-                                      <?php endif; ?>
-                                      </div>
+                                        <?php if ($userRole == 1) : ?>
+                                            <a href="duty_overtime_add.php" class="btn-sm btn-success me-3 text-white text-decoration-none">+ Add Duty Overtime</a>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
-                                <div class="table-responsive">
-                                    <table class="table mb-0 mt-3">
-                                        <thead>
-                                            <tr>
-                                                <th scope="col">No</th>
-                                                <th scope="col" style="min-width : 200px;">Full Name</th>
-                                                <th scope="col" style="min-width : 200px;">Project</th>
-                                                <th scope="col" style="min-width : 200px;">Division</th>
-                                                <th scope="col">Lead Count</th>
-                                                <th scope="col">Customer Count</th>
-                                                <th scope="col" style="min-width : 200px;">Note</th>
-                                                <th scope="col">Status</th>
-                                                <th scope="col" style="min-width : 210px;">Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php if (count($karyawanArray) > 0) : ?>
-                                                <?php foreach ($karyawanArray as $key => $value) : ?>
-                                                    <tr>
-                                                        <td><?= $key + 1 + $offset ?></td>
-                                                        <td><?= $value['name'] ?></td>
-                                                        <td><?= $value['project_name'] ?></td>
-                                                        <td><?= $value['division_name'] ?></td>
-                                                        <td><?= $value['lead_count'] ?></td>
-                                                        <td><?= $value['customer_count'] ?></td>
-                                                        <td><?= empty($value['note']) ? '-' : $value['note'] ?></td>
-                                                        <td>
-                                                            <?php
-                                                            if ($value['status'] === 'Pending') {
-                                                                $statusClass = 'badge bg-warning'; // Status "pending"
-                                                            } elseif ($value['status'] === 'Rejected') {
-                                                                $statusClass = 'badge bg-danger'; // Status "reject"
-                                                            } elseif ($value['status'] === 'Approved') {
-                                                                $statusClass = 'badge bg-success'; // Status "approved"
-                                                            }
-                                                            ?>
-                                                            <button class="btn btn-sm text-white <?= $statusClass ?>" disabled>
-                                                                <?= $value['status'] ?>
-                                                            </button>
-                                                        </td>
-                                                        <td>
-                                                            <?php if ($userRole === 3) : // Admin 
-                                                            ?>
-                                                                <a href="duty_overtime_detail.php?id=<?= $value['duty_overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
-                                                                <form method="post" action="<?= cleanValue($_SERVER['PHP_SELF']); ?>" class="d-inline">
-                                                                    <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
-                                                                    <input type="hidden" name="duty_overtime_id" value="<?= $value['duty_overtime_id'] ?>">
-                                                                    <button type="submit" name="submit" value="Approve" class="btn btn-success btn-sm ms-2">Submit</button>
-                                                                </form>
-                                                            <?php elseif ($userRole === 1) : // User 
-                                                            ?>
-                                                                <?php if ($value['status'] !== 'Approved') :?>
-                                                                    <a href="duty_overtime_delete.php?id=<?= $value['duty_overtime_id'] ?>" class="btn btn-danger btn-sm ms-2" onclick="return confirm('Apakah kamu yakin?')">Delete</a>
-                                                                <?php endif; ?>
-                                                                <a href="duty_overtime_detail.php?id=<?= $value['duty_overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
-                                                                <a href="duty_overtime_update.php?id=<?= $value['duty_overtime_id'] ?>" class="btn btn-warning btn-sm ms-2">Edit</a>
-                                                            <?php endif; ?>
-                                                        </td>
-                                                    </tr>
-                                                <?php endforeach; ?>
-                                            <?php else : ?>
+                                <?php if ($userRole === 2 || $userRole === 3 || $userRole === 4) : ?>
+
+                                    <div class="table-responsive">
+                                        <table class="table mb-0 mt-3">
+                                            <thead>
                                                 <tr>
-                                                    <td colspan="8" style="text-align: center;">Data tidak ada!!</td>
+                                                    <th scope="col">No</th>
+                                                    <th scope="col" style="min-width : 200px;">Full Name</th>
+                                                    <th scope="col" style="min-width : 200px;">Project</th>
+                                                    <th scope="col" style="min-width : 200px;">Division</th>
+                                                    <th scope="col">Lead Count</th>
+                                                    <th scope="col">Customer Count</th>
+                                                    <th scope="col" style="min-width : 210px;">Note</th>
+                                                    <th scope="col" style="min-width : 200px;">Status</th>
+                                                    <th scope="col">Action</th>
                                                 </tr>
-                                            <?php endif; ?>
-                                        </tbody>
-                                    </table>
-                                </div>
+                                            </thead>
+                                            <tbody>
+                                                <?php if (count($karyawanArray) > 0) : ?>
+                                                    <?php foreach ($karyawanArray as $key => $value) : ?>
+                                                        <tr>
+                                                            <td><?= $key + 1 + $offset ?></td>
+                                                            <td><?= $value['name'] ?></td>
+                                                            <td><?= $value['project_name'] ?></td>
+                                                            <td><?= $value['division_name'] ?></td>
+                                                            <td><?= $value['lead_count'] ?></td>
+                                                            <td><?= $value['customer_count'] ?></td>
+                                                            <td><?= empty($value['note']) ? '-' : $value['note'] ?></td>
+                                                            <td>
+                                                                <?php
+                                                                if ($value['status'] === 'Pending') {
+                                                                    $statusClass = 'badge bg-warning'; // Status "pending"
+                                                                } elseif ($value['status'] === 'Rejected') {
+                                                                    $statusClass = 'badge bg-danger'; // Status "reject"
+                                                                } elseif ($value['status'] === 'Approved') {
+                                                                    $statusClass = 'badge bg-success'; // Status "approved"
+                                                                }
+                                                                ?>
+                                                                <button class="btn btn-sm text-white <?= $statusClass ?>" disabled>
+                                                                    <?= $value['status'] ?>
+                                                                </button>
+                                                            </td>
+                                                            <td>
+                                                                <div class="d-flex">
+                                                                    <?php if ($userRole === 3) : // Admin 
+                                                                    ?>
+                                                                        <a href="duty_overtime_detail.php?id=<?= $value['duty_overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
+                                                                        <form method="post" action="<?= cleanValue($_SERVER['PHP_SELF']); ?>" class="d-inline">
+                                                                            <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                                                                            <input type="hidden" name="duty_overtime_id" value="<?= $value['duty_overtime_id'] ?>">
+                                                                            <button type="submit" name="submit" value="Approve" class="btn btn-success btn-sm ms-2">Submit</button>
+                                                                        </form>
+                                                                    <?php elseif ($userRole === 1) : // User 
+                                                                    ?>
+                                                                        <?php if ($value['status'] !== 'Approved') : ?>
+                                                                            <a href="duty_overtime_delete.php?id=<?= $value['duty_overtime_id'] ?>" class="btn btn-danger btn-sm ms-2" onclick="return confirm('Apakah kamu yakin?')">Delete</a>
+                                                                        <?php endif; ?>
+                                                                        <a href="duty_overtime_detail.php?id=<?= $value['duty_overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
+                                                                        <a href="duty_overtime_update.php?id=<?= $value['duty_overtime_id'] ?>" class="btn btn-warning btn-sm ms-2">Edit</a>
+                                                                    <?php elseif ($userRole === 4) : // Supervisor 
+                                                                    ?>
+                                                                        <a href="duty_overtime_detail.php?id=<?= $value['duty_overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
+                                                                    <?php elseif ($userRole === 4) : // Leader 
+                                                                    ?>
+                                                                        <a href="duty_overtime_detail.php?id=<?= $value['duty_overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
+
+                                                                    <?php endif; ?>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    <?php endforeach; ?>
+                                                <?php else : ?>
+                                                    <tr>
+                                                        <td colspan="8" style="text-align: center;">No records found!!!</td>
+                                                    </tr>
+                                                <?php endif; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                <?php elseif ($userRole === 1) : ?>
+                                    <div class="table-responsive">
+                                        <table class="table mb-0 mt-3">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col">No</th>
+                                                    <th scope="col" style="min-width : 200px;">Full Name</th>
+                                                    <th scope="col" style="min-width : 200px;">Project</th>
+                                                    <th scope="col" style="min-width : 200px;">Division</th>
+                                                    <th scope="col">Lead Count</th>
+                                                    <th scope="col">Customer Count</th>
+                                                    <th scope="col" style="min-width : 200px;">Note</th>
+                                                    <th scope="col">Status</th>
+                                                    <th scope="col" style="min-width : 210px;">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php if (count($karyawanArray) > 0) : ?>
+                                                    <?php foreach ($karyawanArray as $key => $value) : ?>
+                                                        <tr>
+                                                            <td><?= $key + 1 + $offset ?></td>
+                                                            <td><?= $value['name'] ?></td>
+                                                            <td><?= $value['project_name'] ?></td>
+                                                            <td><?= $value['division_name'] ?></td>
+                                                            <td><?= $value['lead_count'] ?></td>
+                                                            <td><?= $value['customer_count'] ?></td>
+                                                            <td><?= empty($value['note']) ? '-' : $value['note'] ?></td>
+                                                            <td>
+                                                                <?php
+                                                                if ($value['status'] === 'Pending') {
+                                                                    $statusClass = 'badge bg-warning'; // Status "pending"
+                                                                } elseif ($value['status'] === 'Rejected') {
+                                                                    $statusClass = 'badge bg-danger'; // Status "reject"
+                                                                } elseif ($value['status'] === 'Approved') {
+                                                                    $statusClass = 'badge bg-success'; // Status "approved"
+                                                                }
+                                                                ?>
+                                                                <button class="btn btn-sm text-white <?= $statusClass ?>" disabled>
+                                                                    <?= $value['status'] ?>
+                                                                </button>
+                                                            </td>
+                                                            <td>
+                                                                <div class="d-flex">
+                                                                    <?php if ($userRole === 3) : // Admin 
+                                                                    ?>
+                                                                        <a href="duty_overtime_detail.php?id=<?= $value['duty_overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
+                                                                        <form method="post" action="<?= cleanValue($_SERVER['PHP_SELF']); ?>" class="d-inline">
+                                                                            <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                                                                            <input type="hidden" name="duty_overtime_id" value="<?= $value['duty_overtime_id'] ?>">
+                                                                            <button type="submit" name="submit" value="Approve" class="btn btn-success btn-sm ms-2">Submit</button>
+                                                                        </form>
+                                                                    <?php elseif ($userRole === 1) : // User 
+                                                                    ?>
+                                                                        <?php if ($value['status'] !== 'Approved') : ?>
+                                                                            <a href="duty_overtime_delete.php?id=<?= $value['duty_overtime_id'] ?>" class="btn btn-danger btn-sm ms-2" onclick="return confirm('Apakah kamu yakin?')">Delete</a>
+                                                                        <?php endif; ?>
+                                                                        <a href="duty_overtime_detail.php?id=<?= $value['duty_overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
+                                                                        <a href="duty_overtime_update.php?id=<?= $value['duty_overtime_id'] ?>" class="btn btn-warning btn-sm ms-2">Edit</a>
+                                                                    <?php endif; ?>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    <?php endforeach; ?>
+                                                <?php else : ?>
+                                                    <tr>
+                                                        <td colspan="8" style="text-align: center;">No records found!!!</td>
+                                                    </tr>
+                                                <?php endif; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                <?php endif; ?>
+
                                 <div class="dataTables_paginate paging_simple_numbers ms-3 mt-3">
                                     <ul class="pagination justify-content-end">
                                         <?php if ($jumlah_semua_data > $limit) : ?>

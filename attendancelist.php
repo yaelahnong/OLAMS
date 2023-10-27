@@ -8,13 +8,15 @@ if (!isset($_SESSION["login"])) {
     header("Location: login.php");
     exit();
 }
+$user_id = $_SESSION["user_id"];
+
 
 $limit = 5;
 $halaman_aktif = isset($_GET['page']) ? $_GET['page'] : 1;
 $offset = ($halaman_aktif - 1) * $limit;
 
 $query = "SELECT 
-attendances.attendance_id, 
+attendances.attendance_id,
 attendances.reason, 
 attendances.type, 
 attendances.start_date, 
@@ -37,6 +39,20 @@ $divisionData = mysqli_prepare($conn, $divisionQuery);
 mysqli_stmt_execute($divisionData);
 $divisionData = mysqli_stmt_get_result($divisionData);
 $divisionOptions = mysqli_fetch_all($divisionData, MYSQLI_ASSOC);
+
+$roleQuery = "SELECT m_roles.role_id FROM users
+JOIN m_roles ON users.role_id = m_roles.role_id
+WHERE users.user_id = ?";
+
+$roleStatement = mysqli_prepare($conn, $roleQuery);
+mysqli_stmt_bind_param($roleStatement, "i", $user_id);
+mysqli_stmt_execute($roleStatement);
+$roleData = mysqli_stmt_get_result($roleStatement);
+$userRole = mysqli_fetch_row($roleData)[0];
+
+if($userRole === 1){
+  $query .= " WHERE attendances.user_id = $user_id";
+}
 
 $filter_division = "";
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['filter_division']) && !empty($_GET['filter_division'])) {
@@ -135,14 +151,23 @@ $jumlah_halaman = ceil($jumlah_semua_data / $limit);
                                                         <td><?= date('d-M-Y H:i', strtotime($value['finish_date'])) ?></td>
 
                                                         <td>
+                                                        <?php if ($userRole === 3) : // Cek apakah peran sama dengan admin ?>
                                                             <a href="attendance_update.php?id=<?= $value['attendance_id']; ?>" class="btn btn-warning btn-sm">Edit</a>
+                                                            <a href="attendance_detail.php?id=<?= $value['attendance_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
                                                             <a href="attendance_delete.php?id=<?= $value['attendance_id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a>
+                                                        <?php elseif ($userRole === 1) : // Cek apakah peran sama dengan user ?>
+                                                            <a href="attendance_detail.php?id=<?= $value['attendance_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
+                                                        <?php elseif ($userRole === 2) : // Cek apakah peran sama dengan leader?> 
+                                                            <a href="attendance_detail.php?id=<?= $value['attendance_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
+                                                        <?php elseif ($userRole === 4) : // Cek apakah peran sama dengan leader?> 
+                                                            <a href="attendance_detail.php?id=<?= $value['attendance_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
+                                                        <?php endif; ?>
                                                         </td>
                                                     </tr>
                                                 <?php endforeach; ?>
                                             <?php else : ?>
                                                 <tr>
-                                                    <td colspan="7" style="text-align: center;">No records found!.</td>
+                                                    <td colspan="7" style="text-align: center;">No records found!!!</td>
                                                 </tr>
                                             <?php endif; ?>
                                         </tbody>
