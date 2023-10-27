@@ -377,7 +377,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                                     </form>
                                                                 <?php elseif ($userRole === 1) : // Cek apakah peran sama dengan user
                                                                 ?>
-                                                                    <?php if ($value['status'] !== 'Approved') : ?>
+                                                                    <?php if ($value['status'] !== 'Approved' && $value['status'] !== 'Rejected') : ?>
                                                                         <a href="overtime_delete.php?id=<?= $value['overtime_id']; ?>" class="btn btn-danger btn-sm ms-2" onclick="return confirm('Apakah kamu yakin?')">Delete</a>
                                                                     <?php endif; ?>
                                                                     <a href="overtime_detail.php?id=<?= $value['overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
