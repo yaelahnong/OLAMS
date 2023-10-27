@@ -26,43 +26,48 @@ $roleOptions = mysqli_fetch_all($roleData, MYSQLI_ASSOC);
 $fullnameErr = $usernameErr = $passwordErr = $emailErr = $roleErr = "";
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if (isset($_POST['csrf_token']) && isCsrfTokenValid($_POST['csrf_token'])) {
+    
     $fullname = isset($_POST['name']) ? cleanValue($_POST['name']) : NULL;
     $username = isset($_POST['username']) ? cleanValue($_POST['username']) : NULL;
     $email = isset($_POST['email']) ? cleanValue($_POST['email']) : NULL;
     $password = isset($_POST['password']) ? cleanValue($_POST['password']) : NULL;
     $role = isset($_POST['role_id']) ? cleanValue($_POST['role_id']) : null;
 
-    if (empty($fullname)) {
-      $fullnameErr = "Nama harus diisi.";
-    } elseif (!preg_match("/^[A-Za-z.' ]*$/", $fullname) || strlen($fullname) < 3 || strlen($fullname) > 60) {
-      $fullnameErr = "Nama harus terdiri dari 3 hingga 60 karakter huruf, tanda kutip, dan titik diperbolehkan.";
+    if(empty($password)) {
+      echo "<script> alert ('Nothink has change')</script>";
+      echo "<script>window.location.replace('userlist.php')</script>";
+      exit;
     }
 
-    if (empty($username)) {
-      $usernameErr = "Username harus diisi.";
+    if (empty($fullname)) {
+      $fullnameErr = "Name is required.";
+    } elseif (!preg_match("/^[A-Za-z.' ]*$/", $fullname) || strlen($fullname) < 3 || strlen($fullname) > 60) {
+      $fullnameErr = "The name should consist of 3 to 60 characters of letters, quotes and periods are allowed.";
+    }
+
+     if (empty($username)) {
+      $usernameErr = "Username is required.";
     } elseif (!preg_match("/^[A-Za-z.' ]*$/", $username) || strlen($username) < 3 || strlen($username) > 60) {
-      $usernameErr = "Username harus terdiri dari 3 hingga 60 karakter huruf, tanda kutip, dan titik.";
+      $usernameErr = "Usernames should consist of 3 to 60 characters of letters, quotes, and periods.";
     }
 
     if (empty($email)) {
-      $emailErr = "Email tidak boleh kosong.";
+      $emailErr = "Email is required.";
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) < 6 || strlen($email) > 30) {
-      $emailErr = "Email tidak valid. Harus memiliki panjang antara 6 hingga 30 karakter.";
+      $emailErr = "Invalid email. Must be between 6 to 30 characters long.";
     }
 
-    if (!empty($password)) {
+    
       if (strlen($password) < 8) {
-          $passwordErr = 'Password minimal harus terdiri dari 8 karakter.';
+        $passwordErr = 'Passwords must be at least 8 characters long.';
       } elseif (!preg_match("/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/", $password)) {
-          $passwordErr = 'Password harus mengandung setidaknya satu huruf kecil, satu huruf besar, dan satu angka.';
-      } else {
+        $passwordErr = 'Passwords must contain at least one lowercase letter, one uppercase letter, and one number.';      } else {
           // Hash password 
           $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
       }
-  }
 
     if (empty($role)) {
-      $roleErr = "Anda harus memilih (role).";
+      $roleErr = "Please select (role).";
     }
 
     if (empty($fullnameErr) && empty($usernameErr) && empty($emailErr) && empty($passwordErr) && empty($roleErr)) {
@@ -71,18 +76,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     username = ?, 
     email = ?, 
     password = ?, 
-    role_id = ?
+    role_id = ?,
+    updated_by = ?
     WHERE user_id = ?";
 
       $stmt = mysqli_prepare($conn, $queryUpdate);
       mysqli_stmt_bind_param(
         $stmt,
-        "ssssss",
+        "ssssiii",
         $fullname,
         $username,
         $email,
         $hashedPassword,
         $role,
+        $user_id,
         $_GET['id']
       );
       mysqli_stmt_execute($stmt);
