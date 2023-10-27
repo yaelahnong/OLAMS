@@ -182,7 +182,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                         <th scope="col" style="min-width : 210px;">Category</th>
                         <th scope="col" style="min-width : 200px;">Start Date</th>
                         <th scope="col" style="min-width : 200px;">Finish Date</th>
-                        <th scope="col" style="min-width : 200px;">Action</th>
+                        <th scope="col">Action</th>
                       </tr>
                     </thead>
 
@@ -223,6 +223,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                     <button type="submit" name="submit" value="Approve" class="btn btn-success btn-sm ms-2">Approve</button>
                                     <button type="submit" name="submit" value="Reject" class="btn btn-danger btn-sm ms-2">Reject</button>
                                   </form>
+                                  <?php elseif ($userRole === 2) : // Cek apakah peran sama dengan user
+                                ?>
+                                  <a href="leavelist_detail.php?id=<?= $value['leaves_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
                                 <?php endif; ?>
                               </div>
                             </td>
