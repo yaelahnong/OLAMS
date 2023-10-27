@@ -202,32 +202,29 @@ if ($resultTopLembur->num_rows > 0) {
 
 
 // Tampilan Dashboard Untuk User
-// Mengambil data cuti pengguna dari database
-$queryLeaveUser = "SELECT start_date, finish_date FROM leaves WHERE user_id = ?";
+  // Mengambil data cuti pengguna dari database
+$queryLeaveUser = "SELECT start_date, finish_date, category FROM leaves WHERE user_id = ?";
 $leaveData = mysqli_prepare($conn, $queryLeaveUser);
 mysqli_stmt_bind_param($leaveData, "i", $user_id);
 mysqli_stmt_execute($leaveData);
 $leaveData = mysqli_stmt_get_result($leaveData);
 
 $jumlahCutiTahunan = 12; // Jumlah cuti tahunan awal
+$sisaHariCuti = $jumlahCutiTahunan; // Set sisa cuti tahunan awal
 
-$totalHariCutiDigunakan = 1;
-
-// Iterasi melalui data cuti
 while ($row = mysqli_fetch_assoc($leaveData)) {
-  $start_date = new DateTime($row["start_date"]);
-  $finish_date = new DateTime($row["finish_date"]);
+    $start_date = new DateTime($row["start_date"]);
+    $finish_date = new DateTime($row["finish_date"]);
 
-  // Menghitung jumlah hari cuti dalam rentang tanggal
-  $interval = $start_date->diff($finish_date);
-  $jumlahHariCuti = $interval->days;
+    // Menghitung jumlah hari cuti dalam rentang tanggal
+    $interval = $start_date->diff($finish_date);
+    $jumlahHariCuti = $interval->days;
 
-  // Tambahkan jumlah hari cuti ke totalHariCutiDigunakan
-  $totalHariCutiDigunakan += $jumlahHariCuti;
+    if ($row['category'] === 'Annual') {
+        $sisaHariCuti -= $jumlahHariCuti;
+    }
 }
 
-// Menghitung sisa hari cuti
-$sisaHariCuti = $jumlahCutiTahunan - $totalHariCutiDigunakan;
 
 $queryLeaveUser = "SELECT COUNT(leaves_id) AS leaves_id FROM leaves WHERE user_id = ?";
 $leaveData = mysqli_prepare($conn, $queryLeaveUser);
