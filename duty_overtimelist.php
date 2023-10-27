@@ -255,7 +255,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                                     <?php elseif ($userRole === 4) : // Supervisor 
                                                                     ?>
                                                                         <a href="duty_overtime_detail.php?id=<?= $value['duty_overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
-                                                                    <?php elseif ($userRole === 4) : // Leader 
+                                                                    <?php elseif ($userRole === 2) : // Leader 
                                                                     ?>
                                                                         <a href="duty_overtime_detail.php?id=<?= $value['duty_overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
 
