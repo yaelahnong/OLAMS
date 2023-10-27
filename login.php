@@ -21,7 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 		$username = cleanValue($_POST["username"]);
 		$password = cleanValue($_POST["password"]);
 
-		if (empty($username) || empty($password)) {
+		if (empty($username) && empty($password)) {
 			$error = "Username dan password harus di isi.";
 		} else {
 			// Mencari pengguna berdasarkan username
@@ -42,8 +42,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 					header("Location: dashboard.php");
 					exit;
 				} else {
-					$error = "Username dan Password salah!!";
+					$error = "Incorrect username and password!!";
 				}
+			}else {
+				$error = "Username and Password not found";
 			}
 		}
 	} else {
