@@ -536,7 +536,7 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
                                 <?php endforeach; ?>
                               <?php else : ?>
                                 <tr>
-                                  <td colspan="7" style="text-align: center;">Data tidak ada!!</td>
+                                  <td colspan="7" style="text-align: center;">No records found!!!</td>
                                 </tr>
                               <?php endif; ?>
                             </tbody>
@@ -600,7 +600,7 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
                                 <?php endforeach; ?>
                               <?php else : ?>
                                 <tr>
-                                  <td colspan="8" style="text-align: center;">Data tidak ada!!</td>
+                                  <td colspan="8" style="text-align: center;">No records found!!!</td>
                                 </tr>
                               <?php endif; ?>
                             </tbody>
@@ -673,7 +673,7 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
                                 <?php endforeach; ?>
                               <?php else : ?>
                                 <tr>
-                                  <td colspan="8" style="text-align: center;">Data tidak ada!!</td>
+                                  <td colspan="8" style="text-align: center;">No records found!!!</td>
                                 </tr>
                               <?php endif; ?>
                             </tbody>
@@ -790,7 +790,7 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
                                 <?php endforeach; ?>
                               <?php else : ?>
                                 <tr>
-                                  <td colspan="7" style="text-align: center;">Data tidak ada!!</td>
+                                  <td colspan="7" style="text-align: center;">No records found!!!</td>
                                 </tr>
                               <?php endif; ?>
                             </tbody>
@@ -852,7 +852,7 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
                                 <?php endforeach; ?>
                               <?php else : ?>
                                 <tr>
-                                  <td colspan="8" style="text-align: center;">Data tidak ada!!</td>
+                                  <td colspan="8" style="text-align: center;">No records found!!!</td>
                                 </tr>
                               <?php endif; ?>
                             </tbody>
@@ -916,7 +916,7 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
                                 <?php endforeach; ?>
                               <?php else : ?>
                                 <tr>
-                                  <td colspan="8" style="text-align: center;">Data tidak ada!!</td>
+                                  <td colspan="8" style="text-align: center;">No records found!!!</td>
                                 </tr>
                               <?php endif; ?>
                             </tbody>

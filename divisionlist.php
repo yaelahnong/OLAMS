@@ -132,7 +132,7 @@ $data = mysqli_fetch_all($result2, MYSQLI_ASSOC);
                         <?php endforeach; ?>
                       <?php else : ?>
                         <tr>
-                          <td colspan="7" style="text-align: center;">No records found!.</td>
+                          <td colspan="7" style="text-align: center;">No records found!!!</td>
                         </tr>
                       <?php endif; ?>
                     </tbody>

@@ -57,6 +57,10 @@ mysqli_stmt_execute($roleStatement);
 $roleData = mysqli_stmt_get_result($roleStatement);
 $userRole = mysqli_fetch_row($roleData)[0];
 
+if($userRole === 1){
+    $show_overtime .= " WHERE overtimes.user_id = $user_id";
+}
+
 $filter_division = "";
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['filter_division']) && !empty($_GET['filter_division'])) {
     $filter_division = cleanValue($_GET['filter_division']);
@@ -222,7 +226,105 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                         <?php endif; ?>
                                     </div>
                                 </div>
+                                <?php if ($userRole === 2 || $userRole === 3 || $userRole === 4) : ?>
                                 <div class="table-responsive">
+                                    <table class="table mb-0 mt-3">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">No</th>
+                                                <th scope="col" style="min-width : 200px;">Full Name</th>
+                                                <th scope="col" style="min-width : 210px;">Project</th>
+                                                <th scope="col" style="min-width : 200px;">Division</th>
+                                                <th scope="col">Type</th>
+                                                <th scope="col" style="min-width : 200px;">Start Date</th>
+                                                <th scope="col" style="min-width : 200px;">Finish Date</th>
+                                                <th scope="col">Status</th>
+                                                <th scope="col" style="min-width : 210px;">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php if (count($karyawanArray) > 0) : ?>
+                                                <?php foreach ($karyawanArray as $key => $value) : ?>
+                                                    <tr>
+                                                        <td><?= $key + 1 + $offset ?></td>
+                                                        <td><?= $value['name'] ?></td>
+                                                        <td><?= $value['project_name'] ?></td>
+                                                        <td><?= $value['division_name'] ?></td>
+                                                        <td><?= $value['type'] ?></td>
+                                                        <td><?= date('d-M-Y H:i', strtotime($value['start_date'])) ?></td>
+                                                        <td><?= date('d-M-Y H:i', strtotime($value['finish_date'])) ?></td>
+                                                        <td>
+                                                            <?php
+                                                            if ($value['status'] === 'Pending') {
+                                                                $statusClass = 'badge bg-warning'; // Status "pending"
+                                                            } elseif ($value['status'] === 'Rejected') {
+                                                                $statusClass = 'badge bg-danger'; // Status "reject"
+                                                            } elseif ($value['status'] === 'Approved') {
+                                                                $statusClass = 'badge bg-success'; // Status "approved"
+                                                            }
+                                                            ?>
+                                                            <button class="btn btn-sm text-white <?= $statusClass ?>" disabled>
+                                                                <?= $value['status'] ?>
+                                                            </button>
+                                                        </td>
+                                                        <td>
+                                                            <div class="d-flex">
+                                                                <?php if ($userRole === 3) : // Cek apakah peran sama dengan admin 
+                                                                ?>
+                                                                    <a href="overtime_detail.php?id=<?= $value['overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
+                                                                    <form method="post" action="<?= cleanValue($_SERVER['PHP_SELF']); ?>" style="display: inline;">
+                                                                        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                                                                        <input type="hidden" name="overtime_id" value="<?= $value['overtime_id'] ?>">
+                                                                        <input type="hidden" name="user_id" value="<?= $value['user_id'] ?>">
+                                                                        <button type="submit" name="submit" value="Check" class="btn btn-success btn-sm ms-2">Submit</button>
+                                                                    </form>
+                                                                <?php elseif ($userRole === 1) : // Cek apakah peran sama dengan user
+                                                                ?>
+                                                                    <?php if ($value['status'] !== 'Approved') : ?>
+                                                                        <a href="overtime_delete.php?id=<?= $value['overtime_id']; ?>" class="btn btn-danger btn-sm ms-2" onclick="return confirm('Apakah kamu yakin?')">Delete</a>
+                                                                    <?php endif; ?>
+                                                                    <a href="overtime_detail.php?id=<?= $value['overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
+                                                                    <a href="overtime_update.php?id=<?= $value['overtime_id'] ?>" class="btn btn-warning btn-sm ms-2">Edit</a>
+                                                                <?php elseif ($userRole === 4) : // Cek apakah peran sama dengan supervisor 
+                                                                ?>
+                                                                    <a href="overtime_detail.php?id=<?= $value['overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
+                                                                    <form method="post" action="<?= cleanValue($_SERVER['PHP_SELF']); ?>" class="d-flex">
+                                                                        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                                                                        <input type="hidden" name="overtime_id" value="<?= $value['overtime_id'] ?>">
+                                                                        <input type="hidden" name="user_id" value="<?= $value['user_id'] ?>">
+                                                                        <button type="submit" name="submit" value="Approve" class="btn btn-success btn-sm ms-2">Approve</button>
+                                                                        <button type="submit" name="submit" value="Reject" class="btn btn-danger btn-sm ms-2">Reject</button>
+                                                                    </form>
+                                                                <?php elseif ($userRole === 2) : // Cek apakah peran sama dengan leader 
+                                                                ?>
+                                                                    <a href="overtime_detail.php?id=<?= $value['overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
+                                                                    <form method="post" action="<?= cleanValue($_SERVER['PHP_SELF']); ?>" class="d-flex">
+                                                                        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                                                                        <input type="hidden" name="overtime_id" value="<?= $value['overtime_id'] ?>">
+                                                                        <input type="hidden" name="user_id" value="<?= $value['user_id'] ?>">
+                                                                        <?php if ($userRole === 2 && $value['type'] === 'Urgent') : ?>
+                                                                            <button type="submit" name="submit" value="Approve" class="btn btn-success btn-sm ms-2">Approve</button>
+                                                                        <?php else : ?>
+                                                                            <button type="submit" name="submit" value="Check" class="btn btn-success btn-sm ms-2">Check</button>
+                                                                        <?php endif; ?>
+                                                                        <button type="submit" name="submit" value="Reject" class="btn btn-danger btn-sm ms-2">Reject</button>
+                                                                    </form>
+                                                                <?php endif; ?>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            <?php else : ?>
+                                                <tr>
+                                                    <td colspan="8" style="text-align: center;">No records found!!!</td>
+                                                </tr>
+                                            <?php endif; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <?php elseif($userRole === 1) : ?>
+
+                                    <div class="table-responsive">
                                     <table class="table mb-0 mt-3">
                                         <thead>
                                             <tr>
@@ -311,12 +413,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                 <?php endforeach; ?>
                                             <?php else : ?>
                                                 <tr>
-                                                    <td colspan="8" style="text-align: center;">Data tidak ada!!</td>
+                                                    <td colspan="8" style="text-align: center;">No records found!!!</td>
                                                 </tr>
                                             <?php endif; ?>
                                         </tbody>
                                     </table>
                                 </div>
+                                
+                                <?php endif; ?>
                                 <div class="dataTables_paginate paging_simple_numbers ms-3 mt-3">
                                     <ul class="pagination justify-content-end">
                                         <?php if ($jumlah_semua_data > $limit) : ?>
