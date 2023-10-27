@@ -81,32 +81,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
       if (isset($_POST['leaves_id']) && is_numeric($_POST['leaves_id'])) {
           $leaveId = cleanValue($_POST['leaves_id']);
 
-          if (isset($_POST['submit']) && ($_POST['submit'] === "Reject" || $_POST['submit'] === "Approve")) {
-              if ($userRole === 4 || $userRole === 3) {
-                  $newStatus = ($_POST['submit'] === "Reject") ? 'Reject' : 'Approved';
-                  
-                  $supervisorId = $user_id;
+          if ($userRole === 4 || $userRole === 3) {
+              $newStatus = ($_POST['submit'] === "Reject") ? 'Reject' : 'Approved';
+              $supervisorId = $user_id;
 
-                  $updateQuery = "UPDATE leaves SET status = ?, status_updated_by = ?, status_updated_at = NOW() WHERE leaves_id = ?";
-                  $updateStatement = mysqli_prepare($conn, $updateQuery);
+              $updateQuery = "UPDATE leaves SET status = ?, status_updated_by = ?, status_updated_at = NOW() WHERE leaves_id = ?";
+              $updateStatement = mysqli_prepare($conn, $updateQuery);
 
-                  if ($updateStatement) {
-                    mysqli_stmt_bind_param($updateStatement, "sii", $newStatus, $supervisorId, $leaveId);
+              if ($updateStatement) {
+                  mysqli_stmt_bind_param($updateStatement, "sii", $newStatus, $supervisorId, $leaveId);
 
-                      if (mysqli_stmt_execute($updateStatement)) {
-                        echo "<script>alert('Data updated successfully.')</script>";
-                        echo "<script>window.location.href = 'leavelist.php'</script>";
-                    } else {
-                        echo "Kesalahan saat memperbarui data: " . mysqli_error($conn);
-                    }
+                  if (mysqli_stmt_execute($updateStatement)) {
+                      if ($_POST['submit'] === "Reject") {
+                          echo "<script>alert('Leave rejected.')</script>";
+                      } else if ($_POST['submit'] === "Approve") {
+                          echo "<script>alert('Leave approved.')</script>";
+                      }
 
-                      mysqli_stmt_close($updateStatement);
+                      echo "<script>window.location.href = 'leavelist.php'</script>";
                   } else {
-                      echo "Gagal menyiapkan pernyataan utama: " . mysqli_error($conn);
+                      echo "Kesalahan saat memperbarui data: " . mysqli_error($conn);
                   }
+
+                  mysqli_stmt_close($updateStatement);
               } else {
-                  echo "Anda tidak memiliki izin untuk memodifikasi data cuti.";
+                  echo "Gagal menyiapkan pernyataan utama: " . mysqli_error($conn);
               }
+          } else {
+              echo "Anda tidak memiliki izin untuk memodifikasi data cuti.";
           }
       }
   } else {
@@ -199,7 +201,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                     <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
                                     <input type="hidden" name="leaves_id" value="<?= $value['leaves_id'] ?>">
                                     <input type="hidden" name="user_id" value="<?= $value['user_id'] ?>">
-                                    <button type="submit" name="submit" value="Check" class="btn btn-success btn-sm ms-2">Submit</button>
+                                    <button type="submit" name="submit" value="Check" class="btn btn-success btn-sm ms-2" onclick="return alert('Leave submited')">Submit</button>
                                   </form>
                                 <?php elseif ($userRole === 1) : // Cek apakah peran sama dengan user
                                 ?>
