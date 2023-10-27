@@ -582,7 +582,7 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
 
                                       if ($value['status'] === 'Pending') {
                                         $statusClass = 'btn-warning'; // Status "pending"
-                                      } elseif ($value['status'] === 'Reject') {
+                                      } elseif ($value['status'] === 'Rejected') {
                                         $statusClass = 'btn-danger'; // Status "reject"
                                       } elseif ($value['status'] === 'Approved') {
                                         $statusClass = 'btn-success'; // Status "approved"
@@ -655,7 +655,7 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
 
                                       if ($value['statusOvertime'] === 'Pending') {
                                         $statusClass = 'btn-warning'; // Status "pending"
-                                      } elseif ($value['statusOvertime'] === 'Reject') {
+                                      } elseif ($value['statusOvertime'] === 'Rejected') {
                                         $statusClass = 'btn-danger'; // Status "reject"
                                       } elseif ($value['statusOvertime'] === 'Approved') {
                                         $statusClass = 'btn-success'; // Status "approved"
@@ -834,7 +834,7 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
 
                                       if ($value['status'] === 'Pending') {
                                         $statusClass = 'btn-warning'; // Status "pending"
-                                      } elseif ($value['status'] === 'Reject') {
+                                      } elseif ($value['status'] === 'Rejected') {
                                         $statusClass = 'btn-danger'; // Status "reject"
                                       } elseif ($value['status'] === 'Approved') {
                                         $statusClass = 'btn-success'; // Status "approved"
@@ -898,7 +898,7 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
 
                                       if ($value['statusOvertime'] === 'Pending') {
                                         $statusClass = 'btn-warning'; // Status "pending"
-                                      } elseif ($value['statusOvertime'] === 'Reject') {
+                                      } elseif ($value['statusOvertime'] === 'Rejected') {
                                         $statusClass = 'btn-danger'; // Status "reject"
                                       } elseif ($value['statusOvertime'] === 'Approved') {
                                         $statusClass = 'btn-success'; // Status "approved"
