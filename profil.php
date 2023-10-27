@@ -38,36 +38,44 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $newPassword = isset($_POST['new_password']) ? cleanValue($_POST['new_password']) : NULL;
   $confirmPassword = isset($_POST['confirm_password']) ? cleanValue($_POST['confirm_password']) : NULL;
 
+  if (empty($newPassword) && empty($confirmPassword)) {
+    echo "<script>alert('nothing has changed.')</script>";
+    echo "<script>window.location.href = 'userlist.php'</script>";
+    exit();
+  }
+
   if (strlen($newPassword) < 8) {
     $newPasswordErr = "Password harus terdiri dari setidaknya 8 karakter.";
   } elseif (!preg_match("/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]+$/", $newPassword)) {
-    $newPasswordErr = "Password harus mengandung setidaknya satu huruf kecil, satu huruf besar, dan satu angka.";
+    $newPasswordErr = "Passwords must contain at least one lowercase letter, one uppercase letter, and one number.";
   }
 
-  if (strlen($confirmPassword) < 8) {
-    $confirmPasswordErr = "Password harus terdiri dari setidaknya 8 karakter.";
-  }elseif ($newPassword !== $confirmPassword) {
-    $confirmPasswordErr = "Konfirmasi password tidak sesuai dengan password baru.";
-  }elseif (!preg_match("/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]+$/", $confirmPassword)) {
-    $confirmPasswordErr = "Password harus mengandung setidaknya satu huruf kecil, satu huruf besar, dan satu angka.";
-  }
+  if (!empty($newPassword) && !empty($confirmPassword)) {
+    if (strlen($confirmPassword) < 8) {
+      $confirmPasswordErr = "Password harus terdiri dari setidaknya 8 karakter.";
+    } elseif ($newPassword !== $confirmPassword) {
+      $confirmPasswordErr = "Konfirmasi password tidak sesuai dengan password baru.";
+    } elseif (!preg_match("/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]+$/", $confirmPassword)) {
+      $confirmPasswordErr = "Passwords must contain at least one lowercase letter, one uppercase letter, and one number.";
+    }
 
-  if (empty($newPasswordErr) && empty($confirmPasswordErr)) {
-    // Enkripsi password baru dengan password_hash
-    $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+    if (empty($newPasswordErr) && empty($confirmPasswordErr)) {
+      // Enkripsi password baru dengan password_hash
+      $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
 
-    $updateQuery = "UPDATE users SET password = ?, updated_by = ? WHERE user_id = ?";
-    $updateStmt = mysqli_prepare($conn, $updateQuery);
-    mysqli_stmt_bind_param($updateStmt, "sii", $hashedPassword, $user_id, $user_id);
+      $updateQuery = "UPDATE users SET password = ?, updated_by = ? WHERE user_id = ?";
+      $updateStmt = mysqli_prepare($conn, $updateQuery);
+      mysqli_stmt_bind_param($updateStmt, "sii", $hashedPassword, $user_id, $user_id);
 
-    if (mysqli_stmt_execute($updateStmt)) {
-      // Password berhasil diubah
-      echo "<script>alert('password changed successfully.')</script>";
-      echo "<script>window.location.href = 'userlist.php'</script>";
-      exit();
-    } else {
-      // Terjadi kesalahan saat mengubah password
-      $passwordErr = "Gagal mengubah password.";
+      if (mysqli_stmt_execute($updateStmt)) {
+        // Password berhasil diubah
+        echo "<script>alert('password changed successfully.')</script>";
+        echo "<script>window.location.href = 'userlist.php'</script>";
+        exit();
+      } else {
+        // Terjadi kesalahan saat mengubah password
+        $passwordErr = "Gagal mengubah password.";
+      }
     }
   }
 }
@@ -134,7 +142,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <div class="row">
                       <div class="col align-items-end">
                         <button type="submit" class="btn btn-primary">Submit</button>
-                        <a href="userlist.php" class="btn btn-danger text-white text-decoration-none">Cancel</a>
+                        <a href="userlist.php" class="btn btn-light text-dark text-decoration-none">Cancel</a>
                       </div>
                     </div>
                   </form>
