@@ -74,12 +74,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
 
         if (!is_numeric($lead_count)) {
             $leadCountErr = "Lead Count must be a number.";
+        } elseif ($lead_count < 0) {
+            $leadCountErr = "leads cannot be minus numbers.";
         }
 
         if (!is_numeric($customer_count)) {
             $customerCountErr = "Customer Count must be a number.";
-        } elseif ($customer_count > $lead_count) {
-            $customerCountErr = "Number of Customers cannot be more than the number of leads.";
+        } elseif ($customer_count < 0) {
+            $customerCountErr = "customer cannot be minus numbers.";
         }
 
         if (!empty($note)) {
@@ -88,10 +90,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
             }
         }
 
+        if ($customer_count > 0) {
+            $time_duty_overtime = 8;
+        } else {
+            $time_duty_overtime = 5;
+        }
+        
         if (empty($fullnameErr) && empty($projectErr) && empty($divisionErr) && empty($leadCountErr) && empty($customerCountErr) && empty($noteErr)) {
-            $updateQuery = "UPDATE duty_overtimes SET user_id = ?, project_id = ?, division_id = ?, lead_count = ?, customer_count = ?, note = ?, updated_by = ? WHERE duty_overtime_id = ?";
+            $updateQuery = "UPDATE duty_overtimes SET user_id = ?, project_id = ?, division_id = ?, lead_count = ?, customer_count = ?, note = ?, time_duty_overtime = ?, updated_by = ? WHERE duty_overtime_id = ?";
             $updateStatement = mysqli_prepare($conn, $updateQuery);
-            mysqli_stmt_bind_param($updateStatement, "iiiiisii", $fullname, $project, $division, $lead_count, $customer_count, $note, $user_id, $duty_overtime_id);
+            mysqli_stmt_bind_param($updateStatement, "iiiiisiii", $fullname, $project, $division, $lead_count, $customer_count, $note, $time_duty_overtime, $user_id, $duty_overtime_id);
+
 
             if (mysqli_stmt_execute($updateStatement)) {
                 echo "<script>alert('Duty overtime data updated successfully.')</script>";
@@ -101,7 +110,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                 echo "Failed to update data.";
             }
             mysqli_stmt_close($updateStatement);
-
         }
     } else {
         $TokenErr = "Invalid CSRF token";
@@ -133,17 +141,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                     <form action="<?= cleanValue($_SERVER['PHP_SELF']) ?>?id=<?= $duty_overtime_id ?>" method="post">
                                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
                                         <div class="row">
-                                            <div class="mb-3 col-md-6">
+                                            <div class="mb-3 col-md-6 d-none">
                                                 <label class="form-label" for="inputUser">User</label>
-                                                <span style="color: red">*</span>
-                                                <select name="user_id" id="inputUser" class="form-select">
-                                                    <option value="">Select User</option>
-                                                    <?php foreach ($resultUsers as $user) : ?>
-                                                        <option value="<?= $user['user_id'] ?>" <?= $user['user_id'] == $user_id ? 'selected' : '' ?>>
-                                                            <?= $user['name'] ?>
-                                                        </option>
-                                                    <?php endforeach; ?>
-                                                </select>
+                                                <input type="text" name="user_id" id="inputUser" class="form-control" value="<?= $_SESSION["user_id"]; ?>" readonly>
                                                 <span class="error" style="color: red;"> <?= $fullnameErr; ?> </span>
                                             </div>
                                             <div class="mb-3 col-md-6">
@@ -159,8 +159,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                 </select>
                                                 <span class="error" style="color: red;"> <?= $projectErr; ?> </span>
                                             </div>
-                                        </div>
-                                        <div class="row">
                                             <div class="mb-3 col-md-6">
                                                 <label class="form-label" for="inputDivision">Division</label>
                                                 <span style="color: red">*</span>
@@ -174,27 +172,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                 </select>
                                                 <span class="error" style="color: red;"> <?= $divisionErr; ?> </span>
                                             </div>
+                                        </div>
+                                        <div class="row">
                                             <div class="mb-3 col-md-6">
                                                 <label for="lead_count" class="form-label">Lead Count</label>
                                                 <span style="color: red">*</span>
                                                 <input type="number" name="lead_count" id="lead_count" class="form-control" value="<?= $leadCount; ?>">
                                                 <span class="error" style="color: red;"> <?= $leadCountErr; ?> </span>
                                             </div>
-                                        </div>
-                                        <div class="row">
                                             <div class="mb-3 col-md-6">
                                                 <label for="customer_count" class="form-label">Customer Count</label>
                                                 <span style="color: red">*</span>
                                                 <input type="number" name="customer_count" id="customer_count" class="form-control" value="<?= $customerCount; ?>">
                                                 <span class="error" style="color: red;"> <?= $customerCountErr; ?> </span>
                                             </div>
+                                        </div>
+                                        <div class="row">
                                             <div class="mb-3 col-md-6">
                                                 <label for="note" class="form-label">Note</label>
                                                 <textarea name="note" id="note" class="form-control"><?= $note; ?></textarea>
                                                 <span class="error" style="color: red;"> <?= $noteErr; ?> </span>
                                             </div>
                                         </div>
-                                        <button type="submit" name="submit" class="btn btn-primary">Update</button>
+                                        <button type="submit" name="submit" class="btn btn-primary" onclick="return confirm('are you sure you will update?')">Update</button>
                                         <a href="duty_overtimelist.php" class="btn btn-danger text-white text-decoration-none">Cancel</a>
                                     </form>
                                 </div>
