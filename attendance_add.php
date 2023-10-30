@@ -42,7 +42,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $type = isset($_POST["type"]) ? cleanValue($_POST["type"]) : NULL;
         $startDate = isset($_POST["startDate"]) ? cleanValue($_POST["startDate"]) : NULL;
         $finishDate = isset($_POST["finishDate"]) ? cleanValue($_POST["finishDate"]) : NULL;
-        // Validasi data yang diterima dari formulir
         if (empty($_POST["name"])) {
             $fullnameErr = "Full Name is required.";
         }
@@ -61,8 +60,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         if (empty($startDate)) {
             $startDateErr = "Start Date is required.";
-        } elseif (strtotime($startDate) > strtotime(date('Y-m-d'))) {
-            $startDateErr = "Start Date cannot be in the future.";
         }
 
         if (empty($finishDate)) {
@@ -71,20 +68,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $finishDateErr = "Finish Date cannot be earlier than Start Date.";
         }
 
-        // Validasi nama dan tanggal sebelum penyisipan
         if (empty($fullnameErr) && empty($divisionErr) && empty($reasonErr) && empty($typeErr) && empty($startDateErr) && empty($finishDateErr)) {
-            // Query untuk memeriksa apakah data dengan nama yang sama dan tanggal yang sama sudah ada
-            $checkDuplicateQuery = "SELECT COUNT(*) FROM attendances WHERE user_id = ? AND start_date = ?";
+            $checkDuplicateQuery = "SELECT COUNT(*) FROM attendances WHERE user_id = ? AND DATE(start_date) = ?";
             $checkDuplicateStmt = mysqli_prepare($conn, $checkDuplicateQuery);
             mysqli_stmt_bind_param($checkDuplicateStmt, "is", $fullname, $startDate);
             mysqli_stmt_execute($checkDuplicateStmt);
             mysqli_stmt_store_result($checkDuplicateStmt);
 
-            // Periksa jumlah hasil yang cocok
-            if (mysqli_stmt_num_rows($checkDuplicateStmt) > 0) {
-                $error = "Attendance data with the same name and start date already exists.";
+            mysqli_stmt_bind_result($checkDuplicateStmt, $rowCount);
+            mysqli_stmt_fetch($checkDuplicateStmt);
+
+            if ($rowCount > 0) {
+                $error = "Attendance data with the same name and start date already exists for the selected date.";
             } else {
-                // Lanjutkan dengan penyisipan data
+                
                 $insertQuery = "INSERT INTO attendances (user_id, division_id, reason, type, start_date, finish_date, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)";
                 $insertStmt = mysqli_prepare($conn, $insertQuery);
                 if ($insertStmt) {
@@ -144,7 +141,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
                                         <div class="row">
                                             <div class="mb-3 col-md-6">
-                                                <label class="form-label" for="inputName">Name</label>
+                                                <label class="form-label" for="inputName">User</label>
                                                 <span style="color: red">*</span>
                                                 <select class="form-select" id="inputName" name="name">
                                                     <option value="">Select Name</option>
@@ -189,13 +186,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                             <div class="mb-3 col-md-6">
                                                 <label class="form-label" for="inputStartDate">Start Date</label>
                                                 <span style="color: red">*</span>
-                                                <input type="datetime-local" class="form-control" id="inputStartDate" name="startDate">
+                                                <input type="date" class="form-control" id="inputStartDate" name="startDate">
                                                 <span class="text-danger"><?php echo $startDateErr; ?></span>
                                             </div>
                                             <div class="mb-3 col-md-6">
                                                 <label class="form-label" for="inputFinishDate">Finish Date</label>
                                                 <span style="color: red">*</span>
-                                                <input type="datetime-local" class="form-control" id="inputFinishDate" name="finishDate">
+                                                <input type="date" class="form-control" id="inputFinishDate" name="finishDate">
                                                 <span class="text-danger"><?php echo $finishDateErr; ?></span>
                                             </div>
                                         </div>

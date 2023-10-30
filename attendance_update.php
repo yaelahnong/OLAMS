@@ -81,8 +81,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         if (empty($startDate)) {
             $startDateErr = "Start Date is required.";
-        } elseif (strtotime($startDate) > strtotime(date('Y-m-d H:i:s'))) {
-            $startDateErr = "Start Date cannot be in the future.";
         }
 
         if (empty($finishDate)) {
@@ -160,7 +158,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                                         <div class="row">
                                             <div class="mb-3 col-md-6">
-                                                <label class="form-label" for="inputName">Name</label>
+                                                <label class="form-label" for="inputName">User</label>
                                                 <span style="color: red">*</span>
                                                 <select class="form-select" id="inputName" name="name">
                                                     <option value="">Select Name</option>
@@ -205,13 +203,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                             <div class="mb-3 col-md-6">
                                                 <label class="form-label" for="inputStartDate">Start Date</label>
                                                 <span style="color: red">*</span>
-                                                <input type="datetime-local" class="form-control" id="inputStartDate" name="startDate" value="<?= $startDate ?>">
+                                                <input type="date" class="form-control" id="inputStartDate" name="startDate" value="<?= $startDate ?>">
                                                 <span class="text-danger"><?php echo $startDateErr; ?></span>
                                             </div>
                                             <div class="mb-3 col-md-6">
                                                 <label class="form-label" for="inputFinishDate">Finish Date</label>
                                                 <span style="color: red">*</span>
-                                                <input type="datetime-local" class="form-control" id="inputFinishDate" name="finishDate" value="<?= $finishDate ?>">
+                                                <input type="date" class="form-control" id="inputFinishDate" name="finishDate" value="<?= $finishDate ?>">
                                                 <span class="text-danger"><?php echo $finishDateErr; ?></span>
                                             </div>
                                         </div>
