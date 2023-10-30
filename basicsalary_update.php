@@ -19,13 +19,15 @@ $user_id = $_SESSION["user_id"];
 $formatted_total_basic_salary = ""; // Inisialisasi variabel
 
 // Ambil data pengguna dari database
-$queryUsers = "SELECT user_id, name FROM users"; // Sesuaikan dengan nama tabel dan kolom yang sesuai
+$queryUsers = "SELECT user_id, name, role_id FROM users WHERE role_id = 1"; // Sesuaikan dengan nama tabel dan kolom yang sesuai
 $resultUsers = mysqli_query($conn, $queryUsers);
 
 $users = array();
 while ($row = mysqli_fetch_assoc($resultUsers)) {
-    $users[] = $row;
+  $users[] = $row;
 }
+
+
 
 mysqli_free_result($resultUsers);
 
@@ -112,7 +114,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           <h1 class="h1 mb-3"><strong>Update Basic Salary</strong></h1>
           <div class="row">
             <div class="col-12">
-              <div class= "card">
+              <div class="card">
                 <div class="card-header">
                 </div>
                 <div class="card-body">
@@ -129,14 +131,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     <input type="hidden" name="id" value="<?= $id ?>">
                     <div class="row">
                       <div class="mb-3 col-md-6">
-                        <label class="form-label" for="inputUserId">Fullname</label>
+                        <label class="form-label" for="inputUserId">User</label>
                         <span style="color: red">*</span><br>
-                        <select class="form-select" name="user_id" id="inputUserId">
-                          <?php foreach ($users as $user) { ?>
+                        <select class="form-select" name="user_id" id="inputUserId" disabled>
+                          <?php foreach ($users as $user) : ?>
+                            <?php if ($user["role_id"] == 1): ?>
                             <option value="<?= $user['user_id']; ?>" <?= ($user['user_id'] == $user_id) ? "selected" : "" ?>>
                               <?= $user['name']; ?>
                             </option>
-                          <?php } ?>
+                            <?php endif; ?>
+                            <?php endforeach; ?>
                         </select>
                       </div>
                     </div>
@@ -163,7 +167,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       <?php include "components/footer.inc.php"; ?>
     </div>
   </div>
-  
+
   <?php include "script.inc.php"; ?>
 </body>
 
