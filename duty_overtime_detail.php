@@ -23,7 +23,8 @@ if (isset($_GET["id"])) {
         duty_overtimes.lead_count, 
         duty_overtimes.customer_count, 
         duty_overtimes.note,
-        duty_overtimes.status
+        duty_overtimes.status,
+        duty_overtimes.time_duty_overtime
     FROM duty_overtimes
     LEFT JOIN users ON duty_overtimes.user_id = users.user_id
     LEFT JOIN m_projects ON duty_overtimes.project_id = m_projects.project_id
@@ -36,11 +37,7 @@ if (isset($_GET["id"])) {
     $detailData = mysqli_stmt_get_result($detailStatement);
     $detail = mysqli_fetch_assoc($detailData);
 
-    if ($detail['customer_count'] == 0) {
-        $effective_time = '5 hours';
-    } else {
-        $effective_time = '8 hours';
-    }
+    $time_duty_overtime = $detail['time_duty_overtime']. ' Hours';
 } else {
     // Handle kesalahan jika duty_overtime_id tidak disediakan
     echo "Duty Overtime ID tidak ditemukan.";
@@ -103,7 +100,7 @@ if (isset($_GET["id"])) {
                                         </tr>
                                         <tr>
                                             <td><strong>Effective time</strong></td>
-                                            <td><?= $effective_time ?></td>
+                                            <td><?= $time_duty_overtime ?></td>
                                         </tr>
                                     </table>
                                     <a href="duty_overtimelist.php" class="btn btn-warning btn-sm ms-2">Kembali</a>

@@ -51,26 +51,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
 
         if (!is_numeric($lead_count)) {
             $leadCountErr = "Lead Count must be a number.";
+        } elseif ($lead_count < 0) {
+            $leadCountErr = "leads cannot be minus numbers.";
         }
 
         if (!is_numeric($customer_count)) {
             $customerCountErr = "Customer Count must be a number.";
-        } elseif ($customer_count > $lead_count) {
-            $customerCountErr = "Number of Customers cannot be more than the number of leads.";
+        } elseif ($customer_count < 0) {
+            $customerCountErr = "customer cannot be minus numbers.";
         }
 
-        if (!empty($note)) {
-            if (!preg_match('/^[A-Za-z0-9.,\s]*$/', $note)) {
-                $noteErr = "Note should only contain letters, numbers, spaces, dots, and commas.";
-            }
+        if (!preg_match('/^[A-Za-z0-9.,\s]*$/', $note)) {
+            $noteErr = "Note should only contain letters, numbers, spaces, dots, and commas.";
+        }
+        if ($customer_count > 0) {
+            $time_duty_overtime = 8;
+        } else {
+            $time_duty_overtime = 5;
         }
 
         if (empty($fullnameErr) && empty($projectErr) && empty($divisionErr) && empty($leadCountErr) && empty($customerCountErr) && empty($noteErr)) {
-            $insertQuery = "INSERT INTO duty_overtimes (user_id, project_id, division_id, lead_count, customer_count, note, created_by)
-                            VALUES (?, ?, ?, ?, ?, ?, ?)";
+            $insertQuery = "INSERT INTO duty_overtimes (user_id, project_id, division_id, lead_count, customer_count, note, created_by, time_duty_overtime)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
             $insertStatement = mysqli_prepare($conn, $insertQuery);
-            mysqli_stmt_bind_param($insertStatement, "iiiiiss", $fullname, $project, $division, $lead_count, $customer_count, $note, $user_id);
+            mysqli_stmt_bind_param($insertStatement, "iiiiissi", $fullname, $project, $division, $lead_count, $customer_count, $note, $user_id, $time_duty_overtime);
 
             if (mysqli_stmt_execute($insertStatement)) {
                 echo "<script>alert('Duty overtime data added successfully.')</script>";
@@ -84,6 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
         $TokenErr = "Invalid CSRF token";
     }
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -110,15 +116,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                     <form action="<?= cleanValue($_SERVER['PHP_SELF']) ?>" method="post">
                                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
                                         <div class="row">
-                                            <div class="mb-3 col-md-6">
+                                            <div class="mb-3 col-md-6 d-none">
                                                 <label class="form-label" for="inputUser">User</label>
-                                                <span style="color: red">*</span>
-                                                <select name="user_id" id="inputUser" class="form-select">
-                                                    <option value="">Select User</option>
-                                                    <?php foreach ($resultUsers as $user) : ?>
-                                                        <option value="<?= $user['user_id'] ?>"><?= $user['name'] ?></option>
-                                                    <?php endforeach; ?>
-                                                </select>
+                                                <input type="text" name="user_id" id="inputUser" class="form-control" value="<?= $_SESSION["user_id"]; ?>" readonly>
                                                 <span class="error" style="color: red;"> <?= $fullnameErr; ?> </span>
                                             </div>
                                             <div class="mb-3 col-md-6">
@@ -132,8 +132,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                 </select>
                                                 <span class="error" style="color: red;"> <?= $projectErr; ?> </span>
                                             </div>
-                                        </div>
-                                        <div class="row">
                                             <div class="mb-3 col-md-6">
                                                 <label class="form-label" for="inputDivision">Division</label>
                                                 <span style="color: red">*</span>
@@ -145,20 +143,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                 </select>
                                                 <span class="error" style="color: red;"> <?= $divisionErr; ?> </span>
                                             </div>
+                                        </div>
+                                        <div class="row">
                                             <div class="mb-3 col-md-6">
                                                 <label for="lead_count" class="form-label">Lead Count</label>
                                                 <span style="color: red">*</span>
                                                 <input type="number" name="lead_count" id="lead_count" class="form-control">
                                                 <span class="error" style="color: red;"> <?= $leadCountErr; ?> </span>
                                             </div>
-                                        </div>
-                                        <div class="row">
                                             <div class="mb-3 col-md-6">
                                                 <label for="customer_count" class="form-label">Customer Count</label>
                                                 <span style="color: red">*</span>
                                                 <input type="number" name="customer_count" id="customer_count" class="form-control">
                                                 <span class="error" style="color: red;"> <?= $customerCountErr; ?> </span>
                                             </div>
+                                        </div>
+                                        <div class="row">
                                             <div class="mb-3 col-md-6">
                                                 <label for="note" class="form-label">Note</label>
                                                 <textarea name="note" id="note" class="form-control"></textarea>
