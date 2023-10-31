@@ -9,6 +9,7 @@ if (!isset($_SESSION["login"])) {
 }
 
 $user_id = $_SESSION["user_id"];
+$user_role = $_SESSION['role_id'];
 
 $limit = 5;
 $halaman_aktif = isset($_GET['page']) ? $_GET['page'] : 1;
@@ -23,7 +24,9 @@ m_divisions.division_name AS division_name,
 overtimes.type, 
 overtimes.start_date, 
 overtimes.finish_date,
-overtimes.status
+overtimes.status,
+overtimes.submitted_by_admin,
+overtimes.checked_by_leader
 FROM overtimes
 LEFT JOIN users ON overtimes.user_id = users.user_id
 LEFT JOIN m_projects ON overtimes.project_id = m_projects.project_id
@@ -47,19 +50,11 @@ mysqli_stmt_execute($projectData);
 $projectData = mysqli_stmt_get_result($projectData);
 $projectOptions = mysqli_fetch_all($projectData, MYSQLI_ASSOC);
 
-$roleQuery = "SELECT m_roles.role_id FROM users
-JOIN m_roles ON users.role_id = m_roles.role_id
-WHERE users.user_id = ?";
-
-$roleStatement = mysqli_prepare($conn, $roleQuery);
-mysqli_stmt_bind_param($roleStatement, "i", $user_id);
-mysqli_stmt_execute($roleStatement);
-$roleData = mysqli_stmt_get_result($roleStatement);
-$userRole = mysqli_fetch_row($roleData)[0];
-
-if($userRole === 1){
-    $show_overtime .= " WHERE overtimes.user_id = $user_id";
-}
+// $statusQuery = "SELECT DISTINCT status FROM overtimes";
+// $statusData = mysqli_prepare($conn, $statusQuery);
+// mysqli_stmt_execute($statusData);
+// $statusData = mysqli_stmt_get_result($statusData);
+// $statusOptions = mysqli_fetch_all($statusData, MYSQLI_ASSOC);
 
 $filter_division = "";
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['filter_division']) && !empty($_GET['filter_division'])) {
@@ -79,7 +74,31 @@ $search = "";
 if ($_SERVER['REQUEST_METHOD'] === 'GET' and isset($_GET['search']) and !empty($_GET['search'])) {
     $search = cleanValue($_GET['search']);
     $show_overtime .= (strpos($show_overtime, 'WHERE') === false) ? " WHERE" : " AND";
-    $show_overtime .= " (users.name LIKE '%$search%' OR overtimes.type LIKE '%$search%')";
+    $show_overtime .= " (users.name LIKE '%$search%')";
+}
+
+$filter_status = "";
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['filter_status']) && !empty($_GET['filter_status'])) {
+    $filter_status = cleanValue($_GET['filter_status']);
+    $show_overtime .= (strpos($show_overtime, 'WHERE') === false) ? " WHERE" : " AND";
+    $show_overtime .= " overtimes.status = '$filter_status'";
+}
+
+if ($user_role == 4) {
+    $show_overtime .= " WHERE (overtimes.status = 'Pending' OR overtimes.status = 'Approved' OR overtimes.status = 'Rejected')";
+    $show_overtime .= " AND (overtimes.submitted_by_admin IS NOT NULL AND overtimes.sent_by_admin IS NOT NULL AND overtimes.checked_by_leader IS NOT NULL AND overtimes.checked_by_leader_at IS NOT NULL) OR 
+    (overtimes.submitted_by_admin IS NOT NULL AND overtimes.sent_by_admin IS NOT NULL AND overtimes.checked_by_leader IS NOT NULL AND overtimes.checked_by_leader_at IS NOT NULL AND overtimes.status_updated_at IS NOT NULL AND overtimes.status_updated_at IS NOT NULL) OR
+    (overtimes.submitted_by_admin IS NULL AND overtimes.sent_by_admin IS NULL AND overtimes.checked_by_leader IS NULL AND overtimes.checked_by_leader_at IS NULL AND overtimes.status_updated_at IS NOT NULL AND overtimes.status_updated_at IS NOT NULL)";
+} elseif ($user_role == 3) {
+    $show_overtime .= " WHERE (overtimes.status = 'Pending' OR overtimes.status = 'Approved' OR overtimes.status = 'Rejected')";
+    $show_overtime .= " AND (overtimes.checked_by_leader IS NOT NULL AND overtimes.checked_by_leader_at IS NOT NULL AND overtimes.submitted_by_admin IS NULL AND overtimes.sent_by_admin IS NULL) OR 
+    (overtimes.submitted_by_admin IS NOT NULL AND overtimes.sent_by_admin IS NOT NULL AND overtimes.checked_by_leader IS NOT NULL AND overtimes.checked_by_leader_at IS NOT NULL) OR 
+    (overtimes.submitted_by_admin IS NULL AND overtimes.sent_by_admin IS NULL AND overtimes.checked_by_leader IS NULL AND overtimes.checked_by_leader_at IS NULL AND overtimes.status_updated_at IS NOT NULL AND overtimes.status_updated_at IS NOT NULL)";
+} elseif ($user_role == 2) {
+    $show_overtime .= " WHERE (overtimes.status = 'Pending' OR overtimes.status = 'Approved' OR overtimes.status = 'Rejected')";
+    $show_overtime .= " AND (overtimes.checked_by_leader IS NULL AND overtimes.checked_by_leader_at IS NULL) OR (overtimes.checked_by_leader IS NOT NULL AND overtimes.checked_by_leader_at IS NOT NULL)";
+} elseif ($user_role === 1) {
+    $show_overtime .= " WHERE overtimes.user_id = $user_id";
 }
 
 $show_overtime .= " ORDER BY overtimes.overtime_id DESC";
@@ -90,13 +109,16 @@ $data = mysqli_query($conn, $show_overtime);
 $karyawanArray = mysqli_fetch_all($data, MYSQLI_ASSOC);
 $jumlah_halaman = ceil($jumlah_semua_data / $limit);
 
+// var_dump($show_overtime);
+// exit;
+
 $updateStatement = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     if (isset($_POST['csrf_token']) && isCsrfTokenValid($_POST['csrf_token'])) {
         if (isset($_POST['overtime_id']) && is_numeric($_POST['overtime_id'])) {
             $overtimeId = cleanValue($_POST['overtime_id']);
-            $userId = cleanValue($_POST['user_id']);
+            $userId = $user_id;
 
             $typeQuery = "SELECT overtime_id, type FROM overtimes WHERE overtime_id = ?";
             $typeStatement = mysqli_prepare($conn, $typeQuery);
@@ -110,18 +132,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
             }
 
             if (isset($_POST['submit']) && ($_POST['submit'] === "Reject" || $_POST['submit'] === "Approve" || $_POST['submit'] === "Check")) {
-                if ($userRole === 4) { // jika peran adalah "supervisor"
+                if ($user_role === 4) { // jika peran adalah "supervisor"
                     $newStatus = ($_POST['submit'] === "Reject") ? 'Rejected' : 'Approved';
                     $updateQuery = "UPDATE overtimes SET status = ?, status_updated_by = ?, status_updated_at = NOW() WHERE overtime_id = ?";
-                } elseif ($userRole === 2) { // Jika peran adalah "leader"
+                } elseif ($user_role === 2) { // Jika peran adalah "leader"
                     // Periksa tipe lembur
                     $newStatus = ($_POST['submit'] === "Reject") ? 'Rejected' : 'Approved';
                     if ($type === "Urgent") {
                         $updateQuery = "UPDATE overtimes SET status = ?, status_updated_by = ?, status_updated_at = NOW() WHERE overtime_id = ?";
+                    } elseif ($type === "Normal") {
+                        $updateQuery = "UPDATE overtimes SET status = ?, status_updated_by = ?, status_updated_at = NOW() WHERE overtime_id = ?";
                     } else {
                         $updateQuery = "UPDATE overtimes SET checked_by_leader_at = NOW(), checked_by_leader = ?, updated_by = ? WHERE overtime_id = ?";
                     }
-                } elseif ($userRole === 3) { // Jika peran adalah "admin"
+                } elseif ($user_role === 3) { // Jika peran adalah "admin"
                     $newStatus = ($_POST['submit'] === "Reject") ? 'Rejected' : 'Approved';
                     $updateQuery = "UPDATE overtimes SET sent_by_admin = NOW(), submitted_by_admin = ?, updated_by = ? WHERE overtime_id = ?";
                 } else {
@@ -132,9 +156,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                 $updateStatement = mysqli_prepare($conn, $updateQuery);
 
                 if ($updateStatement) {
-                    if ($userRole === 4) {
+                    if ($user_role === 4) {
                         mysqli_stmt_bind_param($updateStatement, "sii", $newStatus, $user_id, $overtimeId);
-                    } elseif ($userRole === 2 && $type === "Urgent") {
+                    } elseif ($user_role === 2 && $type === "Urgent") {
                         mysqli_stmt_bind_param($updateStatement, "sii", $newStatus, $user_id, $overtimeId);
                     } else {
                         mysqli_stmt_bind_param($updateStatement, "iii", $user_id, $user_id, $overtimeId);
@@ -193,9 +217,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                     <div class="col-md-9">
                                         <div class="d-flex align-items-center">
                                             <form action="<?= cleanValue($_SERVER['PHP_SELF']); ?>" method="get" class="d-flex">
-                                                <label for="inputSearch" class="m-2 mx-2">Search</label>
+                                                <label for="inputSearch" class="m-1 mx-1">Search</label>
                                                 <input type="text" name="search" id="inputSearch" placeholder="Enter Type or name" class="form-control form-control" value="<?= $search ?>">
-                                                <label for="inputRole" class="m-2 mx-2">Division</label>
+                                                <label for="inputRole" class="m-1 mx-1">Division</label>
                                                 <select name="filter_division" id="inputRole" class="form-select form-control">
                                                     <option value="">Select Division</option>
                                                     <?php foreach ($divisionOptions as $option) : ?>
@@ -205,7 +229,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                         </option>
                                                     <?php endforeach; ?>
                                                 </select>
-                                                <label for="inputRole" class="m-2 mx-2">Project</label>
+                                                <label for="inputRole" class="m-1 mx-1">Project</label>
                                                 <select name="filter_project" id="inputRole" class="form-select form-control">
                                                     <option value="">Select Projects</option>
                                                     <?php foreach ($projectOptions as $option) : ?>
@@ -215,211 +239,185 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                         </option>
                                                     <?php endforeach; ?>
                                                 </select>
+                                                <label for="inputStatus" class="m-1 mx-1">Status</label>
+                                                <select name="filter_status" id="inputStatus" class="form-select form-control">
+                                                    <option value="">Select Status</option>
+                                                    <option value="Approved" <?= ($filter_status === 'Approved') ? 'selected' : '' ?>>Approved</option>
+                                                    <option value="Pending" <?= ($filter_status === 'Pending') ? 'selected' : '' ?>>Pending</option>
+                                                    <option value="Rejected" <?= ($filter_status === 'Rejected') ? 'selected' : '' ?>>Rejected</option>
+                                                </select>
                                                 <button type="submit" class="btn btn-sm btn-primary mb-2 mx-2">Search</button>
                                                 <a class="btn btn-sm btn-warning mb-2 mx-2" href="<?php echo cleanValue($_SERVER['PHP_SELF']); ?>">Reset</a>
                                             </form>
                                         </div>
                                     </div>
                                     <div class="col-md-3 text-end">
-                                        <?php if ($userRole == 1) : ?>
+                                        <?php if ($user_role == 1) : ?>
                                             <a href="overtime_add.php" class="btn-sm btn-success me-3 text-white text-decoration-none">+ Add Overtime</a>
                                         <?php endif; ?>
                                     </div>
                                 </div>
-                                <?php if ($userRole === 2 || $userRole === 3 || $userRole === 4) : ?>
-                                <div class="table-responsive">
-                                    <table class="table mb-0 mt-3">
-                                        <thead>
-                                            <tr>
-                                                <th scope="col">No</th>
-                                                <th scope="col" style="min-width : 200px;">Full Name</th>
-                                                <th scope="col" style="min-width : 210px;">Project</th>
-                                                <th scope="col" style="min-width : 200px;">Division</th>
-                                                <th scope="col">Type</th>
-                                                <th scope="col" style="min-width : 200px;">Start Date</th>
-                                                <th scope="col" style="min-width : 200px;">Finish Date</th>
-                                                <th scope="col">Status</th>
-                                                <th scope="col" style="min-width : 210px;">Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php if (count($karyawanArray) > 0) : ?>
-                                                <?php foreach ($karyawanArray as $key => $value) : ?>
-                                                    <tr>
-                                                        <td><?= $key + 1 + $offset ?></td>
-                                                        <td><?= $value['name'] ?></td>
-                                                        <td><?= $value['project_name'] ?></td>
-                                                        <td><?= $value['division_name'] ?></td>
-                                                        <td><?= $value['type'] ?></td>
-                                                        <td><?= date('d-M-Y H:i', strtotime($value['start_date'])) ?></td>
-                                                        <td><?= date('d-M-Y H:i', strtotime($value['finish_date'])) ?></td>
-                                                        <td>
-                                                            <?php
-                                                            if ($value['status'] === 'Pending') {
-                                                                $statusClass = 'badge bg-warning'; // Status "pending"
-                                                            } elseif ($value['status'] === 'Rejected') {
-                                                                $statusClass = 'badge bg-danger'; // Status "reject"
-                                                            } elseif ($value['status'] === 'Approved') {
-                                                                $statusClass = 'badge bg-success'; // Status "approved"
-                                                            }
-                                                            ?>
-                                                            <button class="btn btn-sm text-white <?= $statusClass ?>" disabled>
-                                                                <?= $value['status'] ?>
-                                                            </button>
-                                                        </td>
-                                                        <td>
-                                                            <div class="d-flex">
-                                                                <?php if ($userRole === 3) : // Cek apakah peran sama dengan admin 
-                                                                ?>
-                                                                    <a href="overtime_detail.php?id=<?= $value['overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
-                                                                    <form method="post" action="<?= cleanValue($_SERVER['PHP_SELF']); ?>" style="display: inline;">
-                                                                        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
-                                                                        <input type="hidden" name="overtime_id" value="<?= $value['overtime_id'] ?>">
-                                                                        <input type="hidden" name="user_id" value="<?= $value['user_id'] ?>">
-                                                                        <button type="submit" name="submit" value="Check" class="btn btn-success btn-sm ms-2">Submit</button>
-                                                                    </form>
-                                                                <?php elseif ($userRole === 1) : // Cek apakah peran sama dengan user
-                                                                ?>
-                                                                    <?php if ($value['status'] !== 'Approved') : ?>
-                                                                        <a href="overtime_delete.php?id=<?= $value['overtime_id']; ?>" class="btn btn-danger btn-sm ms-2" onclick="return confirm('Apakah kamu yakin?')">Delete</a>
-                                                                    <?php endif; ?>
-                                                                    <a href="overtime_detail.php?id=<?= $value['overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
-                                                                    <a href="overtime_update.php?id=<?= $value['overtime_id'] ?>" class="btn btn-warning btn-sm ms-2">Edit</a>
-                                                                <?php elseif ($userRole === 4) : // Cek apakah peran sama dengan supervisor 
-                                                                ?>
-                                                                    <a href="overtime_detail.php?id=<?= $value['overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
-                                                                    <form method="post" action="<?= cleanValue($_SERVER['PHP_SELF']); ?>" class="d-flex">
-                                                                        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
-                                                                        <input type="hidden" name="overtime_id" value="<?= $value['overtime_id'] ?>">
-                                                                        <input type="hidden" name="user_id" value="<?= $value['user_id'] ?>">
-                                                                        <button type="submit" name="submit" value="Approve" class="btn btn-success btn-sm ms-2">Approve</button>
-                                                                        <button type="submit" name="submit" value="Reject" class="btn btn-danger btn-sm ms-2">Reject</button>
-                                                                    </form>
-                                                                <?php elseif ($userRole === 2) : // Cek apakah peran sama dengan leader 
-                                                                ?>
-                                                                    <a href="overtime_detail.php?id=<?= $value['overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
-                                                                    <form method="post" action="<?= cleanValue($_SERVER['PHP_SELF']); ?>" class="d-flex">
-                                                                        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
-                                                                        <input type="hidden" name="overtime_id" value="<?= $value['overtime_id'] ?>">
-                                                                        <input type="hidden" name="user_id" value="<?= $value['user_id'] ?>">
-                                                                        <?php if ($userRole === 2 && $value['type'] === 'Urgent') : ?>
-                                                                            <button type="submit" name="submit" value="Approve" class="btn btn-success btn-sm ms-2">Approve</button>
-                                                                        <?php else : ?>
-                                                                            <button type="submit" name="submit" value="Check" class="btn btn-success btn-sm ms-2">Check</button>
-                                                                        <?php endif; ?>
-                                                                        <button type="submit" name="submit" value="Reject" class="btn btn-danger btn-sm ms-2">Reject</button>
-                                                                    </form>
-                                                                <?php endif; ?>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                <?php endforeach; ?>
-                                            <?php else : ?>
+                                <?php if ($user_role === 2 || $user_role === 3 || $user_role === 4) : ?>
+                                    <div class="table-responsive">
+                                        <table class="table mb-0 mt-3">
+                                            <thead>
                                                 <tr>
-                                                    <td colspan="8" style="text-align: center;">No records found!!!</td>
+                                                    <th scope="col">No</th>
+                                                    <th scope="col" style="min-width : 200px;">Full Name</th>
+                                                    <th scope="col" style="min-width : 210px;">Project</th>
+                                                    <th scope="col" style="min-width : 200px;">Division</th>
+                                                    <th scope="col">Type</th>
+                                                    <th scope="col" style="min-width : 200px;">Start Date</th>
+                                                    <th scope="col" style="min-width : 200px;">Finish Date</th>
+                                                    <th scope="col">Status</th>
+                                                    <th scope="col" style="min-width : 210px;">Action</th>
                                                 </tr>
-                                            <?php endif; ?>
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <?php elseif($userRole === 1) : ?>
+                                            </thead>
+                                            <tbody>
+                                                <?php if (count($karyawanArray) > 0) : ?>
+                                                    <?php foreach ($karyawanArray as $key => $value) : ?>
+                                                        <tr>
+                                                            <td><?= $key + 1 + $offset ?></td>
+                                                            <td><?= $value['name'] ?></td>
+                                                            <td><?= $value['project_name'] ?></td>
+                                                            <td><?= $value['division_name'] ?></td>
+                                                            <td><?= $value['type'] ?></td>
+                                                            <td><?= date('d-M-Y H:i', strtotime($value['start_date'])) ?></td>
+                                                            <td><?= date('d-M-Y H:i', strtotime($value['finish_date'])) ?></td>
+                                                            <td>
+                                                                <?php
+                                                                if ($value['status'] === 'Pending') {
+                                                                    $statusClass = 'badge bg-warning'; // Status "pending"
+                                                                } elseif ($value['status'] === 'Rejected') {
+                                                                    $statusClass = 'badge bg-danger'; // Status "reject"
+                                                                } elseif ($value['status'] === 'Approved') {
+                                                                    $statusClass = 'badge bg-success'; // Status "approved"
+                                                                }
+                                                                ?>
+                                                                <button class="btn btn-sm text-white <?= $statusClass ?>" disabled>
+                                                                    <?= $value['status'] ?>
+                                                                </button>
+                                                            </td>
+                                                            <td>
+                                                                <div class="d-flex">
+                                                                    <?php if ($user_role === 3) : // Cek apakah peran sama dengan admin 
+                                                                    ?>
+                                                                        <a href="overtime_detail.php?id=<?= $value['overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
+                                                                        <form method="post" action="<?= cleanValue($_SERVER['PHP_SELF']); ?>" style="display: inline;">
+                                                                            <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                                                                            <input type="hidden" name="overtime_id" value="<?= $value['overtime_id'] ?>">
+                                                                            <?php if ($value['status'] === 'Pending' && $value['submitted_by_admin'] == NULL) : ?>
+                                                                                <button type="submit" name="submit" value="Check" class="btn btn-success btn-sm ms-2" onclick="return confirm('are you sure you will submit it?')">Submit</button>
+                                                                            <?php endif; ?>
+                                                                        </form>
+                                                                    <?php elseif ($user_role === 4) : // Cek apakah peran sama dengan supervisor 
+                                                                    ?>
+                                                                        <a href="overtime_detail.php?id=<?= $value['overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
+                                                                        <form method="post" action="<?= cleanValue($_SERVER['PHP_SELF']); ?>" class="d-flex">
+                                                                            <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                                                                            <input type="hidden" name="overtime_id" value="<?= $value['overtime_id'] ?>">
+                                                                            <?php if ($value['status'] === 'Pending') : ?>
+                                                                                <button type="submit" name="submit" value="Approve" class="btn btn-success btn-sm ms-2" onclick="return confirm('are you sure you will approve it?')">Approve</button>
+                                                                                <button type="submit" name="submit" value="Reject" class="btn btn-danger btn-sm ms-2" onclick="return confirm('are you sure you will reject it?')">Reject</button>
+                                                                            <?php endif; ?>
+                                                                        </form>
+                                                                    <?php elseif ($user_role === 2) : // Cek apakah peran sama dengan leader 
+                                                                    ?>
+                                                                        <a href="overtime_detail.php?id=<?= $value['overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
+                                                                        <form method="post" action="<?= cleanValue($_SERVER['PHP_SELF']); ?>" class="d-flex">
+                                                                            <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                                                                            <input type="hidden" name="overtime_id" value="<?= $value['overtime_id'] ?>">
+                                                                            <?php if ($value['status'] === 'Pending' && $value['checked_by_leader'] == NULL) : ?>
+                                                                                <?php if ($user_role === 2 && $value['type'] === 'Urgent') : ?>
+                                                                                    <button type="submit" name="submit" value="Approve" class="btn btn-success btn-sm ms-2" onclick="return confirm('are you sure you will approve it?')">Approve</button>
+                                                                                <?php else : ?>
+                                                                                    <button type="submit" name="submit" value="Check" class="btn btn-success btn-sm ms-2" onclick="return confirm('Are you sure you have checked?')">Check</button>
+                                                                                <?php endif; ?>
+                                                                                <button type="submit" name="submit" value="Reject" class="btn btn-danger btn-sm ms-2" onclick="return confirm('are you sure you will reject it?')">Reject</button>
+                                                                            <?php endif; ?>
+                                                                        </form>
+                                                                    <?php endif; ?>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    <?php endforeach; ?>
+                                                <?php else : ?>
+                                                    <tr>
+                                                        <td colspan="8" style="text-align: center;">No records found!!!</td>
+                                                    </tr>
+                                                <?php endif; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                <?php elseif ($user_role === 1) : ?>
 
                                     <div class="table-responsive">
-                                    <table class="table mb-0 mt-3">
-                                        <thead>
-                                            <tr>
-                                                <th scope="col">No</th>
-                                                <th scope="col" style="min-width : 200px;">Full Name</th>
-                                                <th scope="col" style="min-width : 200px;">Project</th>
-                                                <th scope="col" style="min-width : 200px;">Division</th>
-                                                <th scope="col">Type</th>
-                                                <th scope="col" style="min-width : 200px;">Start Date</th>
-                                                <th scope="col" style="min-width : 200px;">Finish Date</th>
-                                                <th scope="col">Status</th>
-                                                <th scope="col" style="min-width : 210px;">Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php if (count($karyawanArray) > 0) : ?>
-                                                <?php foreach ($karyawanArray as $key => $value) : ?>
-                                                    <tr>
-                                                        <td><?= $key + 1 + $offset ?></td>
-                                                        <td><?= $value['name'] ?></td>
-                                                        <td><?= $value['project_name'] ?></td>
-                                                        <td><?= $value['division_name'] ?></td>
-                                                        <td><?= $value['type'] ?></td>
-                                                        <td><?= date('d-M-Y H:i', strtotime($value['start_date'])) ?></td>
-                                                        <td><?= date('d-M-Y H:i', strtotime($value['finish_date'])) ?></td>
-                                                        <td>
-                                                            <?php
-                                                            if ($value['status'] === 'Pending') {
-                                                                $statusClass = 'badge bg-warning'; // Status "pending"
-                                                            } elseif ($value['status'] === 'Rejected') {
-                                                                $statusClass = 'badge bg-danger'; // Status "reject"
-                                                            } elseif ($value['status'] === 'Approved') {
-                                                                $statusClass = 'badge bg-success'; // Status "approved"
-                                                            }
-                                                            ?>
-                                                            <button class="btn btn-sm text-white <?= $statusClass ?>" disabled>
-                                                                <?= $value['status'] ?>
-                                                            </button>
-                                                        </td>
-                                                        <td>
-                                                            <div class="d-flex">
-                                                                <?php if ($userRole === 3) : // Cek apakah peran sama dengan admin 
-                                                                ?>
-                                                                    <a href="overtime_detail.php?id=<?= $value['overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
-                                                                    <form method="post" action="<?= cleanValue($_SERVER['PHP_SELF']); ?>" style="display: inline;">
-                                                                        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
-                                                                        <input type="hidden" name="overtime_id" value="<?= $value['overtime_id'] ?>">
-                                                                        <input type="hidden" name="user_id" value="<?= $value['user_id'] ?>">
-                                                                        <button type="submit" name="submit" value="Check" class="btn btn-success btn-sm ms-2">Submit</button>
-                                                                    </form>
-                                                                <?php elseif ($userRole === 1) : // Cek apakah peran sama dengan user
-                                                                ?>
-                                                                    <?php if ($value['status'] !== 'Approved' && $value['status'] !== 'Rejected') : ?>
-                                                                        <a href="overtime_delete.php?id=<?= $value['overtime_id']; ?>" class="btn btn-danger btn-sm ms-2" onclick="return confirm('Apakah kamu yakin?')">Delete</a>
-                                                                    <?php endif; ?>
-                                                                    <a href="overtime_detail.php?id=<?= $value['overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
-                                                                    <a href="overtime_update.php?id=<?= $value['overtime_id'] ?>" class="btn btn-warning btn-sm ms-2">Edit</a>
-                                                                <?php elseif ($userRole === 4) : // Cek apakah peran sama dengan supervisor 
-                                                                ?>
-                                                                    <a href="overtime_detail.php?id=<?= $value['overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
-                                                                    <form method="post" action="<?= cleanValue($_SERVER['PHP_SELF']); ?>" class="d-flex">
-                                                                        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
-                                                                        <input type="hidden" name="overtime_id" value="<?= $value['overtime_id'] ?>">
-                                                                        <input type="hidden" name="user_id" value="<?= $value['user_id'] ?>">
-                                                                        <button type="submit" name="submit" value="Approve" class="btn btn-success btn-sm ms-2">Approve</button>
-                                                                        <button type="submit" name="submit" value="Reject" class="btn btn-danger btn-sm ms-2">Reject</button>
-                                                                    </form>
-                                                                <?php elseif ($userRole === 2) : // Cek apakah peran sama dengan leader 
-                                                                ?>
-                                                                    <a href="overtime_detail.php?id=<?= $value['overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
-                                                                    <form method="post" action="<?= cleanValue($_SERVER['PHP_SELF']); ?>" class="d-flex">
-                                                                        <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
-                                                                        <input type="hidden" name="overtime_id" value="<?= $value['overtime_id'] ?>">
-                                                                        <input type="hidden" name="user_id" value="<?= $value['user_id'] ?>">
-                                                                        <?php if ($userRole === 2 && $value['type'] === 'Urgent') : ?>
-                                                                            <button type="submit" name="submit" value="Approve" class="btn btn-success btn-sm ms-2">Approve</button>
-                                                                        <?php else : ?>
-                                                                            <button type="submit" name="submit" value="Check" class="btn btn-success btn-sm ms-2">Check</button>
-                                                                        <?php endif; ?>
-                                                                        <button type="submit" name="submit" value="Reject" class="btn btn-danger btn-sm ms-2">Reject</button>
-                                                                    </form>
-                                                                <?php endif; ?>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                <?php endforeach; ?>
-                                            <?php else : ?>
+                                        <table class="table mb-0 mt-3">
+                                            <thead>
                                                 <tr>
-                                                    <td colspan="8" style="text-align: center;">No records found!!!</td>
+                                                    <th scope="col">No</th>
+                                                    <th scope="col" style="min-width : 200px;">Full Name</th>
+                                                    <th scope="col" style="min-width : 200px;">Project</th>
+                                                    <th scope="col" style="min-width : 200px;">Division</th>
+                                                    <th scope="col">Type</th>
+                                                    <th scope="col" style="min-width : 200px;">Start Date</th>
+                                                    <th scope="col" style="min-width : 200px;">Finish Date</th>
+                                                    <th scope="col">Status</th>
+                                                    <th scope="col" style="min-width : 210px;">Action</th>
                                                 </tr>
-                                            <?php endif; ?>
-                                        </tbody>
-                                    </table>
-                                </div>
-                                
+                                            </thead>
+                                            <tbody>
+                                                <?php if (count($karyawanArray) > 0) : ?>
+                                                    <?php foreach ($karyawanArray as $key => $value) : ?>
+                                                        <tr>
+                                                            <td><?= $key + 1 + $offset ?></td>
+                                                            <td><?= $value['name'] ?></td>
+                                                            <td><?= $value['project_name'] ?></td>
+                                                            <td><?= $value['division_name'] ?></td>
+                                                            <td><?= $value['type'] ?></td>
+                                                            <td><?= date('d-M-Y H:i', strtotime($value['start_date'])) ?></td>
+                                                            <td><?= date('d-M-Y H:i', strtotime($value['finish_date'])) ?></td>
+                                                            <td>
+                                                                <?php
+                                                                if ($value['status'] === 'Pending') {
+                                                                    $statusClass = 'badge bg-warning'; // Status "pending"
+                                                                } elseif ($value['status'] === 'Rejected') {
+                                                                    $statusClass = 'badge bg-danger'; // Status "reject"
+                                                                } elseif ($value['status'] === 'Approved') {
+                                                                    $statusClass = 'badge bg-success'; // Status "approved"
+                                                                }
+                                                                ?>
+                                                                <button class="btn btn-sm text-white <?= $statusClass ?>" disabled>
+                                                                    <?= $value['status'] ?>
+                                                                </button>
+                                                            </td>
+                                                            <td>
+                                                                <div class="d-flex">
+                                                                    <?php if ($user_role === 1) : // Cek apakah peran sama dengan user
+                                                                    ?>
+                                                                        <?php if ($value['status'] !== 'Approved' && $value['status'] !== 'Rejected') : ?>
+                                                                            <a href="overtime_delete.php?id=<?= $value['overtime_id']; ?>" class="btn btn-danger btn-sm ms-2" onclick="return confirm('Are you sure?')">Delete</a>
+                                                                        <?php endif; ?>
+                                                                        <?php if ($value['status'] !== 'Approved') : ?>
+                                                                            <a href="overtime_update.php?id=<?= $value['overtime_id'] ?>" class="btn btn-warning btn-sm ms-2" onclick="return confirm('are you sure you will Edit it?')">Edit</a>
+                                                                        <?php elseif ($value['status'] == 'Approved') : ?>
+                                                                            <a href="overtime_update.php?id=<?= $value['overtime_id'] ?>" class="btn btn-warning btn-sm ms-2" onclick="return confirm(`are you sure you'll be able to complete it?`)">Compliting</a>
+                                                                        <?php endif; ?>
+                                                                        <a href="overtime_detail.php?id=<?= $value['overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
+                                                                    <?php endif; ?>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    <?php endforeach; ?>
+                                                <?php else : ?>
+                                                    <tr>
+                                                        <td colspan="8" style="text-align: center;">No records found!!!</td>
+                                                    </tr>
+                                                <?php endif; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
                                 <?php endif; ?>
                                 <div class="dataTables_paginate paging_simple_numbers ms-3 mt-3">
                                     <ul class="pagination justify-content-end">
@@ -427,7 +425,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                             <?php if ($halaman_aktif > 1) : ?>
                                                 <?php $prevPage = $halaman_aktif - 1; ?>
                                                 <li class="page-item">
-                                                    <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $prevPage . ($search ? '&search=' . $search : '') . ($filter_division ? '&filter_division=' . $filter_division : '') . ($filter_project ? '&filter_project=' . $filter_project : ''); ?>">Previous</a>
+                                                    <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $prevPage . ($search ? '&search=' . $search : '') . ($filter_division ? '&filter_division=' . $filter_division : '') . ($filter_project ? '&filter_project=' . $filter_project : '') . ($filter_status ? '&filter_status=' . $filter_status : ''); ?>">Previous</a>
                                                 </li>
                                             <?php else : ?>
                                                 <li class="page-item disabled">
@@ -436,14 +434,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                             <?php endif; ?>
                                             <?php for ($i = 1; $i <= $jumlah_halaman; $i++) : ?>
                                                 <li class="page-item<?= $i == $halaman_aktif ? ' active' : ''; ?>">
-                                                    <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $i . ($search ? '&search=' . $search : '') . ($filter_division ? '&filter_division=' . $filter_division : '') . ($filter_project ? '&filter_project=' . $filter_project : ''); ?>"><?= $i ?></a>
+                                                    <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $i . ($search ? '&search=' . $search : '') . ($filter_division ? '&filter_division=' . $filter_division : '') . ($filter_project ? '&filter_project=' . $filter_project : '') . ($filter_status ? '&filter_status=' . $filter_status : ''); ?>"><?= $i ?></a>
                                                 </li>
                                             <?php endfor; ?>
 
                                             <?php if ($halaman_aktif < $jumlah_halaman) : ?>
                                                 <?php $nextPage = $halaman_aktif + 1; ?>
                                                 <li class="page-item">
-                                                    <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $nextPage . ($search ? '&search=' . $search : '') . ($filter_division ? '&filter_division=' . $filter_division : '') . ($filter_project ? '&filter_project=' . $filter_project : ''); ?>">Next</a>
+                                                    <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $nextPage . ($search ? '&search=' . $search : '') . ($filter_division ? '&filter_division=' . $filter_division : '') . ($filter_project ? '&filter_project=' . $filter_project : '') . ($filter_status ? '&filter_status=' . $filter_status : ''); ?>">Next</a>
                                                 </li>
                                             <?php else : ?>
                                                 <li class="page-item disabled">
