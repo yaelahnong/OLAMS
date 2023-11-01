@@ -184,15 +184,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                                 <span class="error" style="color: red;"><?= $typeErr; ?></span>
                                             </div>
                                             <div class="mb-3 col-md-6">
-                                                <label class="form-label" for="inputStartDate">Start Date</label>
-                                                <input type="datetime-local" class="form-control" name="start_date" id="inputStartDate" value="<?= $start_date; ?>">
+                                                <label class="form-label" for="datepickerStart">Start Date</label>
+                                                <input type="text" class="form-control" name="start_date" id="datepickerStart">
                                                 <span class="error" style="color: red;"> <?= $start_dateErr; ?> </span>
                                             </div>
                                         </div>
                                         <div class="row">
                                             <div class="mb-3 col-md-6">
-                                                <label class="form-label" for="inputFinishDate">Finish Date</label>
-                                                <input type="datetime-local" class="form-control" name="finish_date" id="inputFinishDate" value="<?= $finish_date; ?>">
+                                                <label class="form-label" for="datepickerFinish">Finish Date</label>
+                                                <input type="text" class="form-control" name="finish_date" id="datepickerFinish">
                                                 <span class="error" style="color: red;"> <?= $finish_dateErr; ?> </span>
                                             </div>
                                             <div class="mb-3 col-md-6">

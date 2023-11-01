@@ -172,9 +172,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     </div>
                     <div class="row">
                       <div class="mb-3 col-md-6">
-                        <label class="form-label" for="inputTotalBasicSalary">Total Basic Salary</label>
+                        <label class="form-label" for="rupiah">Total Basic Salary</label>
                         <span style="color: red">*</span><br>
-                        <input type="text" class="form-control" name="total_basic_salary" id="inputTotalBasicSalary" placeholder="Enter Total Basic Salary" pattern="[0-9,]*" title="Enter a numeric value with optional commas (e.g., 1,000,000)">
+                        <input type="text" class="form-control" name="rupiah" id="inputTotalBasicSalary" placeholder="Enter Total Basic Salary">
                       </div>
                     </div>
                     <div class="row">
@@ -193,7 +193,30 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       <?php include "components/footer.inc.php"; ?>
     </div>
   </div>
+  <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const inputTotalBasicSalary = document.getElementById("inputTotalBasicSalary");
 
+    inputTotalBasicSalary.addEventListener("input", function (e) {
+      let rawValue = e.target.value.replace(/\D/g, "");
+
+      let formattedValue = addCommas(rawValue);
+
+      e.target.value = formattedValue;
+    });
+  });
+
+  function addCommas(value) {
+    const number = parseFloat(value);
+    if (isNaN(number)) {
+      return "";
+    }
+
+    const formattedValue = number.toLocaleString();
+
+    return formattedValue;
+  }
+</script>
   <?php include "script.inc.php"; ?>
 </body>
 

@@ -202,7 +202,7 @@ if ($resultTopLembur->num_rows > 0) {
 
 
 // Tampilan Dashboard Untuk User
-  // Mengambil data cuti pengguna dari database
+// Mengambil data cuti pengguna dari database
 $queryLeaveUser = "SELECT start_date, finish_date, category FROM leaves WHERE user_id = ?";
 $leaveData = mysqli_prepare($conn, $queryLeaveUser);
 mysqli_stmt_bind_param($leaveData, "i", $user_id);
@@ -213,16 +213,16 @@ $jumlahCutiTahunan = 12; // Jumlah cuti tahunan awal
 $sisaHariCuti = $jumlahCutiTahunan; // Set sisa cuti tahunan awal
 
 while ($row = mysqli_fetch_assoc($leaveData)) {
-    $start_date = new DateTime($row["start_date"]);
-    $finish_date = new DateTime($row["finish_date"]);
+  $start_date = new DateTime($row["start_date"]);
+  $finish_date = new DateTime($row["finish_date"]);
 
-    // Menghitung jumlah hari cuti dalam rentang tanggal
-    $interval = $start_date->diff($finish_date);
-    $jumlahHariCuti = $interval->days;
+  // Menghitung jumlah hari cuti dalam rentang tanggal
+  $interval = $start_date->diff($finish_date);
+  $jumlahHariCuti = $interval->days;
 
-    if ($row['category'] === 'Annual') {
-        $sisaHariCuti -= $jumlahHariCuti;
-    }
+  if ($row['category'] === 'Annual') {
+    $sisaHariCuti -= $jumlahHariCuti;
+  }
 }
 
 
@@ -334,596 +334,549 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
       <?php include "components/navbar.inc.php"; ?>
       <main class="content">
         <?php if ($userRole === 2 || $userRole === 3 || $userRole === 4) : ?>
-            <div class="container-fluid p-0">
-              <h1 class="h1 mb-3 judul_halaman"><strong>Dashboard</strong></h1>
-              <div class="row">
-                <div class="col-md-3">
-                  <div class="card">
-                    <div class="card-body">
-                      <h5 class="card-title">Filter Laporan</h5>
-                      <form action="<?= cleanValue($_SERVER['PHP_SELF']) ?>" method="get">
-                        <div class="form-group row">
-                          <div class="col-12">
-                            <label for="monthSelect">Pilih Bulan:</label>
-                            <select id="monthSelect" name="month" class="form-select">
-                              <option value="this_month" <?= ($selectedMonth === 'this_month') ? 'selected' : '' ?>>Bulan Ini</option>
-                              <option value="last_month" <?= ($selectedMonth === 'last_month') ? 'selected' : '' ?>>Bulan Kemarin</option>
-                            </select>
-                          </div>
-                          <div class="col mt-4">
-                            <button type="submit" class="btn btn-primary float-right">Tampilkan</button>
-                          </div>
+          <div class="container-fluid p-0">
+            <h1 class="h1 mb-3 judul_halaman"><strong>Dashboard</strong></h1>
+            <div class="row">
+              <div class="col-md-3">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Filter Laporan</h5>
+                    <form action="<?= cleanValue($_SERVER['PHP_SELF']) ?>" method="get">
+                      <div class="form-group row">
+                        <div class="col-12">
+                          <label for="monthSelect">Pilih Bulan:</label>
+                          <select id="monthSelect" name="month" class="form-select">
+                            <option value="this_month" <?= ($selectedMonth === 'this_month') ? 'selected' : '' ?>>Bulan Ini</option>
+                            <option value="last_month" <?= ($selectedMonth === 'last_month') ? 'selected' : '' ?>>Bulan Kemarin</option>
+                          </select>
                         </div>
-                      </form>
-                    </div>
+                        <div class="col mt-4">
+                          <button type="submit" class="btn btn-primary float-right">Tampilkan</button>
+                        </div>
+                      </div>
+                    </form>
                   </div>
                 </div>
-                <div class="col-md-3">
-                  <div class="card ml-auto">
-                    <div class="card-body">
-                      <div class="row">
-                        <div class="col mt-0">
-                          <h5 class="card-title text-center">Overtime</h5>
-                        </div>
-                      </div>
-                      <h1 class="mt-1 mb-3 text-center"><?= $totalOvertimeThisMonth ?></h1>
-                      <div class="mb-0 text-center">
-                        <span class="badge badge-primary-light"> <i class="mdi mdi-arrow-bottom-right"></i></span>
-                        <span class="text-muted">Total Overtime This Month</span>
+              </div>
+              <div class="col-md-3">
+                <div class="card ml-auto">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col mt-0">
+                        <h5 class="card-title text-center">Overtime</h5>
                       </div>
                     </div>
-                  </div>
-                </div>
-                <div class="col-md-3">
-                  <div class="card ml-auto">
-                    <div class="card-body">
-                      <div class="row">
-                        <div class="col mt-0 text-center">
-                          <h5 class="card-title">Leave</h5>
-                        </div>
-                      </div>
-                      <h1 class="mt-1 mb-3 text-center"><?= $totalLeavesThisMonth ?></h1>
-                      <div class="mb-0 text-center">
-                        <span class="badge badge-primary-light"> <i class="mdi mdi-arrow-bottom-right"></i></span>
-                        <span class="text-muted">Total Leave This Month</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-md-3">
-                  <div class="card ml-auto">
-                    <div class="card-body">
-                      <div class="row">
-                        <div class="col mt-0 text-center">
-                          <h5 class="card-title">Attendance</h5>
-                        </div>
-                      </div>
-                      <h1 class="mt-1 mb-3 text-center"><?= $totalAttendanceThisMonth ?></h1>
-                      <div class="mb-0 text-center">
-                        <span class="badge badge-primary-light"> <i class="mdi mdi-arrow-bottom-right"></i> </span>
-                        <span class="text-muted">Total Attendance This Month</span>
-                      </div>
+                    <h1 class="mt-1 mb-3 text-center"><?= $totalOvertimeThisMonth ?></h1>
+                    <div class="mb-0 text-center">
+                      <span class="badge badge-primary-light"> <i class="mdi mdi-arrow-bottom-right"></i></span>
+                      <span class="text-muted">Total Overtime This Month</span>
                     </div>
                   </div>
                 </div>
               </div>
-              <div class="col-12 d-flex flex-row">
-                <div class="col-sm-4 pe-3">
-                  <div class="card bg-secondary">
-                    <div class="card-body">
-                      <div class="row">
-                        <div class="col mt-0">
-                          <h5 class="card-title text-white">Employees Who Leave the Most</h5>
-                        </div>
-
-                        <div class="col-auto">
-                          <div class="stat text-primary">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-users align-middle">
-                              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                              <circle cx="9" cy="7" r="4"></circle>
-                              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                            </svg>
-                          </div>
-                        </div>
-                      </div>
-                      <h1 class="mt-1 mb-3 text-white"><?= $namaKaryawanPalingBanyakCuti ?></h1>
-                      <div class="mb-0">
-                        <span class="text-white"> <i class="mdi mdi-arrow-bottom-right"></i> <?= $jumlahCutiPalingBanyak ?> </span>
-                        <span class="text-white">Total Leave</span>
+              <div class="col-md-3">
+                <div class="card ml-auto">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col mt-0 text-center">
+                        <h5 class="card-title">Leave</h5>
                       </div>
                     </div>
-                  </div>
-                </div>
-                <div class="col-sm-4 px-3">
-                  <div class="card bg-secondary">
-                    <div class="card-body">
-                      <div class="row">
-                        <div class="col mt-0">
-                          <h5 class="card-title text-white">Employees who get sick the most</h5>
-                        </div>
-
-                        <div class="col-auto">
-                          <div class="stat text-primary">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-users align-middle">
-                              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                              <circle cx="9" cy="7" r="4"></circle>
-                              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                            </svg>
-                          </div>
-                        </div>
-                      </div>
-                      <h1 class="mt-1 mb-3 text-white"><?= $namaKaryawanPalingBanyakSakit; ?></h1>
-                      <div class="mb-0">
-                        <span class="text-white"> <i class="mdi mdi-arrow-bottom-right"></i> <?= $jumlahSakitPalingBanyak; ?> </span>
-                        <span class="text-white">Total Attendance</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-sm-4 ps-3">
-                  <div class="card bg-secondary">
-                    <div class="card-body">
-                      <div class="row">
-                        <div class="col mt-0">
-                          <h5 class="card-title text-white">Employees Who Work the Most Overtime</h5>
-                        </div>
-
-                        <div class="col-auto">
-                          <div class="stat text-primary">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-users align-middle">
-                              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                              <circle cx="9" cy="7" r="4"></circle>
-                              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                            </svg>
-                          </div>
-                        </div>
-                      </div>
-                      <h1 class="mt-1 mb-3 text-white"><?= $namaKaryawanPalingBanyakLembur ?></h1>
-                      <div class="mb-0">
-                        <span class="text-white"> <i class="mdi mdi-arrow-bottom-right"></i> <?= $jumlahLemburPalingBanyak ?></span>
-                        <span class="text-white">Total Overtime</span>
-                      </div>
+                    <h1 class="mt-1 mb-3 text-center"><?= $totalLeavesThisMonth ?></h1>
+                    <div class="mb-0 text-center">
+                      <span class="badge badge-primary-light"> <i class="mdi mdi-arrow-bottom-right"></i></span>
+                      <span class="text-muted">Total Leave This Month</span>
                     </div>
                   </div>
                 </div>
               </div>
-              <div class="content px-0">
+              <div class="col-md-3">
+                <div class="card ml-auto">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col mt-0 text-center">
+                        <h5 class="card-title">Attendance</h5>
+                      </div>
+                    </div>
+                    <h1 class="mt-1 mb-3 text-center"><?= $totalAttendanceThisMonth ?></h1>
+                    <div class="mb-0 text-center">
+                      <span class="badge badge-primary-light"> <i class="mdi mdi-arrow-bottom-right"></i> </span>
+                      <span class="text-muted">Total Attendance This Month</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-12 d-flex flex-row">
+              <div class="col-sm-4 pe-3">
+                <div class="card bg-secondary">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col mt-0">
+                        <h5 class="card-title text-white">Employees Who Leave the Most</h5>
+                      </div>
+
+                      <div class="col-auto">
+                        <div class="stat text-primary">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-users align-middle">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                    <h1 class="mt-1 mb-3 text-white"><?= $namaKaryawanPalingBanyakCuti ?></h1>
+                    <div class="mb-0">
+                      <span class="text-white"> <i class="mdi mdi-arrow-bottom-right"></i> <?= $jumlahCutiPalingBanyak ?> </span>
+                      <span class="text-white">Total Leave</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-4 px-3">
+                <div class="card bg-secondary">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col mt-0">
+                        <h5 class="card-title text-white">Employees who get sick the most</h5>
+                      </div>
+
+                      <div class="col-auto">
+                        <div class="stat text-primary">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-users align-middle">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                    <h1 class="mt-1 mb-3 text-white"><?= $namaKaryawanPalingBanyakSakit; ?></h1>
+                    <div class="mb-0">
+                      <span class="text-white"> <i class="mdi mdi-arrow-bottom-right"></i> <?= $jumlahSakitPalingBanyak; ?> </span>
+                      <span class="text-white">Total Attendance</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-4 ps-3">
+                <div class="card bg-secondary">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col mt-0">
+                        <h5 class="card-title text-white">Employees Who Work the Most Overtime</h5>
+                      </div>
+
+                      <div class="col-auto">
+                        <div class="stat text-primary">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-users align-middle">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                    <h1 class="mt-1 mb-3 text-white"><?= $namaKaryawanPalingBanyakLembur ?></h1>
+                    <div class="mb-0">
+                      <span class="text-white"> <i class="mdi mdi-arrow-bottom-right"></i> <?= $jumlahLemburPalingBanyak ?></span>
+                      <span class="text-white">Total Overtime</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="content px-0">
+              <div class="card">
                 <div class="container-fluid p-0">
-                  <div class="row">
-                    <div class="col-12">
-                      <div class="card">
-                        <div class="card-header">
-                          <h1 class="h1 mb-3 judul_halaman"><strong>Attendance List</strong></h1>
-                        </div>
-                        <div class="table-responsive">
-                          <table class="table mb-0 mt-3">
-                            <thead>
-                              <tr>
-                                <th scope="col">No</th>
-                                <th scope="col">Full Name</th>
-                                <th scope="col">Division</th>
-                                <th scope="col">Reason</th>
-                                <th scope="col">Type</th>
-                                <th scope="col">Start Date</th>
-                                <th scope="col">Finish Date</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <?php if (count($attendanceArray) > 0) : ?>
-                                <?php foreach ($attendanceArray as $key => $value) : ?>
-                                  <tr>
-                                    <td><?= $key + 1 + $offset ?></td>
-                                    <td><?= $value['name'] ?></td>
-                                    <td><?= $value['division_name'] ?></td>
-                                    <td>
-                                      <?php if (!empty($value['reason'])) {
-                                        echo $value['reason'];
-                                      } else {
-                                        echo "-";
-                                      }
-                                      ?>
-                                    </td>
-                                    <td><?= $value['type'] ?></td>
-                                    <td><?= date('d-M-Y H:i', strtotime($value['start_date'])) ?></td>
-                                    <td><?= date('d-M-Y H:i', strtotime($value['finish_date'])) ?></td>
-                                  </tr>
-                                <?php endforeach; ?>
-                              <?php else : ?>
-                                <tr>
-                                  <td colspan="7" style="text-align: center;">No records found!!!</td>
-                                </tr>
-                              <?php endif; ?>
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  <div id='calendar'></div>
                 </div>
               </div>
-              <div class="">
-                <div class="container-fluid p-0">
-                  <div class="row">
-                    <div class="col-12">
-                      <div class="card">
-                        <div class="card-header">
-                          <h1 class="h1 mb-3 judul_halaman"><strong>Leave List</strong></h1>
-                        </div>
-                        <div class="table-responsive">
-                          <table class="table mb-0 mt-3">
-                            <thead>
-                              <tr>
-                                <th scope="col">No</th>
-                                <th scope="col">Full Name</th>
-                                <th scope="col">Division</th>
-                                <th scope="col">Reason</th>
-                                <th scope="col">Category</th>
-                                <th scope="col">Start Date</th>
-                                <th scope="col">Finish Date</th>
-                                <th scope="col">Status</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <?php if (count($leaveArray) > 0) : ?>
-                                <?php foreach ($leaveArray as $key => $value) : ?>
-                                  <tr>
-                                    <td><?= $key + 1 + $offset ?></td>
-                                    <td><?= $value['name'] ?></td>
-                                    <td><?= $value['division_name'] ?></td>
-                                    <td><?= $value['reason'] ?></td>
-                                    <td><?= $value['category'] ?></td>
-                                    <td><?= date('d-M-Y H:i', strtotime($value['leaveStart'])) ?></td>
-                                    <td><?= date('d-M-Y H:i', strtotime($value['leaveFinish'])) ?></td>
-                                    <td>
-                                      <?php
-
-                                      if ($value['status'] === 'Pending') {
-                                        $statusClass = 'btn-warning'; // Status "pending"
-                                      } elseif ($value['status'] === 'Rejected') {
-                                        $statusClass = 'btn-danger'; // Status "reject"
-                                      } elseif ($value['status'] === 'Approved') {
-                                        $statusClass = 'btn-success'; // Status "approved"
-                                      }
-
-                                      ?>
-                                      <button class="btn btn-sm <?= $statusClass; ?>" disabled>
-                                        <?= $value['status'] ?>
-                                      </button>
-                                    </td>
-                                  </tr>
-                                <?php endforeach; ?>
-                              <?php else : ?>
-                                <tr>
-                                  <td colspan="8" style="text-align: center;">No records found!!!</td>
-                                </tr>
-                              <?php endif; ?>
-                            </tbody>
-                          </table>
-                        </div>
+            </div>
+            <div class="">
+              <div class="container-fluid p-0">
+                <div class="row">
+                  <div class="col-12">
+                    <div class="card">
+                      <div class="card-header">
+                        <h1 class="h1 mb-3 judul_halaman"><strong>Leave List</strong></h1>
                       </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="">
-                <div class="container-fluid p-0">
-                  <div class="row">
-                    <div class="col-12">
-                      <div class="card">
-                        <div class="card-header">
-                          <h1 class="h1 mb-3 judul_halaman"><strong>Overtime List</strong></h1>
-                        </div>
-                        <div class="table-responsive">
-                          <table class="table mb-0 mt-3">
-                            <thead>
-                              <tr>
-                                <th scope="col">No</th>
-                                <th scope="col">Full Name</th>
-                                <th scope="col">Division</th>
-                                <th scope="col">Type Overtime</th>
-                                <th scope="col">Start Date</th>
-                                <th scope="col">Finish Date</th>
-                                <th scope="col">Category</th>
-                                <th scope="col">Reason</th>
-                                <th scope="col">Status</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <?php if (count($overtimeArray) > 0) : ?>
-                                <?php foreach ($overtimeArray as $key => $value) : ?>
-                                  <tr>
-                                    <td><?= $key + 1 + $offset ?></td>
-                                    <td><?= $value['name'] ?></td>
-                                    <td><?= $value['division_name'] ?></td>
-                                    <td><?= $value['type'] ?></td>
-                                    <td><?= date('d-M-Y H:i', strtotime($value['overtimeStart'])) ?></td>
-                                    <td>
-                                      <?php if (!empty($value['overtimeFinish'])) {
-                                        echo date('d-M-Y H:i', strtotime($value['overtimeFinish']));
-                                      } else {
-                                        echo "-";
-                                      }
-                                      ?>
-                                    </td>
-                                    <td><?= $value['categoryOvertime'] ?></td>
-                                    <td><?= $value['reasonOvertime'] ?></td>
-                                    <td>
-                                      <?php
-
-                                      if ($value['statusOvertime'] === 'Pending') {
-                                        $statusClass = 'btn-warning'; // Status "pending"
-                                      } elseif ($value['statusOvertime'] === 'Rejected') {
-                                        $statusClass = 'btn-danger'; // Status "reject"
-                                      } elseif ($value['statusOvertime'] === 'Approved') {
-                                        $statusClass = 'btn-success'; // Status "approved"
-                                      }
-
-                                      ?>
-                                      <button class="btn btn-sm <?= $statusClass ?>" disabled>
-                                        <?= $value['statusOvertime'] ?>
-                                      </button>
-                                    </td>
-                                  </tr>
-                                <?php endforeach; ?>
-                              <?php else : ?>
+                      <div class="table-responsive">
+                        <table class="table mb-0 mt-3">
+                          <thead>
+                            <tr>
+                              <th scope="col">No</th>
+                              <th scope="col">Full Name</th>
+                              <th scope="col">Division</th>
+                              <th scope="col">Reason</th>
+                              <th scope="col">Category</th>
+                              <th scope="col">Start Date</th>
+                              <th scope="col">Finish Date</th>
+                              <th scope="col">Status</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <?php if (count($leaveArray) > 0) : ?>
+                              <?php foreach ($leaveArray as $key => $value) : ?>
                                 <tr>
-                                  <td colspan="8" style="text-align: center;">No records found!!!</td>
+                                  <td><?= $key + 1 + $offset ?></td>
+                                  <td><?= $value['name'] ?></td>
+                                  <td><?= $value['division_name'] ?></td>
+                                  <td><?= $value['reason'] ?></td>
+                                  <td><?= $value['category'] ?></td>
+                                  <td><?= date('d-M-Y H:i', strtotime($value['leaveStart'])) ?></td>
+                                  <td><?= date('d-M-Y H:i', strtotime($value['leaveFinish'])) ?></td>
+                                  <td>
+                                    <?php
+
+                                    if ($value['status'] === 'Pending') {
+                                      $statusClass = 'btn-warning'; // Status "pending"
+                                    } elseif ($value['status'] === 'Rejected') {
+                                      $statusClass = 'btn-danger'; // Status "reject"
+                                    } elseif ($value['status'] === 'Approved') {
+                                      $statusClass = 'btn-success'; // Status "approved"
+                                    }
+
+                                    ?>
+                                    <button class="btn btn-sm <?= $statusClass; ?>" disabled>
+                                      <?= $value['status'] ?>
+                                    </button>
+                                  </td>
                                 </tr>
-                              <?php endif; ?>
-                            </tbody>
-                          </table>
-                        </div>
+                              <?php endforeach; ?>
+                            <?php else : ?>
+                              <tr>
+                                <td colspan="8" style="text-align: center;">No records found!!!</td>
+                              </tr>
+                            <?php endif; ?>
+                          </tbody>
+                        </table>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+            <div class="">
+              <div class="container-fluid p-0">
+                <div class="row">
+                  <div class="col-12">
+                    <div class="card">
+                      <div class="card-header">
+                        <h1 class="h1 mb-3 judul_halaman"><strong>Overtime List</strong></h1>
+                      </div>
+                      <div class="table-responsive">
+                        <table class="table mb-0 mt-3">
+                          <thead>
+                            <tr>
+                              <th scope="col">No</th>
+                              <th scope="col">Full Name</th>
+                              <th scope="col">Division</th>
+                              <th scope="col">Type Overtime</th>
+                              <th scope="col">Start Date</th>
+                              <th scope="col">Finish Date</th>
+                              <th scope="col">Category</th>
+                              <th scope="col">Reason</th>
+                              <th scope="col">Status</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <?php if (count($overtimeArray) > 0) : ?>
+                              <?php foreach ($overtimeArray as $key => $value) : ?>
+                                <tr>
+                                  <td><?= $key + 1 + $offset ?></td>
+                                  <td><?= $value['name'] ?></td>
+                                  <td><?= $value['division_name'] ?></td>
+                                  <td><?= $value['type'] ?></td>
+                                  <td><?= date('d-M-Y H:i', strtotime($value['overtimeStart'])) ?></td>
+                                  <td>
+                                    <?php if (!empty($value['overtimeFinish'])) {
+                                      echo date('d-M-Y H:i', strtotime($value['overtimeFinish']));
+                                    } else {
+                                      echo "-";
+                                    }
+                                    ?>
+                                  </td>
+                                  <td><?= $value['categoryOvertime'] ?></td>
+                                  <td><?= $value['reasonOvertime'] ?></td>
+                                  <td>
+                                    <?php
+
+                                    if ($value['statusOvertime'] === 'Pending') {
+                                      $statusClass = 'btn-warning'; // Status "pending"
+                                    } elseif ($value['statusOvertime'] === 'Rejected') {
+                                      $statusClass = 'btn-danger'; // Status "reject"
+                                    } elseif ($value['statusOvertime'] === 'Approved') {
+                                      $statusClass = 'btn-success'; // Status "approved"
+                                    }
+
+                                    ?>
+                                    <button class="btn btn-sm <?= $statusClass ?>" disabled>
+                                      <?= $value['statusOvertime'] ?>
+                                    </button>
+                                  </td>
+                                </tr>
+                              <?php endforeach; ?>
+                            <?php else : ?>
+                              <tr>
+                                <td colspan="8" style="text-align: center;">No records found!!!</td>
+                              </tr>
+                            <?php endif; ?>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         <?php elseif ($userRole === 1) : ?>
           <!-- Tampilan untuk User -->
-            <div class="container-fluid p-0">
-              <h1 class="h1 mb-3 judul_halaman"><strong>Dashboard</strong></h1>
-              <div class="row">
-                <div class="col-md-3">
-                  <div class="card ml-auto">
-                    <div class="card-body">
-                      <div class="row">
-                        <div class="col mt-0">
-                          <h5 class="card-title text-center">Remaining Leave</h5>
-                        </div>
-                      </div>
-                      <h1 class="mt-1 mb-3 text-center"> <?= $sisaHariCuti; ?> Days </h1>
-                      <div class="mb-0 text-center">
-                        <span class="badge badge-primary-light"> <i class="mdi mdi-arrow-bottom-right"></i></span>
-                        <span class="text-muted">leave this year</span>
+          <div class="container-fluid p-0">
+            <h1 class="h1 mb-3 judul_halaman"><strong>Dashboard</strong></h1>
+            <div class="row">
+              <div class="col-md-3">
+                <div class="card ml-auto">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col mt-0">
+                        <h5 class="card-title text-center">Remaining Leave</h5>
                       </div>
                     </div>
-                  </div>
-                </div>
-                <div class="col-md-3">
-                  <div class="card ml-auto">
-                    <div class="card-body">
-                      <div class="row">
-                        <div class="col mt-0">
-                          <h5 class="card-title text-center">Overtime</h5>
-                        </div>
-                      </div>
-                      <h1 class="mt-1 mb-3 text-center"><?= $totalOvertimeUser ?></h1>
-                      <div class="mb-0 text-center">
-                        <span class="badge badge-primary-light"> <i class="mdi mdi-arrow-bottom-right"></i></span>
-                        <span class="text-muted">Total Overtime This Month</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-md-3">
-                  <div class="card ml-auto">
-                    <div class="card-body">
-                      <div class="row">
-                        <div class="col mt-0 text-center">
-                          <h5 class="card-title">Leave</h5>
-                        </div>
-                      </div>
-                      <h1 class="mt-1 mb-3 text-center"><?= $totalLeavesUser ?></h1>
-                      <div class="mb-0 text-center">
-                        <span class="badge badge-primary-light"> <i class="mdi mdi-arrow-bottom-right"></i></span>
-                        <span class="text-muted">Total Leave This Month</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-md-3">
-                  <div class="card ml-auto">
-                    <div class="card-body">
-                      <div class="row">
-                        <div class="col mt-0 text-center">
-                          <h5 class="card-title">Attendance</h5>
-                        </div>
-                      </div>
-                      <h1 class="mt-1 mb-3 text-center"><?= $totalAttendanceUser ?></h1>
-                      <div class="mb-0 text-center">
-                        <span class="badge badge-primary-light"> <i class="mdi mdi-arrow-bottom-right"></i> </span>
-                        <span class="text-muted">Total Attendance This Month</span>
-                      </div>
+                    <h1 class="mt-1 mb-3 text-center"> <?= $sisaHariCuti; ?> Days </h1>
+                    <div class="mb-0 text-center">
+                      <span class="badge badge-primary-light"> <i class="mdi mdi-arrow-bottom-right"></i></span>
+                      <span class="text-muted">leave this year</span>
                     </div>
                   </div>
                 </div>
               </div>
-                <div class="container-fluid p-0">
-                  <div class="row">
-                    <div class="col-12">
-                      <div class="card">
-                        <div class="card-header">
-                          <h1 class="h1 mb-3 judul_halaman"><strong>Attendance List</strong></h1>
-                        </div>
-                        <div class="table-responsive">
-                          <table class="table mb-0 mt-3">
-                            <thead>
-                              <tr>
-                                <th scope="col">No</th>
-                                <th scope="col">Full Name</th>
-                                <th scope="col">Division</th>
-                                <th scope="col">Reason</th>
-                                <th scope="col">Type</th>
-                                <th scope="col">Start Date</th>
-                                <th scope="col">Finish Date</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <?php if (count($attendanceArrayUser) > 0) : ?>
-                                <?php foreach ($attendanceArrayUser as $key => $value) : ?>
-                                  <tr>
-                                    <td><?= $key + 1 + $offset ?></td>
-                                    <td><?= $value['name'] ?></td>
-                                    <td><?= $value['division_name'] ?></td>
-                                    <td><?= $value['reason'] ?></td>
-                                    <td><?= $value['type'] ?></td>
-                                    <td><?= date('d-M-Y H:i', strtotime($value['start_date'])) ?></td>
-                                    <td><?= date('d-M-Y H:i', strtotime($value['finish_date'])) ?></td>
-                                  </tr>
-                                <?php endforeach; ?>
-                              <?php else : ?>
-                                <tr>
-                                  <td colspan="7" style="text-align: center;">No records found!!!</td>
-                                </tr>
-                              <?php endif; ?>
-                            </tbody>
-                          </table>
-                        </div>
+              <div class="col-md-3">
+                <div class="card ml-auto">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col mt-0">
+                        <h5 class="card-title text-center">Overtime</h5>
                       </div>
+                    </div>
+                    <h1 class="mt-1 mb-3 text-center"><?= $totalOvertimeUser ?></h1>
+                    <div class="mb-0 text-center">
+                      <span class="badge badge-primary-light"> <i class="mdi mdi-arrow-bottom-right"></i></span>
+                      <span class="text-muted">Total Overtime This Month</span>
                     </div>
                   </div>
                 </div>
-                <div class="container-fluid p-0">
-                  <div class="row">
-                    <div class="col-12">
-                      <div class="card">
-                        <div class="card-header">
-                          <h1 class="h1 mb-3 judul_halaman"><strong>Leave List</strong></h1>
-                        </div>
-                        <div class="table-responsive">
-                          <table class="table mb-0 mt-3">
-                            <thead>
-                              <tr>
-                                <th scope="col">No</th>
-                                <th scope="col">Full Name</th>
-                                <th scope="col">Division</th>
-                                <th scope="col">Reason</th>
-                                <th scope="col">Category</th>
-                                <th scope="col">Start Date</th>
-                                <th scope="col">Finish Date</th>
-                                <th scope="col">Status</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <?php if (count($leaveArrayUser) > 0) : ?>
-                                <?php foreach ($leaveArrayUser as $key => $value) : ?>
-                                  <tr>
-                                    <td><?= $key + 1 + $offset ?></td>
-                                    <td><?= $value['name'] ?></td>
-                                    <td><?= $value['division_name'] ?></td>
-                                    <td><?= $value['reason'] ?></td>
-                                    <td><?= $value['category'] ?></td>
-                                    <td><?= date('d-M-Y H:i', strtotime($value['leaveStart'])) ?></td>
-                                    <td><?= date('d-M-Y H:i', strtotime($value['leaveFinish'])) ?></td>
-                                    <td>
-                                      <?php
-
-                                      if ($value['status'] === 'Pending') {
-                                        $statusClass = 'btn-warning'; // Status "pending"
-                                      } elseif ($value['status'] === 'Rejected') {
-                                        $statusClass = 'btn-danger'; // Status "reject"
-                                      } elseif ($value['status'] === 'Approved') {
-                                        $statusClass = 'btn-success'; // Status "approved"
-                                      }
-
-                                      ?>
-                                      <button class="btn btn-sm <?= $statusClass; ?>" disabled>
-                                        <?= $value['status'] ?>
-                                      </button>
-                                    </td>
-                                  </tr>
-                                <?php endforeach; ?>
-                              <?php else : ?>
-                                <tr>
-                                  <td colspan="8" style="text-align: center;">No records found!!!</td>
-                                </tr>
-                              <?php endif; ?>
-                            </tbody>
-                          </table>
-                        </div>
+              </div>
+              <div class="col-md-3">
+                <div class="card ml-auto">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col mt-0 text-center">
+                        <h5 class="card-title">Leave</h5>
                       </div>
+                    </div>
+                    <h1 class="mt-1 mb-3 text-center"><?= $totalLeavesUser ?></h1>
+                    <div class="mb-0 text-center">
+                      <span class="badge badge-primary-light"> <i class="mdi mdi-arrow-bottom-right"></i></span>
+                      <span class="text-muted">Total Leave This Month</span>
                     </div>
                   </div>
                 </div>
-                <div class="container-fluid p-0">
-                  <div class="row">
-                    <div class="col-12">
-                      <div class="card">
-                        <div class="card-header">
-                          <h1 class="h1 mb-3 judul_halaman"><strong>Overtime List</strong></h1>
-                        </div>
-                        <div class="table-responsive">
-                          <table class="table mb-0 mt-3">
-                            <thead>
-                              <tr>
-                                <th scope="col">No</th>
-                                <th scope="col">Full Name</th>
-                                <th scope="col">Division</th>
-                                <th scope="col">Type Overtime</th>
-                                <th scope="col">Start Date</th>
-                                <th scope="col">Finish Date</th>
-                                <th scope="col">Category</th>
-                                <th scope="col">Reason</th>
-                                <th scope="col">Status</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <?php if (count($overtimeArrayUser) > 0) : ?>
-                                <?php foreach ($overtimeArrayUser as $key => $value) : ?>
-                                  <tr>
-                                    <td><?= $key + 1 + $offset ?></td>
-                                    <td><?= $value['name'] ?></td>
-                                    <td><?= $value['division_name'] ?></td>
-                                    <td><?= $value['type'] ?></td>
-                                    <td><?= date('d-M-Y H:i', strtotime($value['overtimeStart'])) ?></td>
-                                    <td><?= date('d-M-Y H:i', strtotime($value['overtimeFinish'])) ?></td>
-                                    <td><?= $value['categoryOvertime'] ?></td>
-                                    <td><?= $value['reasonOvertime'] ?></td>
-                                    <td>
-                                      <?php
-
-                                      if ($value['statusOvertime'] === 'Pending') {
-                                        $statusClass = 'btn-warning'; // Status "pending"
-                                      } elseif ($value['statusOvertime'] === 'Rejected') {
-                                        $statusClass = 'btn-danger'; // Status "reject"
-                                      } elseif ($value['statusOvertime'] === 'Approved') {
-                                        $statusClass = 'btn-success'; // Status "approved"
-                                      }
-
-                                      ?>
-                                      <button class="btn btn-sm <?= $statusClass ?>" disabled>
-                                        <?= $value['statusOvertime'] ?>
-                                      </button>
-                                    </td>
-                                  </tr>
-                                <?php endforeach; ?>
-                              <?php else : ?>
-                                <tr>
-                                  <td colspan="8" style="text-align: center;">No records found!!!</td>
-                                </tr>
-                              <?php endif; ?>
-                            </tbody>
-                          </table>
-                        </div>
+              </div>
+              <div class="col-md-3">
+                <div class="card ml-auto">
+                  <div class="card-body">
+                    <div class="row">
+                      <div class="col mt-0 text-center">
+                        <h5 class="card-title">Attendance</h5>
                       </div>
+                    </div>
+                    <h1 class="mt-1 mb-3 text-center"><?= $totalAttendanceUser ?></h1>
+                    <div class="mb-0 text-center">
+                      <span class="badge badge-primary-light"> <i class="mdi mdi-arrow-bottom-right"></i> </span>
+                      <span class="text-muted">Total Attendance This Month</span>
                     </div>
                   </div>
                 </div>
+              </div>
             </div>
+            <div class="container-fluid p-0">
+              <div class="row">
+                <div class="col-12">
+                  <div class="card">
+                    <div class="card-header">
+                      <h1 class="h1 mb-3 judul_halaman"><strong>Attendance List</strong></h1>
+                    </div>
+                    <div class="table-responsive">
+                      <table class="table mb-0 mt-3">
+                        <thead>
+                          <tr>
+                            <th scope="col">No</th>
+                            <th scope="col">Full Name</th>
+                            <th scope="col">Division</th>
+                            <th scope="col">Reason</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">Start Date</th>
+                            <th scope="col">Finish Date</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <?php if (count($attendanceArrayUser) > 0) : ?>
+                            <?php foreach ($attendanceArrayUser as $key => $value) : ?>
+                              <tr>
+                                <td><?= $key + 1 + $offset ?></td>
+                                <td><?= $value['name'] ?></td>
+                                <td><?= $value['division_name'] ?></td>
+                                <td><?= $value['reason'] ?></td>
+                                <td><?= $value['type'] ?></td>
+                                <td><?= date('d-M-Y H:i', strtotime($value['start_date'])) ?></td>
+                                <td><?= date('d-M-Y H:i', strtotime($value['finish_date'])) ?></td>
+                              </tr>
+                            <?php endforeach; ?>
+                          <?php else : ?>
+                            <tr>
+                              <td colspan="7" style="text-align: center;">No records found!!!</td>
+                            </tr>
+                          <?php endif; ?>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="container-fluid p-0">
+              <div class="row">
+                <div class="col-12">
+                  <div class="card">
+                    <div class="card-header">
+                      <h1 class="h1 mb-3 judul_halaman"><strong>Leave List</strong></h1>
+                    </div>
+                    <div class="table-responsive">
+                      <table class="table mb-0 mt-3">
+                        <thead>
+                          <tr>
+                            <th scope="col">No</th>
+                            <th scope="col">Full Name</th>
+                            <th scope="col">Division</th>
+                            <th scope="col">Reason</th>
+                            <th scope="col">Category</th>
+                            <th scope="col">Start Date</th>
+                            <th scope="col">Finish Date</th>
+                            <th scope="col">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <?php if (count($leaveArrayUser) > 0) : ?>
+                            <?php foreach ($leaveArrayUser as $key => $value) : ?>
+                              <tr>
+                                <td><?= $key + 1 + $offset ?></td>
+                                <td><?= $value['name'] ?></td>
+                                <td><?= $value['division_name'] ?></td>
+                                <td><?= $value['reason'] ?></td>
+                                <td><?= $value['category'] ?></td>
+                                <td><?= date('d-M-Y H:i', strtotime($value['leaveStart'])) ?></td>
+                                <td><?= date('d-M-Y H:i', strtotime($value['leaveFinish'])) ?></td>
+                                <td>
+                                  <?php
+
+                                  if ($value['status'] === 'Pending') {
+                                    $statusClass = 'btn-warning'; // Status "pending"
+                                  } elseif ($value['status'] === 'Rejected') {
+                                    $statusClass = 'btn-danger'; // Status "reject"
+                                  } elseif ($value['status'] === 'Approved') {
+                                    $statusClass = 'btn-success'; // Status "approved"
+                                  }
+
+                                  ?>
+                                  <button class="btn btn-sm <?= $statusClass; ?>" disabled>
+                                    <?= $value['status'] ?>
+                                  </button>
+                                </td>
+                              </tr>
+                            <?php endforeach; ?>
+                          <?php else : ?>
+                            <tr>
+                              <td colspan="8" style="text-align: center;">No records found!!!</td>
+                            </tr>
+                          <?php endif; ?>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="container-fluid p-0">
+              <div class="row">
+                <div class="col-12">
+                  <div class="card">
+                    <div class="card-header">
+                      <h1 class="h1 mb-3 judul_halaman"><strong>Overtime List</strong></h1>
+                    </div>
+                    <div class="table-responsive">
+                      <table class="table mb-0 mt-3">
+                        <thead>
+                          <tr>
+                            <th scope="col">No</th>
+                            <th scope="col">Full Name</th>
+                            <th scope="col">Division</th>
+                            <th scope="col">Type Overtime</th>
+                            <th scope="col">Start Date</th>
+                            <th scope="col">Finish Date</th>
+                            <th scope="col">Category</th>
+                            <th scope="col">Reason</th>
+                            <th scope="col">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <?php if (count($overtimeArrayUser) > 0) : ?>
+                            <?php foreach ($overtimeArrayUser as $key => $value) : ?>
+                              <tr>
+                                <td><?= $key + 1 + $offset ?></td>
+                                <td><?= $value['name'] ?></td>
+                                <td><?= $value['division_name'] ?></td>
+                                <td><?= $value['type'] ?></td>
+                                <td><?= date('d-M-Y H:i', strtotime($value['overtimeStart'])) ?></td>
+                                <td><?= date('d-M-Y H:i', strtotime($value['overtimeFinish'])) ?></td>
+                                <td><?= $value['categoryOvertime'] ?></td>
+                                <td><?= $value['reasonOvertime'] ?></td>
+                                <td>
+                                  <?php
+
+                                  if ($value['statusOvertime'] === 'Pending') {
+                                    $statusClass = 'btn-warning'; // Status "pending"
+                                  } elseif ($value['statusOvertime'] === 'Rejected') {
+                                    $statusClass = 'btn-danger'; // Status "reject"
+                                  } elseif ($value['statusOvertime'] === 'Approved') {
+                                    $statusClass = 'btn-success'; // Status "approved"
+                                  }
+
+                                  ?>
+                                  <button class="btn btn-sm <?= $statusClass ?>" disabled>
+                                    <?= $value['statusOvertime'] ?>
+                                  </button>
+                                </td>
+                              </tr>
+                            <?php endforeach; ?>
+                          <?php else : ?>
+                            <tr>
+                              <td colspan="8" style="text-align: center;">No records found!!!</td>
+                            </tr>
+                          <?php endif; ?>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         <?php else : ?>
           <div class="col-md-12">
             <div class="alert alert-warning">
