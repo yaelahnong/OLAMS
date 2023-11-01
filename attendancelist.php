@@ -11,7 +11,7 @@ if (!isset($_SESSION["login"])) {
 $user_id = $_SESSION["user_id"];
 
 
-$limit = 5;
+$limit = 20;
 $halaman_aktif = isset($_GET['page']) ? $_GET['page'] : 1;
 $offset = ($halaman_aktif - 1) * $limit;
 
@@ -147,8 +147,8 @@ $jumlah_halaman = ceil($jumlah_semua_data / $limit);
                                                         <td><?= $value['division_name'] ?></td>
                                                         <td><?= $value['reason'] ?></td>
                                                         <td><?= $value['type'] ?></td>
-                                                        <td><?= date('d-M-Y H:i', strtotime($value['start_date'])) ?></td>
-                                                        <td><?= date('d-M-Y H:i', strtotime($value['finish_date'])) ?></td>
+                                                        <td><?= date('d-M-Y', strtotime($value['start_date'])) ?></td>
+                                                        <td><?= date('d-M-Y', strtotime($value['finish_date'])) ?></td>
 
                                                         <td>
                                                         <?php if ($userRole === 3) : // Cek apakah peran sama dengan admin ?>

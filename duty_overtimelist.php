@@ -82,6 +82,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['search']) && !empty($_G
     $show_duty_overtime .= " ( users.name LIKE '%$search%')";
 }
 
+$filter_status = "";
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['filter_status']) && !empty($_GET['filter_status'])) {
+    $filter_status = cleanValue($_GET['filter_status']);
+    $show_duty_overtime .= (strpos($show_duty_overtime, 'WHERE') === false) ? " WHERE" : " AND";
+    $show_duty_overtime .= " duty_overtimes.status = '$filter_status'";
+}
+
 $show_duty_overtime .= " ORDER BY duty_overtimes.duty_overtime_id DESC";
 
 $jumlah_semua_data = mysqli_num_rows(mysqli_query($conn, $show_duty_overtime));
@@ -160,9 +167,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                     <div class="col-md-9">
                                         <div class="d-flex align-items-center">
                                             <form action="<?= cleanValue($_SERVER['PHP_SELF']); ?>" method="get" class="d-flex">
-                                                <label for="inputSearch" class="m-2 mx-2">Search</label>
+                                                <label for="inputSearch" class="m-1 mx-1">Search</label>
                                                 <input type="text" name="search" id="inputSearch" placeholder="Enter Name" class="form-control form-control" value="<?= $search ?>">
-                                                <label for="inputRole" class="m-2 mx-2">Division</label>
+                                                <label for="inputRole" class="m-1 mx-1">Division</label>
                                                 <select name="filter_division" id="inputRole" class="form-select form-control">
                                                     <option value="">Select Division</option>
                                                     <?php foreach ($divisionOptions as $option) : ?>
@@ -172,7 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                         </option>
                                                     <?php endforeach; ?>
                                                 </select>
-                                                <label for="inputRole" class="m-2 mx-2">Project</label>
+                                                <label for="inputRole" class="m-1 mx-1">Project</label>
                                                 <select name="filter_project" id="inputRole" class="form-select form-control">
                                                     <option value="">Select Projects</option>
                                                     <?php foreach ($projectOptions as $option) : ?>
@@ -182,8 +189,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                         </option>
                                                     <?php endforeach; ?>
                                                 </select>
-                                                <button type="submit" class="btn btn-sm btn-primary mb-2 mx-2">Search</button>
-                                                <a class="btn btn-sm btn-warning mb-2 mx-2" href="<?php echo cleanValue($_SERVER['PHP_SELF']); ?>">Reset</a>
+                                                <label for="inputStatus" class="m-1 mx-1">Status</label>
+                                                <select name="filter_status" id="inputStatus" class="form-select form-control">
+                                                    <option value="">Select Status</option>
+                                                    <option value="Approved" <?= ($filter_status === 'Approved') ? 'selected' : '' ?>>Approved</option>
+                                                    <option value="Pending" <?= ($filter_status === 'Pending') ? 'selected' : '' ?>>Pending</option>
+                                                    <option value="Rejected" <?= ($filter_status === 'Rejected') ? 'selected' : '' ?>>Rejected</option>
+                                                </select>
+                                                <div class="d-flex align-items-center">
+                                                    <button type="submit" class="btn btn-sm btn-primary mb-2 mx-2">Search</button>
+                                                    <a class="btn btn-sm btn-warning mb-2 mx-2" href="<?php echo cleanValue($_SERVER['PHP_SELF']); ?>">Reset</a>
+                                                </div>
                                             </form>
                                         </div>
                                     </div>
@@ -243,15 +259,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                                         <form method="post" action="<?= cleanValue($_SERVER['PHP_SELF']); ?>" class="d-inline">
                                                                             <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
                                                                             <input type="hidden" name="duty_overtime_id" value="<?= $value['duty_overtime_id'] ?>">
-                                                                            <button type="submit" name="submit" value="Approve" class="btn btn-success btn-sm ms-2">Submit</button>
+                                                                            <?php if ($value['status'] !== 'Approved') : ?>
+                                                                                <button type="submit" name="submit" value="Approve" class="btn btn-success btn-sm ms-2" onclick="return confirm('are you sure you will approve it?')">Submit</button>
+                                                                            <?php else : ?>
+                                                                            <?php endif; ?>
                                                                         </form>
-                                                                    <?php elseif ($userRole === 1) : // User 
-                                                                    ?>
-                                                                        <?php if ($value['status'] !== 'Approved') : ?>
-                                                                            <a href="duty_overtime_delete.php?id=<?= $value['duty_overtime_id'] ?>" class="btn btn-danger btn-sm ms-2" onclick="return confirm('Apakah kamu yakin?')">Delete</a>
-                                                                        <?php endif; ?>
-                                                                        <a href="duty_overtime_detail.php?id=<?= $value['duty_overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
-                                                                        <a href="duty_overtime_update.php?id=<?= $value['duty_overtime_id'] ?>" class="btn btn-warning btn-sm ms-2">Edit</a>
                                                                     <?php elseif ($userRole === 4) : // Supervisor 
                                                                     ?>
                                                                         <a href="duty_overtime_detail.php?id=<?= $value['duty_overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
@@ -313,21 +325,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                             </td>
                                                             <td>
                                                                 <div class="d-flex">
-                                                                    <?php if ($userRole === 3) : // Admin 
+                                                                    <?php if ($userRole === 1) : // User 
                                                                     ?>
                                                                         <a href="duty_overtime_detail.php?id=<?= $value['duty_overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
-                                                                        <form method="post" action="<?= cleanValue($_SERVER['PHP_SELF']); ?>" class="d-inline">
-                                                                            <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
-                                                                            <input type="hidden" name="duty_overtime_id" value="<?= $value['duty_overtime_id'] ?>">
-                                                                            <button type="submit" name="submit" value="Approve" class="btn btn-success btn-sm ms-2">Submit</button>
-                                                                        </form>
-                                                                    <?php elseif ($userRole === 1) : // User 
-                                                                    ?>
                                                                         <?php if ($value['status'] !== 'Approved') : ?>
-                                                                            <a href="duty_overtime_delete.php?id=<?= $value['duty_overtime_id'] ?>" class="btn btn-danger btn-sm ms-2" onclick="return confirm('Apakah kamu yakin?')">Delete</a>
+                                                                            <a href="duty_overtime_update.php?id=<?= $value['duty_overtime_id'] ?>" class="btn btn-warning btn-sm ms-2" onclick="return confirm('are you sure you will Edit?')">Edit</a>
+                                                                            <a href="duty_overtime_delete.php?id=<?= $value['duty_overtime_id'] ?>" class="btn btn-danger btn-sm ms-2" onclick="return confirm('are you sure you will delete?')">Delete</a>
                                                                         <?php endif; ?>
-                                                                        <a href="duty_overtime_detail.php?id=<?= $value['duty_overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
-                                                                        <a href="duty_overtime_update.php?id=<?= $value['duty_overtime_id'] ?>" class="btn btn-warning btn-sm ms-2">Edit</a>
                                                                     <?php endif; ?>
                                                                 </div>
                                                             </td>
@@ -349,7 +353,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                             <?php if ($halaman_aktif > 1) : ?>
                                                 <?php $prevPage = $halaman_aktif - 1; ?>
                                                 <li class="page-item">
-                                                    <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $prevPage . ($search ? '&search=' . $search : '') . ($filter_division ? '&filter_division=' . $filter_division : '') . ($filter_project ? '&filter_project=' . $filter_project : ''); ?>">Previous</a>
+                                                    <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $prevPage . ($search ? '&search=' . $search : '') . ($filter_division ? '&filter_division=' . $filter_division : '') . ($filter_project ? '&filter_project=' . $filter_project : '') . ($filter_status ? '&filter_status=' . $filter_status : ''); ?>">Previous</a>
                                                 </li>
                                             <?php else : ?>
                                                 <li class="page-item disabled">
@@ -358,14 +362,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                             <?php endif; ?>
                                             <?php for ($i = 1; $i <= $jumlah_halaman; $i++) : ?>
                                                 <li class="page-item<?= $i == $halaman_aktif ? ' active' : ''; ?>">
-                                                    <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $i . ($search ? '&search=' . $search : '') . ($filter_division ? '&filter_division=' . $filter_division : '') . ($filter_project ? '&filter_project=' . $filter_project : ''); ?>"><?= $i ?></a>
+                                                    <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $i . ($search ? '&search=' . $search : '') . ($filter_division ? '&filter_division=' . $filter_division : '') . ($filter_project ? '&filter_project=' . $filter_project : '') . ($filter_status ? '&filter_sta$filter_status=' . $filter_status : ''); ?>"><?= $i ?></a>
                                                 </li>
                                             <?php endfor; ?>
 
                                             <?php if ($halaman_aktif < $jumlah_halaman) : ?>
                                                 <?php $nextPage = $halaman_aktif + 1; ?>
                                                 <li class="page-item">
-                                                    <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $nextPage . ($search ? '&search=' . $search : '') . ($filter_division ? '&filter_division=' . $filter_division : '') . ($filter_project ? '&filter_project=' . $filter_project : ''); ?>">Next</a>
+                                                    <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $nextPage . ($search ? '&search=' . $search : '') . ($filter_division ? '&filter_division=' . $filter_division : '') . ($filter_project ? '&filter_project=' . $filter_project : '') . ($filter_status ? '&filter_status=' . $filter_status : ''); ?>">Next</a>
                                                 </li>
                                             <?php else : ?>
                                                 <li class="page-item disabled">

@@ -58,77 +58,77 @@ if (isset($_GET['id'])) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-  if (isset($_POST['csrf_token']) && isCsrfTokenValid($_POST['csrf_token'])) {
-      $fullname = isset($_POST["name"]) ? cleanValue($_POST["name"]) : "";
-      $division = isset($_POST["division"]) ? cleanValue($_POST["division"]) : "";
-      $reason = isset($_POST["reason"]) ? cleanValue($_POST["reason"]) : "";
-      $category = isset($_POST["category"]) ? cleanValue($_POST["category"]) : "";
-      $startDate = isset($_POST["startDate"]) ? cleanValue($_POST["startDate"]) : "";
-      $finishDate = isset($_POST["finishDate"]) ? cleanValue($_POST["finishDate"]) : "";
+    if (isset($_POST['csrf_token']) && isCsrfTokenValid($_POST['csrf_token'])) {
+        $fullname = isset($_POST["user_id"]) ? cleanValue($_POST["user_id"]) : "";
+        $division = isset($_POST["division"]) ? cleanValue($_POST["division"]) : "";
+        $reason = isset($_POST["reason"]) ? cleanValue($_POST["reason"]) : "";
+        $category = isset($_POST["category"]) ? cleanValue($_POST["category"]) : "";
+        $startDate = isset($_POST["startDate"]) ? cleanValue($_POST["startDate"]) : "";
+        $finishDate = isset($_POST["finishDate"]) ? cleanValue($_POST["finishDate"]) : "";
 
-      if (empty($fullname)) {
-          $fullnameErr = "Full Name is required.";
-      }
-
-      if (empty($division)) {
-          $divisionErr = "Division is required.";
-      }
-
-      if (empty($reason)) {
-          $reasonErr = "Reason is required.";
-      }
-
-      if (empty($category)) {
-          $categoryErr = "Category is required.";
-      }
-
-      if (empty($startDate)) {
-          $startDateErr = "Start Date is required.";
-      } elseif (strtotime($startDate) < strtotime(date('Y-m-d'))) {
-          $startDateErr = "Start Date cannot be in the past.";
-      }
-
-      if (empty($finishDate)) {
-          $finishDateErr = "Finish Date is required.";
-      } elseif (strtotime($finishDate) < strtotime($startDate)) {
-          $finishDateErr = "Finish Date cannot be earlier than Start Date.";
-      }
-
-      if (empty($fullnameErr) && empty($divisionErr) && empty($reasonErr) && empty($categoryErr) && empty($startDateErr) && empty($finishDateErr)) {
-          // Determine whether this is an operation to add new data or to update
-          if ($leave_id === null) {
-            $insertQuery = "INSERT INTO leaves (user_id, division_id, reason, category, start_date, finish_date, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)";
-            $stmt = mysqli_prepare($conn, $insertQuery);
-            if ($stmt) {
-                $created_by = $user_id;  // Use user_id from the session
-                mysqli_stmt_bind_param($stmt, "iisssssi", $fullname, $division, $reason, $category, $startDate, $finishDate, $created_by);
-            }
-        } else {
-            $updateQuery = "UPDATE leaves SET user_id = ?, division_id = ?, reason = ?, category = ?, start_date = ?, finish_date = ?, updated_by = ? WHERE leaves_id = ?";
-            $stmt = mysqli_prepare($conn, $updateQuery);
-            if ($stmt) {
-                $updated_by = $user_id;  // Use user_id from the session
-                mysqli_stmt_bind_param($stmt, "iisssssi", $fullname, $division, $reason, $category, $startDate, $finishDate, $updated_by, $leave_id);
-            }
+        if (empty($fullname)) {
+            $fullnameErr = "Full Name is required.";
         }
 
-          if ($stmt) {
-              if (mysqli_stmt_execute($stmt)) {
-                  // Redirect to the leave list page if the operation is successful
-                  echo "<script>alert('Leave data updated successfully.')</script>";
-                  echo "<script>window.location.href = 'leavelist.php'</script>";
-                  exit();
-              } else {
-                  $error = "Failed to update data in the database: " . mysqli_error($conn);
-              }
-              mysqli_stmt_close($stmt);
-          } else {
-              $error = "Failed to create a prepared statement for data update.";
-          }
-      }
-  } else {
-      $TokenErr = "Invalid CSRF token";
-  }
+        if (empty($division)) {
+            $divisionErr = "Division is required.";
+        }
+
+        if (empty($reason)) {
+            $reasonErr = "Reason is required.";
+        }
+
+        if (empty($category)) {
+            $categoryErr = "Category is required.";
+        }
+
+        if (empty($startDate)) {
+            $startDateErr = "Start Date is required.";
+        } elseif (strtotime($startDate) < strtotime(date('Y-m-d'))) {
+            $startDateErr = "Start Date cannot be in the past.";
+        }
+
+        if (empty($finishDate)) {
+            $finishDateErr = "Finish Date is required.";
+        } elseif (strtotime($finishDate) < strtotime($startDate)) {
+            $finishDateErr = "Finish Date cannot be earlier than Start Date.";
+        }
+
+        if (empty($fullnameErr) && empty($divisionErr) && empty($reasonErr) && empty($categoryErr) && empty($startDateErr) && empty($finishDateErr)) {
+            // Determine whether this is an operation to add new data or to update
+            if ($leave_id === null) {
+                $insertQuery = "INSERT INTO leaves (user_id, division_id, reason, category, start_date, finish_date, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                $stmt = mysqli_prepare($conn, $insertQuery);
+                if ($stmt) {
+                    $created_by = $user_id;  // Use user_id from the session
+                    mysqli_stmt_bind_param($stmt, "iisssssi", $fullname, $division, $reason, $category, $startDate, $finishDate, $created_by);
+                }
+            } else {
+                $updateQuery = "UPDATE leaves SET user_id = ?, division_id = ?, reason = ?, category = ?, start_date = ?, finish_date = ?, updated_by = ? WHERE leaves_id = ?";
+                $stmt = mysqli_prepare($conn, $updateQuery);
+                if ($stmt) {
+                    $updated_by = $user_id;  // Use user_id from the session
+                    mysqli_stmt_bind_param($stmt, "iisssssi", $fullname, $division, $reason, $category, $startDate, $finishDate, $updated_by, $leave_id);
+                }
+            }
+
+            if ($stmt) {
+                if (mysqli_stmt_execute($stmt)) {
+                    // Redirect to the leave list page if the operation is successful
+                    echo "<script>alert('Leave data updated successfully.')</script>";
+                    echo "<script>window.location.href = 'leavelist.php'</script>";
+                    exit();
+                } else {
+                    $error = "Failed to update data in the database: " . mysqli_error($conn);
+                }
+                mysqli_stmt_close($stmt);
+            } else {
+                $error = "Failed to create a prepared statement for data update.";
+            }
+        }
+    } else {
+        $TokenErr = "Invalid CSRF token";
+    }
 }
 
 ?>
@@ -167,18 +167,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
 
                                         <div class="row">
-                                            <div class="mb-3 col-md-6">
-                                                <label class="form-label" for="inputName">Name</label>
-                                                <span style="color: red">*</span>
-                                                <select class="form-select" id="inputName" name="name">
-                                                    <option value="">Select Name</option>
-                                                    <?php foreach ($resultUsers as $user) { ?>
-                                                        <option value="<?= $user['user_id'] ?>" <?= ($user['user_id'] == $fullname) ? 'selected' : '' ?>>
-                                                            <?= $user['name'] ?>
-                                                        </option>
-                                                    <?php } ?>
-                                                </select>
-                                                <span class="text-danger"><?php echo $fullnameErr; ?></span>
+                                            <div class="mb-3 col-md-6 d-none">
+                                                <label class="form-label" for="inputUser">User</label>
+                                                <input type="text" name="user_id" id="inputUser" class="form-control" value="<?= $_SESSION["user_id"]; ?>" readonly>
+                                                <span class="error" style="color: red;"> <?= $fullnameErr; ?> </span>
                                             </div>
                                             <div class="mb-3 col-md-6">
                                                 <label class="form-label" for="inputDivision">Division</label>
@@ -192,14 +184,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                                     <?php } ?>
                                                 </select>
                                                 <span class="text-danger"><?php echo $divisionErr; ?></span>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="mb-3 col-md-6">
-                                                <label class="form-label" for="inputReason">Reason</label>
-                                                <span style="color: red">*</span>
-                                                <textarea class="form-control" id="inputReason" name="reason" rows="4"><?= $reason ?></textarea>
-                                                <span class="text-danger"><?php echo $reasonErr; ?></span>
                                             </div>
                                             <div class="mb-3 col-md-6">
                                                 <label class="form-label" for="inputCategory">Category</label>
@@ -220,6 +204,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                                 <span style="color: red">*</span>
                                                 <input type="datetime-local" class="form-control" id="inputFinishDate" name="finishDate" value="<?= $finishDate ?>">
                                                 <span class="text-danger"><?php echo $finishDateErr; ?></span>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="mb-3 col-md-6">
+                                                <label class="form-label" for="inputReason">Reason</label>
+                                                <span style="color: red">*</span>
+                                                <textarea class="form-control" id="inputReason" name="reason" rows="4"><?= $reason ?></textarea>
+                                                <span class="text-danger"><?php echo $reasonErr; ?></span>
                                             </div>
                                         </div>
                                         <div class="row">

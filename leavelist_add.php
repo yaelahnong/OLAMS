@@ -28,7 +28,7 @@ $fullname = $division = $reason = $category = $startDate = $finishDate = NULL;
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
   if (isset($_POST['csrf_token']) && isCsrfTokenValid($_POST['csrf_token'])) {
-    $fullname = isset($_POST["name"]) ? cleanValue($_POST["name"]) : NULL;
+    $fullname = isset($_POST["user_id"]) ? cleanValue($_POST["user_id"]) : NULL;
     $division = isset($_POST["division"]) ? cleanValue($_POST["division"]) : NULL;
     $reason = isset($_POST["reason"]) ? cleanValue($_POST["reason"]) : NULL;
     $category = isset($_POST["category"]) ? cleanValue($_POST["category"]) : NULL;
@@ -36,19 +36,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $finishDate = isset($_POST["finishDate"]) ? cleanValue($_POST["finishDate"]) : NULL;
 
     // Validasi data yang diterima dari formulir
-    if (empty($_POST["name"])) {
+    if (empty($fullname)) {
       $fullnameErr = "Full Name is required.";
     }
 
-    if (empty($_POST["division"])) {
+    if (empty($division)) {
       $divisionErr = "Division is required.";
     }
 
-    if (empty($_POST["reason"])) {
+    if (empty($reason)) {
       $reasonErr = "Reason is required.";
     }
 
-    if (empty($_POST["category"])) {
+    if (empty($category)) {
       $categoryErr = "Category is required.";
     }
 
@@ -86,10 +86,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         // Lanjutkan dengan penyisipan data
         $insertQuery = "INSERT INTO leaves (user_id, division_id, reason, category, start_date, finish_date, status, created_by) VALUES (?, ?, ?, ?, ?, ?, 'Pending', ?)";
         $insertStmt = mysqli_prepare($conn, $insertQuery);
-
-        if ($insertStmt) {
-          mysqli_stmt_bind_param($insertStmt, "iissssi", $fullname, $division, $reason, $category, $startDate, $finishDate, $user_id);
-        }
 
         if ($insertStmt) {
           mysqli_stmt_bind_param($insertStmt, "iissssi", $fullname, $division, $reason, $category, $startDate, $finishDate, $user_id);
@@ -151,16 +147,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                   <form method="post" action="<?= cleanValue($_SERVER['PHP_SELF']); ?>">
                     <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
                     <div class="row">
-                      <div class="mb-3 col-md-6">
-                        <label class="form-label" for="inputName">Name</label>
-                        <span style="color: red">*</span>
-                        <select class="form-select" id="inputName" name="name">
-                          <option value="">Select Name</option>
-                          <?php foreach ($resultUsers as $key => $user) { ?>
-                            <option value="<?= $user['user_id'] ?>"><?= $user['name'] ?></option>
-                          <?php } ?>
-                        </select>
-                        <span class="text-danger"><?php echo $fullnameErr; ?></span>
+                      <div class="mb-3 col-md-6 d-none">
+                        <label class="form-label" for="inputUser">User</label>
+                        <input type="text" name="user_id" id="inputUser" class="form-control" value="<?= $_SESSION["user_id"]; ?>" readonly>
+                        <span class="error" style="color: red;"> <?= $fullnameErr; ?> </span>
                       </div>
                       <div class="mb-3 col-md-6">
                         <label class="form-label" for="inputDivision">Division</label>
@@ -172,14 +162,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                           <?php } ?>
                         </select>
                         <span class="text-danger"><?php echo $divisionErr; ?></span>
-                      </div>
-                    </div>
-                    <div class="row">
-                      <div class="mb-3 col-md-6">
-                        <label class="form-label" for="inputReason">Reason</label>
-                        <span style="color: red">*</span>
-                        <textarea class="form-control" id="inputReason" name="reason" rows="4"></textarea>
-                        <span class="text-danger"><?php echo $reasonErr; ?></span>
                       </div>
                       <div class="mb-3 col-md-6">
                         <label class="form-label" for="inputCategory">Category</label>
@@ -206,6 +188,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         <span style="color: red">*</span>
                         <input type="text" class="form-control" id="datepickerFinish" name="finishDate">
                         <span class="text-danger"><?php echo $finishDateErr; ?></span>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="mb-3 col-md-6">
+                        <label class="form-label" for="inputReason">Reason</label>
+                        <span style="color: red">*</span>
+                        <textarea class="form-control" id="inputReason" name="reason" rows="4"></textarea>
+                        <span class="text-danger"><?php echo $reasonErr; ?></span>
                       </div>
                     </div>
                     <div class="row">

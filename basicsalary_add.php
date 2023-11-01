@@ -33,6 +33,30 @@ if ($stmt) {
   die("Failed to create a prepared statement: " . mysqli_error($conn));
 }
 
+// Query SQL untuk mengambil daftar pengguna yang belum ada dalam m_basic_salaries
+$queryUsers = "
+  SELECT users.user_id, users.name, users.role_id
+  FROM users
+  LEFT JOIN m_basic_salaries ON users.user_id = m_basic_salaries.user_id
+  WHERE users.role_id = 1 AND m_basic_salaries.user_id IS NULL
+";
+$stmt = mysqli_prepare($conn, $queryUsers);
+
+if ($stmt) {
+  mysqli_stmt_execute($stmt);
+  mysqli_stmt_bind_result($stmt, $user_id, $name, $user_role_id);
+
+  while (mysqli_stmt_fetch($stmt)) {
+    $users[] = array("user_id" => $user_id, "name" => $name, "role_id" => $user_role_id);
+  }
+
+  mysqli_stmt_close($stmt);
+} else {
+  die("Failed to create a prepared statement: " . mysqli_error($conn));
+}
+
+
+
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
   if (isset($_POST['csrf_token']) && isCsrfTokenValid($_POST['csrf_token'])) {
@@ -135,12 +159,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
                     <div class="row">
                       <div class="mb-3 col-md-6">
-                        <label class="form-label" for="inputUserId">Fullname</label>
+                        <label class="form-label" for="inputUserId">User</label>
                         <span style="color: red">*</span><br>
                         <select class="form-select" name="user_id" id="inputUserId">
-                          <?php foreach ($users as $user) { ?>
-                            <option value="<?= $user['user_id']; ?>"><?= $user['name']; ?></option>
-                          <?php } ?>
+                          <?php foreach ($users as $user) : ?>
+                            <?php if ($user["role_id"] == 1 && $count == 0) : ?>
+                              <option value="<?= $user['user_id']; ?>"><?= $user['name']; ?></option>
+                            <?php endif; ?>
+                          <?php endforeach; ?>
                         </select>
                       </div>
                     </div>
@@ -191,7 +217,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     return formattedValue;
   }
 </script>
-
   <?php include "script.inc.php"; ?>
 </body>
 

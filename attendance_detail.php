@@ -85,11 +85,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id']) && is_numeric($_G
                                         </tr>
                                         <tr>
                                             <td><strong>Start Date:</strong></td>
-                                            <td><?= date('d-M-Y H:i', strtotime($attendanceDetails['start_date'])) ?></td>
+                                            <td><?= date('d-M-Y', strtotime($attendanceDetails['start_date'])) ?></td>
                                         </tr>
                                         <tr>
                                             <td><strong>Finish Date:</strong></td>
-                                            <td><?= date('d-M-Y H:i', strtotime($attendanceDetails['finish_date'])) ?></td>
+                                            <td><?= date('d-M-Y', strtotime($attendanceDetails['finish_date'])) ?></td>
                                         </tr>
                                     </table>
                                 </div>
