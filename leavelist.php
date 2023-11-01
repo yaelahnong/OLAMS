@@ -260,7 +260,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                       <thead>
                         <tr>
                           <th scope="col">No</th>
-                          <th scope="col" style="min-width : 200px;">Full Name</th>
                           <th scope="col" style="min-width : 200px;">Division</th>
                           <th scope="col" style="min-width : 200px;">Reason</th>
                           <th scope="col" style="min-width : 210px;">Category</th>
@@ -276,7 +275,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                           <?php foreach ($leaveArray as $key => $value) : ?>
                             <tr>
                               <td><?= $key + 1 + $offset ?></td>
-                              <td><?= $value['name'] ?></td>
                               <td><?= $value['division_name'] ?></td>
                               <td><?= $value['reason'] ?></td>
                               <td><?= $value['category'] ?></td>

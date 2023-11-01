@@ -8,3 +8,6 @@
 <link rel="stylesheet" href="styles/custom.css">
 <link rel="shortcut icon" href="images/icons/favicon.ico" type="image/x-icon">
 <link rel="icon" href="images/icons/favicon.ico" type="image/x-icon">
+
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/smoothness/jquery-ui.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.6.1/fullcalendar.min.css">

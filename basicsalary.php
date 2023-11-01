@@ -123,7 +123,7 @@ $data = mysqli_fetch_all($result2, MYSQLI_ASSOC);
                           <tr>
                             <td><?= $key + 1 + $offset; ?></td> <!-- Menggunakan nomor baris (row number) -->
                             <td><?= $row['name']; ?></td>
-                            <td><?= number_format($row['total_basic_salary']); ?></td>
+                            <td><?= "Rp." . number_format($row['total_basic_salary']); ?></td>
                             <td>
                               <!-- Link to Update and Delete Basic Salary -->
                               <a href="basicsalary_update.php?id=<?= $row['basic_salary_id']; ?>" class="btn btn-warning btn-sm">Edit</a>
