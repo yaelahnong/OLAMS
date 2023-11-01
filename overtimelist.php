@@ -26,7 +26,9 @@ overtimes.start_date,
 overtimes.finish_date,
 overtimes.status,
 overtimes.submitted_by_admin,
-overtimes.checked_by_leader
+overtimes.checked_by_leader,
+overtimes.status_updated_by,
+overtimes.effective_time
 FROM overtimes
 LEFT JOIN users ON overtimes.user_id = users.user_id
 LEFT JOIN m_projects ON overtimes.project_id = m_projects.project_id
@@ -84,6 +86,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['filter_status']) && !em
     $show_overtime .= " overtimes.status = '$filter_status'";
 }
 
+$show_overtime .= " ORDER BY overtimes.overtime_id DESC";
+
+$jumlah_semua_data = mysqli_num_rows(mysqli_query($conn, $show_overtime));
+$show_overtime .= " LIMIT $limit OFFSET $offset ";
+$data = mysqli_query($conn, $show_overtime);
+$karyawanArray = mysqli_fetch_all($data, MYSQLI_ASSOC);
+$jumlah_halaman = ceil($jumlah_semua_data / $limit);
+
 if ($user_role == 4) {
     $show_overtime .= " WHERE (overtimes.status = 'Pending' OR overtimes.status = 'Approved' OR overtimes.status = 'Rejected')";
     $show_overtime .= " AND (overtimes.submitted_by_admin IS NOT NULL AND overtimes.sent_by_admin IS NOT NULL AND overtimes.checked_by_leader IS NOT NULL AND overtimes.checked_by_leader_at IS NOT NULL) OR 
@@ -101,13 +111,8 @@ if ($user_role == 4) {
     $show_overtime .= " WHERE overtimes.user_id = $user_id";
 }
 
-$show_overtime .= " ORDER BY overtimes.overtime_id DESC";
 
-$jumlah_semua_data = mysqli_num_rows(mysqli_query($conn, $show_overtime));
-$show_overtime .= " LIMIT $limit OFFSET $offset ";
-$data = mysqli_query($conn, $show_overtime);
-$karyawanArray = mysqli_fetch_all($data, MYSQLI_ASSOC);
-$jumlah_halaman = ceil($jumlah_semua_data / $limit);
+
 
 // var_dump($show_overtime);
 // exit;
@@ -140,7 +145,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                     $newStatus = ($_POST['submit'] === "Reject") ? 'Rejected' : 'Approved';
                     if ($type === "Urgent") {
                         $updateQuery = "UPDATE overtimes SET status = ?, status_updated_by = ?, status_updated_at = NOW() WHERE overtime_id = ?";
-                    } elseif ($type === "Normal") {
+                    } elseif ($type === "Normal" && $_POST['submit'] === "Reject") {
                         $updateQuery = "UPDATE overtimes SET status = ?, status_updated_by = ?, status_updated_at = NOW() WHERE overtime_id = ?";
                     } else {
                         $updateQuery = "UPDATE overtimes SET checked_by_leader_at = NOW(), checked_by_leader = ?, updated_by = ? WHERE overtime_id = ?";
@@ -153,6 +158,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                     echo "<script>window.location.href = 'overtimelist.php'</script>";
                     exit();
                 }
+                // var_dump($updateQuery);
+                // exit;
                 $updateStatement = mysqli_prepare($conn, $updateQuery);
 
                 if ($updateStatement) {
@@ -160,6 +167,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                         mysqli_stmt_bind_param($updateStatement, "sii", $newStatus, $user_id, $overtimeId);
                     } elseif ($user_role === 2 && $type === "Urgent") {
                         mysqli_stmt_bind_param($updateStatement, "sii", $newStatus, $user_id, $overtimeId);
+                    } elseif ($user_role === 2 && $type === "Normal") {
+                        mysqli_stmt_bind_param($updateStatement, "iii", $user_id, $user_id, $overtimeId);
                     } else {
                         mysqli_stmt_bind_param($updateStatement, "iii", $user_id, $user_id, $overtimeId);
                     }
@@ -271,6 +280,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                     <th scope="col" style="min-width : 200px;">Finish Date</th>
                                                     <th scope="col">Status</th>
                                                     <th scope="col" style="min-width : 210px;">Action</th>
+                                                    <?php if ($user_role === 2) : ?>
+                                                        <th scope="col" style="min-width : 210px;">Status Leader</th>
+                                                    <?php elseif ($user_role === 3 || $user_role === 4) : ?>
+                                                        <th scope="col" style="min-width : 210px;">Status Leader</th>
+                                                        <th scope="col" style="min-width : 210px;">Status Admin</th>
+                                                    <?php endif; ?>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -339,6 +354,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                                     <?php endif; ?>
                                                                 </div>
                                                             </td>
+                                                            <?php
+                                                                if ($value['status'] === 'Pending') {
+                                                                    $statusClass = 'badge bg-warning'; // Status "pending"
+                                                                } elseif ($value['status'] === 'Rejected') {
+                                                                    $statusClass = 'badge bg-danger'; // Status "reject"
+                                                                } elseif ($value['status'] === 'Approved') {
+                                                                    $statusClass = 'badge bg-success'; // Status "approved"
+                                                                }
+                                                                ?>
+                                                            <?php if ($user_role === 2) : //Leader ?>
+                                                                <?php if ($value['type'] == 'Urgent') : ?>
+                                                                    <td><button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['status_updated_by'] ? "{$value['status']} to leader" : "-" ?></button></td>
+                                                                <?php else : ?>
+                                                                    <td><button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['checked_by_leader'] ? "{$value['status']} to admin" : "-" ?></button></td>
+                                                                <?php endif; ?>
+                                                                <?php elseif ($user_role === 3) : //Admin ?>
+                                                                    <?php if ($value['type'] == 'Urgent') : ?>
+                                                                    <td><button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['status_updated_by'] ? "{$value['status']} to leader" : "-" ?></button></td>
+                                                                <?php else : ?>
+                                                                    <td><button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['checked_by_leader'] ? "{$value['status']} to admin" : "-" ?></button></td>
+                                                                <?php endif; ?>
+                                                                <td>
+                                                                    <button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['submitted_by_admin'] ? "{$value['status']} to supervisor" : "{$value['status']} to supervisor"?></button>
+                                                                </td>
+                                                                <?php elseif ($user_role === 4) : //Admin ?>
+                                                                    <?php if ($value['type'] == 'Urgent') : ?>
+                                                                    <td><button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['status_updated_by'] ? "{$value['status']} to leader" : "-" ?></button></td>
+                                                                <?php else : ?>
+                                                                    <td><button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['checked_by_leader'] ? "{$value['status']} to admin" : "-" ?></button></td>
+                                                                <?php endif; ?>
+                                                                <td>
+                                                                    <button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['submitted_by_admin'] ? "{$value['status']} to supervisor" : "{$value['status']} to admin"?></button>
+                                                                </td>
+                                                            <?php endif; ?>
                                                         </tr>
                                                     <?php endforeach; ?>
                                                 <?php else : ?>
@@ -364,6 +413,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                     <th scope="col" style="min-width : 200px;">Finish Date</th>
                                                     <th scope="col">Status</th>
                                                     <th scope="col" style="min-width : 210px;">Action</th>
+                                                    <th scope="col" style="min-width : 210px;">Status Leader</th>
+                                                    <th scope="col" style="min-width : 210px;">Status Admin</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -395,17 +446,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                                 <div class="d-flex">
                                                                     <?php if ($user_role === 1) : // Cek apakah peran sama dengan user
                                                                     ?>
-                                                                        <?php if ($value['status'] !== 'Approved' && $value['status'] !== 'Rejected') : ?>
+                                                                        <?php if ($value['status'] == 'Pending') : ?>
                                                                             <a href="overtime_delete.php?id=<?= $value['overtime_id']; ?>" class="btn btn-danger btn-sm ms-2" onclick="return confirm('Are you sure?')">Delete</a>
+                                                                        <?php else : ?>
                                                                         <?php endif; ?>
-                                                                        <?php if ($value['status'] !== 'Approved') : ?>
+                                                                        <?php if ($value['status'] == 'Pending') : ?>
                                                                             <a href="overtime_update.php?id=<?= $value['overtime_id'] ?>" class="btn btn-warning btn-sm ms-2" onclick="return confirm('are you sure you will Edit it?')">Edit</a>
-                                                                        <?php elseif ($value['status'] == 'Approved') : ?>
+                                                                        <?php elseif ($value['status'] == 'Approved' && $value['effective_time'] == NULL) : ?>
                                                                             <a href="overtime_update.php?id=<?= $value['overtime_id'] ?>" class="btn btn-warning btn-sm ms-2" onclick="return confirm(`are you sure you'll be able to complete it?`)">Compliting</a>
+                                                                        <?php else : ?>
                                                                         <?php endif; ?>
                                                                         <a href="overtime_detail.php?id=<?= $value['overtime_id'] ?>" class="btn btn-primary btn-sm ms-2">Detail</a>
                                                                     <?php endif; ?>
                                                                 </div>
+                                                            </td>
+                                                            <?php
+                                                                if ($value['status'] === 'Pending') {
+                                                                    $statusClass = 'badge bg-warning'; // Status "pending"
+                                                                } elseif ($value['status'] === 'Rejected') {
+                                                                    $statusClass = 'badge bg-danger'; // Status "reject"
+                                                                } elseif ($value['status'] === 'Approved') {
+                                                                    $statusClass = 'badge bg-success'; // Status "approved"
+                                                                }
+                                                                ?>
+                                                            <?php if ($value['type'] == 'Urgent') : ?>
+                                                                <td><button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['status_updated_by'] ? "{$value['status']} to leader" : "-" ?></button></td>
+                                                            <?php else : ?>
+                                                                <td><button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['checked_by_leader'] ? "{$value['status']} to admin" : "-" ?></button></td>
+                                                            <?php endif; ?>
+                                                            <td>
+                                                                <button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['submitted_by_admin'] ? "{$value['status']} to Supervisor" : '-' ?></button>
                                                             </td>
                                                         </tr>
                                                     <?php endforeach; ?>
