@@ -82,9 +82,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($usernameSudahAda) {
       echo "<script>alert('Username has been used')</script>";
     }
-    
+
     if (empty($fullnameErr) && empty($usernameErr) && empty($emailErr) && empty($passwordErr) && empty($roleErr) && !$emailSudahAda && !$usernameSudahAda) {
-      
+
       $queryInsert = "INSERT INTO users (name, username, email, password, role_id, created_by) VALUES (?, ?, ?, ?, ?, ?)";
       $stmt = mysqli_prepare($conn, $queryInsert);
       mysqli_stmt_bind_param(
@@ -172,7 +172,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                     <div class="row">
                       <div class="col">
-                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <?php if ($_SERVER['REQUEST_METHOD'] == 'POST') : ?>
+                          <button type="button" class="btn btn-primary">Submit</button>
+                        <?php else : ?>
+                          <button type="submit" class="btn btn-primary" onclick="return confirm('Are you sure you want to add it?')">Submit</button>
+                        <?php endif; ?>
                         <a href="userlist.php" class="btn btn-light text-dark text-decoration-none">Cancel</a>
                       </div>
                     </div>

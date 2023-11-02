@@ -135,12 +135,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         <span style="color: red">*</span><br>
                         <select class="form-select" name="user_id" id="inputUserId" disabled>
                           <?php foreach ($users as $user) : ?>
-                            <?php if ($user["role_id"] == 1): ?>
-                            <option value="<?= $user['user_id']; ?>" <?= ($user['user_id'] == $user_id) ? "selected" : "" ?>>
-                              <?= $user['name']; ?>
-                            </option>
+                            <?php if ($user["role_id"] == 1) : ?>
+                              <option value="<?= $user['user_id']; ?>" <?= ($user['user_id'] == $user_id) ? "selected" : "" ?>>
+                                <?= $user['name']; ?>
+                              </option>
                             <?php endif; ?>
-                            <?php endforeach; ?>
+                          <?php endforeach; ?>
                         </select>
                       </div>
                     </div>
@@ -153,7 +153,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     </div>
                     <div class="row">
                       <div class="col">
-                        <button type="submit" class="btn btn-primary">Update</button>
+                        <?php if ($_SERVER['REQUEST_METHOD'] == 'POST') : ?>
+                          <button type="button" name="submit" class="btn btn-primary">Update</button>
+                        <?php else : ?>
+                          <button type="submit" class="btn btn-primary" onclick="return confirm('are you sure you will update?')">Update</button>
+                        <?php endif; ?>
                         <a href="basicsalary.php" class="btn btn-light text-dark text-decoration-none">Cancel</a>
                       </div>
                     </div>

@@ -118,7 +118,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                             <button type="button" class="btn-close align-items-end" data-bs-dismiss="alert" aria-label="Close"></button>
                                         </div>
                                     <?php } ?>
-                                    <form method="post" action="<?= cleanValue($_SERVER['PHP_SELF']."?id=$division_id"); ?>">
+                                    <form method="post" action="<?= cleanValue($_SERVER['PHP_SELF'] . "?id=$division_id"); ?>">
                                         <div class="row">
                                             <div class="mb-3 col-md-6">
                                                 <label class="form-label" for="inputDivisionName">Division Name</label>
@@ -127,7 +127,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                         </div>
                                         <div class="row">
                                             <div class="col">
-                                                <button type="submit" class="btn btn-primary">Submit</button>
+                                                <?php if ($_SERVER['REQUEST_METHOD'] == 'POST') : ?>
+                                                    <button type="button" name="update" class="btn btn-primary">Update</button>
+                                                <?php else : ?>
+                                                    <button type="submit" name="update" class="btn btn-primary" onclick="return confirm('are you sure you will update?')">Update</button>
+                                                <?php endif; ?>
                                                 <a href="divisionlist.php" class="btn btn-light text-dark text-decoration-none">Cancel</a>
                                             </div>
                                         </div>

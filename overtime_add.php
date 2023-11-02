@@ -40,7 +40,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $reason = isset($_POST["reason"]) ? cleanValue($_POST["reason"]) : NULL;
         $start_date = isset($_POST["start_date"]) ? cleanValue($_POST["start_date"]) : NULL;
         $finish_date = isset($_POST["finish_date"]) ? cleanValue($_POST["finish_date"]) : NULL;
-        // $effective_time = isset($_POST["effective_time"]) ? cleanValue($_POST["effective_time"]) : NULL;
 
         if (empty($fullname)) {
             $fullnameErr = "Full Name is required";
@@ -198,7 +197,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         </div>
                                         <div class="row">
                                             <div class="col">
-                                                <button type="submit" class="btn btn-primary">Submit</button>
+                                                <?php if ($_SERVER['REQUEST_METHOD'] == 'POST') : ?>
+                                                    <button type="button" class="btn btn-primary">Submit</button>
+                                                <?php else : ?>
+                                                    <button type="submit" class="btn btn-primary" onclick="return confirm('Are you sure you want to add it?')">Submit</button>
+                                                <?php endif; ?>
                                                 <a href="overtimelist.php" class="btn btn-light text-dark text-decoration-none">Cancel</a>
                                             </div>
                                         </div>

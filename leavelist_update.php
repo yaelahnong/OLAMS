@@ -216,7 +216,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                         </div>
                                         <div class="row">
                                             <div class="col">
-                                                <button type="submit" class="btn btn-primary">Update</button>
+                                                <?php if ($_SERVER['REQUEST_METHOD'] == 'POST') : ?>
+                                                    <button type="button" class="btn btn-primary">Update</button>
+                                                    <?php else : ?>
+                                                        <button type="submit" class="btn btn-primary" onclick="return confirm('are you sure you will update?')">Update</button>
+                                                <?php endif; ?>
                                                 <a href="leavelist.php" class="btn btn-light text-dark text-decoration-none">Cancel</a>
                                             </div>
                                         </div>
