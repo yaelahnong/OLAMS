@@ -35,22 +35,23 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           mysqli_stmt_execute($checkStmt);
           $checkResult = mysqli_stmt_get_result($checkStmt);
 
+
+                        if ($stmt) {
+                            mysqli_stmt_bind_param($stmt, "ss", $divisionName, $user_id);
+                            if (mysqli_stmt_execute($stmt)) {
+                                echo "<script>alert('Data added successfully.')</script>";
+                                echo "<script>window.location.href = 'divisionlist.php'</script>";
+                                exit();
+                            } else {
+                                $error = "Failed to save the data.";
+                            }
+
           if (mysqli_num_rows($checkResult) > 0) {
             $error = "Division with the same name already exists.";
           } else {
             // Jika tidak ada yang sama, baru lakukan penyimpanan
             $insertQuery = "INSERT INTO m_divisions (division_name, created_by) VALUES (?, ?)";
             $stmt = mysqli_prepare($conn, $insertQuery);
-
-            if ($stmt) {
-              mysqli_stmt_bind_param($stmt, "ss", $divisionName, $user_id);
-              if (mysqli_stmt_execute($stmt)) {
-                echo "<script>alert('Division data berhasil ditambahkan.')</script>";
-                echo "<script>window.location.href = 'divisionlist.php'</script>";
-                exit();
-              } else {
-                $error = "Failed to save the data.";
-              }
 
               mysqli_stmt_close($stmt);
             } else {

@@ -44,7 +44,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         if ($stmt) {
                             mysqli_stmt_bind_param($stmt, "ss", $projectName, $user_id);
                             if (mysqli_stmt_execute($stmt)) {
-                                echo "<script>alert('Data project berhasil ditambahkan.')</script>";
+                              echo "<script>alert('Data added successfully');</script>";
                                 echo "<script>window.location.href = 'projectlist.php'</script>";
                                 exit();
                             } else {
@@ -82,6 +82,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 <head>
     <?php include "head.inc.php"; ?>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <title>OLAMS - Add project</title>
 </head>
 
@@ -136,6 +137,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <?php include "components/footer.inc.php"; ?>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="sweetalert2.all.min.js"></script>
+    <script>
+    function showSuccessAlert() {
+        Swal.fire({
+            title: 'Good job!',
+            text: 'Project added successfully!',
+            icon: 'success'
+        }).then(function() {
+            window.location.href = 'projectlist.php';
+        });
+    }
+</script>
     <?php include "script.inc.php"; ?>
 </body>
 

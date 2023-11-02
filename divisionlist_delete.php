@@ -25,7 +25,7 @@ if (isset($_GET['id']) && isset($_SESSION['user_id'])) {
     mysqli_stmt_bind_param($stmt, "i", $division_id);
 
     if (mysqli_stmt_execute($stmt)) {
-        echo "<script>alert('Division data delete successfully.')</script>";
+        echo "<script>alert('Data deleted successfully.')</script>";
         echo "<script>window.location.href = 'divisionlist.php'</script>";
     } else {
         echo "Failed to delete the division data.";

@@ -182,16 +182,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                         </div>
                                         <div class="row">
                                             <div class="mb-3 col-md-6">
-                                                <label class="form-label" for="datepickerStart">Start Date</label>
+                                                <label class="form-label" for="inputStartDate">Start Date</label>
                                                 <span style="color: red">*</span>
-                                                <input type="text" class="form-control datepicker" id="datepickerStart"
+                                                <input type="date" class="form-control datepicker" id="inputStartDate"
                                                     name="startDate">
                                                 <span class="text-danger"><?php echo $startDateErr; ?></span>
                                             </div>
                                             <div class="mb-3 col-md-6">
-                                                <label class="form-label" for="datepickerFinish">Finish Date</label>
+                                                <label class="form-label" for="inputFinishDate">Finish Date</label>
                                                 <span style="color: red">*</span>
-                                                <input type="text" class="form-control" id="datepickerFinish"
+                                                <input type="date" class="form-control" id="inputFinishDate"
                                                     name="finishDate">
                                                 <span class="text-danger"><?php echo $finishDateErr; ?></span>
                                             </div>

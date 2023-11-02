@@ -490,12 +490,52 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
                 </div>
               </div>
             </div>
-            <div class="content px-0">
-              <div class="card">
-                <div class="container-fluid p-0">
-                  <div id='calendar'></div>
+            <div class="">
+            <div class="container-fluid p-0">
+              <div class="row">
+                <div class="col-12">
+                  <div class="card">
+                    <div class="card-header">
+                      <h1 class="h1 mb-3 judul_halaman"><strong>Attendance List</strong></h1>
+                    </div>
+                    <div class="table-responsive">
+                      <table class="table mb-0 mt-3">
+                        <thead>
+                          <tr>
+                            <th scope="col">No</th>
+                            <th scope="col">Full Name</th>
+                            <th scope="col">Division</th>
+                            <th scope="col">Reason</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">Start Date</th>
+                            <th scope="col">Finish Date</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <?php if (count($attendanceArray) > 0) : ?>
+                            <?php foreach ($attendanceArray as $key => $value) : ?>
+                              <tr>
+                                <td><?= $key + 1 + $offset ?></td>
+                                <td><?= $value['name'] ?></td>
+                                <td><?= $value['division_name'] ?></td>
+                                <td><?= $value['reason'] ?></td>
+                                <td><?= $value['type'] ?></td>
+                                <td><?= date('d-M-Y H:i', strtotime($value['start_date'])) ?></td>
+                                <td><?= date('d-M-Y H:i', strtotime($value['finish_date'])) ?></td>
+                              </tr>
+                            <?php endforeach; ?>
+                          <?php else : ?>
+                            <tr>
+                              <td colspan="7" style="text-align: center;">No records found!!!</td>
+                            </tr>
+                          <?php endif; ?>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
                 </div>
               </div>
+            </div>
             </div>
             <div class="">
               <div class="container-fluid p-0">

@@ -56,6 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['search']) && !empty($_G
   $show_divisi .= " WHERE division_name LIKE ?";
   $parameters[] = "%" . $search_divisi . "%";
 }
+$show_divisi .= " ORDER BY division_id DESC";
 
 $show_divisi .= " LIMIT $limit OFFSET $offset ";
 $jumlah_halaman = ceil($jumlah_semua_data / $limit);
@@ -72,7 +73,10 @@ if (!empty($parameters)) {
 mysqli_stmt_execute($stmt2);
 $result2 = mysqli_stmt_get_result($stmt2);
 $data = mysqli_fetch_all($result2, MYSQLI_ASSOC);
+
+
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -126,7 +130,7 @@ $data = mysqli_fetch_all($result2, MYSQLI_ASSOC);
                             <td><?= $row['division_name']; ?></td>
                             <td>
                               <a href="divisionlist_update.php?id=<?= $row['division_id']; ?>" class="btn btn-warning btn-sm">Edit</a>
-                              <a href="divisionlist_delete.php?id=<?= $row['division_id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this data?')">Delete</a>
+                              <a href="divisionlist_delete.php?id=<?= $row['division_id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a>
                             </td>
                           </tr>
                         <?php endforeach; ?>

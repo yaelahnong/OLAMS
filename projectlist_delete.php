@@ -26,7 +26,7 @@ if (isset($_GET['id']) && isset($_SESSION['user_id'])) {
     mysqli_stmt_bind_param($stmt, "sii", $sekarang, $user_id, $project_id);
 
     if (mysqli_stmt_execute($stmt)) {
-        echo "<script>alert('Data project berhasil dihapus.')</script>";
+        echo "<script>alert('Data deleted successfully.')</script>";
         echo "<script>window.location.href = 'projectlist.php'</script>";
     } else {
         echo "Gagal menandai proyek sebagai dihapus.";
