@@ -433,6 +433,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                                 } elseif ($value['status'] === 'Approved') {
                                                                     $statusClass = 'badge bg-success'; // Status "approved"
                                                                 }
+
                                                                 ?>
                                                                 <button class="btn btn-sm text-white <?= $statusClass ?>" disabled>
                                                                     <?= $value['status'] ?>

@@ -143,7 +143,7 @@ $jumlah_halaman = ceil($jumlah_semua_data / $limit);
                                                 <?php foreach ($karyawanArray as $key => $value) : ?>
                                                     <tr>
                                                         <td><?= $key + 1 + $offset ?></td>
-                                                        <td><?= $value['name'] ?></td>
+                                                        <td><?= $value['name'] ?></td>  
                                                         <td><?= $value['division_name'] ?></td>
                                                         <td><?= $value['reason'] ?></td>
                                                         <td><?= $value['type'] ?></td>

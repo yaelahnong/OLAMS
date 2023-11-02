@@ -290,7 +290,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                             <thead>
                                                 <tr>
                                                     <th scope="col">No</th>
-                                                    <th scope="col" style="min-width : 200px;">Full Name</th>
                                                     <th scope="col" style="min-width : 200px;">Project</th>
                                                     <th scope="col" style="min-width : 200px;">Division</th>
                                                     <th scope="col">Lead Count</th>
@@ -305,7 +304,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                     <?php foreach ($karyawanArray as $key => $value) : ?>
                                                         <tr>
                                                             <td><?= $key + 1 + $offset ?></td>
-                                                            <td><?= $value['name'] ?></td>
                                                             <td><?= $value['project_name'] ?></td>
                                                             <td><?= $value['division_name'] ?></td>
                                                             <td><?= $value['lead_count'] ?></td>
