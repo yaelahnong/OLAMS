@@ -236,25 +236,29 @@ if (isset($_POST['update']) && isset($_POST['overtime_id'])) {
                                                 <span class="error" style="color: red;"> <?= $reasonErr; ?> </span>
                                             </div>
                                             <?php if (isset($status) && ($status === 'Pending' || $status === 'Rejected')) : ?>
-                                                
-                                                    <div class="mb-3 col-md-6 d-none">
-                                                        <label class="form-label" for="inputEffectiveTime">Effective Time</label>
-                                                        <input type="number" class="form-control" name="effective_time" id="inputEffectiveTime" placeholder="Enter effective time...">
-                                                    </div>
+
+                                                <div class="mb-3 col-md-6 d-none">
+                                                    <label class="form-label" for="inputEffectiveTime">Effective Time</label>
+                                                    <input type="number" class="form-control" name="effective_time" id="inputEffectiveTime" placeholder="Enter effective time...">
+                                                </div>
                                             <?php elseif (isset($status) && ($status === 'Approved')) : ?>
-                                                
-                                                    <div class="mb-3 col-md-6">
-                                                        <label class="form-label" for="inputEffectiveTime">Effective Time (Hours)</label>
-                                                        <input type="number" class="form-control" name="effective_time" id="inputEffectiveTime" placeholder="Enter effective time..." value="<?= $effective_time; ?>">
-                                                        <span class="error" style="color: red;"> <?= $effective_timeErr; ?> </span>
-                                                    </div>
-                                                
+
+                                                <div class="mb-3 col-md-6">
+                                                    <label class="form-label" for="inputEffectiveTime">Effective Time (Hours)</label>
+                                                    <input type="number" class="form-control" name="effective_time" id="inputEffectiveTime" placeholder="Enter effective time..." value="<?= $effective_time; ?>">
+                                                    <span class="error" style="color: red;"> <?= $effective_timeErr; ?> </span>
+                                                </div>
+
                                             <?php endif; ?>
                                         </div>
                                         <input type="hidden" name="overtime_id" value="<?= $overtimeId; ?>">
                                         <div class="row">
                                             <div class="col">
-                                                <button type="submit" name="update" class="btn btn-primary">Update</button>
+                                                <?php if ($_SERVER['REQUEST_METHOD'] == 'POST') : ?>
+                                                    <button type="button" name="update" class="btn btn-primary">Update</button>
+                                                <?php else : ?>
+                                                    <button type="submit" name="update" class="btn btn-primary" onclick="return confirm('are you sure you will update?')">Update</button>
+                                                <?php endif; ?>
                                                 <a href="overtimelist.php" class="btn btn-light text-dark text-decoration-none">Cancel</a>
                                             </div>
                                         </div>

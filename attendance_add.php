@@ -80,7 +80,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             if ($rowCount > 0) {
                 $error = "Attendance data with the same name and start date already exists for the selected date.";
             } else {
-                
+
                 $insertQuery = "INSERT INTO attendances (user_id, division_id, reason, type, start_date, finish_date, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)";
                 $insertStmt = mysqli_prepare($conn, $insertQuery);
                 if ($insertStmt) {
@@ -197,10 +197,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <div class="col">
-                                                <button type="submit" class="btn btn-primary">Submit</button>
-                                                <a href="attendancelist.php"
-                                                    class="btn btn-light text-dark text-decoration-none">Cancel</a>
+                                            <div class="col"><?php if ($_SERVER['REQUEST_METHOD'] == 'POST') : ?>
+                                                    <button type="button" name="submit" class="btn btn-primary">Submit</button>
+                                                <?php else : ?>
+                                                    <button type="submit" name="submit" class="btn btn-primary" onclick="return confirm('Are you sure you want to add it?')">Submit</button>
+                                                <?php endif; ?>
+                                                <a href="attendancelist.php" class="btn btn-light text-dark text-decoration-none">Cancel</a>
+
                                             </div>
                                         </div>
                                     </form>

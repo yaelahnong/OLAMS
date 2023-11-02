@@ -33,7 +33,7 @@ $attendance_id = null;
 
 if (isset($_GET['id'])) {
     $attendance_id = cleanValue($_GET['id']);
-    
+
     $queryAttendance = "SELECT user_id, division_id, reason, type, start_date, finish_date FROM attendances WHERE attendance_id = ?";
     $stmt = mysqli_prepare($conn, $queryAttendance);
     mysqli_stmt_bind_param($stmt, "i", $attendance_id);
@@ -215,7 +215,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                         </div>
                                         <div class="row">
                                             <div class="col">
-                                                <button type="submit" class="btn btn-primary">Update</button>
+                                                <?php if ($_SERVER['REQUEST_METHOD'] == 'POST') : ?>
+                                                    <button type="button" name="submit" class="btn btn-primary">Update</button>
+                                                <?php else : ?>
+                                                    <button type="submit" class="btn btn-primary" onclick="return confirm('are you sure you will update?')">Update</button>
+                                                <?php endif; ?>
                                                 <a href="attendancelist.php" class="btn btn-light text-dark text-decoration-none">Cancel</a>
                                             </div>
                                         </div>

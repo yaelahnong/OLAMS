@@ -16,20 +16,20 @@ $halaman_aktif = isset($_GET['page']) ? $_GET['page'] : 1;
 $offset = ($halaman_aktif - 1) * $limit;
 
 $query = "SELECT
-leaves.leaves_id,
-leaves.user_id,
-users.name AS name,
-m_divisions.division_name AS division_name,
-leaves.reason,
-leaves.category,
-leaves.start_date,
-leaves.finish_date,
-leaves.status,
-leaves.status_updated_at,
-leaves.status_updated_by
-FROM leaves
-LEFT JOIN users ON leaves.user_id = users.user_id
-LEFT JOIN m_divisions ON leaves.division_id = m_divisions.division_id";
+  leaves.leaves_id,
+  leaves.user_id,
+  users.name AS name,
+  m_divisions.division_name AS division_name,
+  leaves.reason,
+  leaves.category,
+  leaves.start_date,
+  leaves.finish_date,
+  leaves.status,
+  leaves.status_updated_at,
+  leaves.status_updated_by
+  FROM leaves
+  LEFT JOIN users ON leaves.user_id = users.user_id
+  LEFT JOIN m_divisions ON leaves.division_id = m_divisions.division_id";
 
 $userQuery = "SELECT user_id, name FROM users";
 $userData = mysqli_prepare($conn, $userQuery);
@@ -43,17 +43,17 @@ mysqli_stmt_execute($divisionData);
 $divisionData = mysqli_stmt_get_result($divisionData);
 $divisionOptions = mysqli_fetch_all($divisionData, MYSQLI_ASSOC);
 
-if ($user_role === 4) {
-  $query .= " WHERE (leaves.status = 'Pending' OR leaves.status = 'Rejected' OR leaves.status = 'Approved')";
-  $query .= " AND (leaves.submitted_by_admin IS NOT NULL AND leaves.sent_by_admin IS NOT NULL)";
-}
-elseif ($user_role === 3) { 
-  $query .= " WHERE (leaves.status = 'Pending' OR leaves.status = 'Rejected' OR leaves.status = 'Approved')";
-  $query .= " AND (leaves.submitted_by_admin IS NULL OR leaves.sent_by_admin IS NULL) OR (leaves.submitted_by_admin IS NOT NULL OR leaves.sent_by_admin IS NOT NULL)";
-}
-
 if ($user_role === 1) {
   $query .= " WHERE leaves.user_id = $user_id";
+}
+
+if ($user_role === 4) { // Supervisor
+  $query .= " WHERE (leaves.status = 'Pending' OR leaves.status = 'Rejected' OR leaves.status = 'Approved') ";
+  $query .= " AND (leaves.submitted_by_admin IS NOT NULL AND leaves.sent_by_admin IS NOT NULL) ";
+}
+elseif ($user_role === 3) { // Admin
+  $query .= " WHERE (leaves.status = 'Pending' OR leaves.status = 'Rejected' OR leaves.status = 'Approved') ";
+  $query .= " AND (leaves.submitted_by_admin IS NULL OR leaves.sent_by_admin IS NULL) OR (leaves.submitted_by_admin IS NOT NULL OR leaves.sent_by_admin IS NOT NULL) ";
 }
 
 $filter_division = "";

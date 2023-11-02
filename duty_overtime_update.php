@@ -194,7 +194,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                 <span class="error" style="color: red;"> <?= $noteErr; ?> </span>
                                             </div>
                                         </div>
-                                        <button type="submit" name="submit" class="btn btn-primary" onclick="return confirm('are you sure you will update?')">Update</button>
+                                        <?php if ($_SERVER['REQUEST_METHOD'] == 'POST') : ?>
+                                            <button type="button" name="submit" class="btn btn-primary">Update</button>
+                                            <?php else : ?>
+                                                <button type="submit" name="submit" class="btn btn-primary" onclick="return confirm('are you sure you will update?')">Update</button>
+                                                <?php endif; ?>
                                         <a href="duty_overtimelist.php" class="btn btn-danger text-white text-decoration-none">Cancel</a>
                                     </form>
                                 </div>

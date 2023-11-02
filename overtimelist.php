@@ -52,12 +52,24 @@ mysqli_stmt_execute($projectData);
 $projectData = mysqli_stmt_get_result($projectData);
 $projectOptions = mysqli_fetch_all($projectData, MYSQLI_ASSOC);
 
-// $statusQuery = "SELECT DISTINCT status FROM overtimes";
-// $statusData = mysqli_prepare($conn, $statusQuery);
-// mysqli_stmt_execute($statusData);
-// $statusData = mysqli_stmt_get_result($statusData);
-// $statusOptions = mysqli_fetch_all($statusData, MYSQLI_ASSOC);
+if ($user_role === 1) {
+    $show_overtime .= " WHERE overtimes.user_id = $user_id ";
+}
 
+if ($user_role == 4) {
+    $show_overtime .= " WHERE (overtimes.status = 'Pending' OR overtimes.status = 'Approved' OR overtimes.status = 'Rejected')";
+    $show_overtime .= " AND (overtimes.submitted_by_admin IS NOT NULL AND overtimes.sent_by_admin IS NOT NULL AND overtimes.checked_by_leader IS NOT NULL AND overtimes.checked_by_leader_at IS NOT NULL) OR 
+    (overtimes.submitted_by_admin IS NOT NULL AND overtimes.sent_by_admin IS NOT NULL AND overtimes.checked_by_leader IS NOT NULL AND overtimes.checked_by_leader_at IS NOT NULL AND overtimes.status_updated_at IS NOT NULL AND overtimes.status_updated_at IS NOT NULL) OR
+    (overtimes.submitted_by_admin IS NULL AND overtimes.sent_by_admin IS NULL AND overtimes.checked_by_leader IS NULL AND overtimes.checked_by_leader_at IS NULL AND overtimes.status_updated_at IS NOT NULL AND overtimes.status_updated_at IS NOT NULL) ";
+} elseif ($user_role == 3) {
+    $show_overtime .= " WHERE (overtimes.status = 'Pending' OR overtimes.status = 'Approved' OR overtimes.status = 'Rejected')";
+    $show_overtime .= " AND (overtimes.checked_by_leader IS NOT NULL AND overtimes.checked_by_leader_at IS NOT NULL AND overtimes.submitted_by_admin IS NULL AND overtimes.sent_by_admin IS NULL) OR 
+    (overtimes.submitted_by_admin IS NOT NULL AND overtimes.sent_by_admin IS NOT NULL AND overtimes.checked_by_leader IS NOT NULL AND overtimes.checked_by_leader_at IS NOT NULL) OR 
+    (overtimes.submitted_by_admin IS NULL AND overtimes.sent_by_admin IS NULL AND overtimes.checked_by_leader IS NULL AND overtimes.checked_by_leader_at IS NULL AND overtimes.status_updated_at IS NOT NULL AND overtimes.status_updated_at IS NOT NULL) ";
+} elseif ($user_role == 2) {
+    $show_overtime .= " WHERE (overtimes.status = 'Pending' OR overtimes.status = 'Approved' OR overtimes.status = 'Rejected')";
+    $show_overtime .= " AND (overtimes.checked_by_leader IS NULL AND overtimes.checked_by_leader_at IS NULL) OR (overtimes.checked_by_leader IS NOT NULL AND overtimes.checked_by_leader_at IS NOT NULL) ";
+}
 $filter_division = "";
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['filter_division']) && !empty($_GET['filter_division'])) {
     $filter_division = cleanValue($_GET['filter_division']);
@@ -93,25 +105,6 @@ $show_overtime .= " LIMIT $limit OFFSET $offset ";
 $data = mysqli_query($conn, $show_overtime);
 $karyawanArray = mysqli_fetch_all($data, MYSQLI_ASSOC);
 $jumlah_halaman = ceil($jumlah_semua_data / $limit);
-
-if ($user_role == 4) {
-    $show_overtime .= " WHERE (overtimes.status = 'Pending' OR overtimes.status = 'Approved' OR overtimes.status = 'Rejected')";
-    $show_overtime .= " AND (overtimes.submitted_by_admin IS NOT NULL AND overtimes.sent_by_admin IS NOT NULL AND overtimes.checked_by_leader IS NOT NULL AND overtimes.checked_by_leader_at IS NOT NULL) OR 
-    (overtimes.submitted_by_admin IS NOT NULL AND overtimes.sent_by_admin IS NOT NULL AND overtimes.checked_by_leader IS NOT NULL AND overtimes.checked_by_leader_at IS NOT NULL AND overtimes.status_updated_at IS NOT NULL AND overtimes.status_updated_at IS NOT NULL) OR
-    (overtimes.submitted_by_admin IS NULL AND overtimes.sent_by_admin IS NULL AND overtimes.checked_by_leader IS NULL AND overtimes.checked_by_leader_at IS NULL AND overtimes.status_updated_at IS NOT NULL AND overtimes.status_updated_at IS NOT NULL) ";
-} elseif ($user_role == 3) {
-    $show_overtime .= " WHERE (overtimes.status = 'Pending' OR overtimes.status = 'Approved' OR overtimes.status = 'Rejected')";
-    $show_overtime .= " AND (overtimes.checked_by_leader IS NOT NULL AND overtimes.checked_by_leader_at IS NOT NULL AND overtimes.submitted_by_admin IS NULL AND overtimes.sent_by_admin IS NULL) OR 
-    (overtimes.submitted_by_admin IS NOT NULL AND overtimes.sent_by_admin IS NOT NULL AND overtimes.checked_by_leader IS NOT NULL AND overtimes.checked_by_leader_at IS NOT NULL) OR 
-    (overtimes.submitted_by_admin IS NULL AND overtimes.sent_by_admin IS NULL AND overtimes.checked_by_leader IS NULL AND overtimes.checked_by_leader_at IS NULL AND overtimes.status_updated_at IS NOT NULL AND overtimes.status_updated_at IS NOT NULL) ";
-} elseif ($user_role == 2) {
-    $show_overtime .= " WHERE (overtimes.status = 'Pending' OR overtimes.status = 'Approved' OR overtimes.status = 'Rejected')";
-    $show_overtime .= " AND (overtimes.checked_by_leader IS NULL AND overtimes.checked_by_leader_at IS NULL) OR (overtimes.checked_by_leader IS NOT NULL AND overtimes.checked_by_leader_at IS NOT NULL) ";
-} elseif ($user_role === 1) {
-    $show_overtime .= " WHERE overtimes.user_id = $user_id ";
-}
-// var_dump($show_overtime);
-// exit;
 
 $updateStatement = null;
 
@@ -154,8 +147,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                     echo "<script>window.location.href = 'overtimelist.php'</script>";
                     exit();
                 }
-                // var_dump($updateQuery);
-                // exit;
                 $updateStatement = mysqli_prepare($conn, $updateQuery);
 
                 if ($updateStatement) {
