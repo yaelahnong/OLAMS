@@ -45,7 +45,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         if ($stmt) {
                             mysqli_stmt_bind_param($stmt, "ss", $divisionName, $user_id);
                             if (mysqli_stmt_execute($stmt)) {
-                                echo "<script>alert('Division data berhasil ditambahkan.')</script>";
+                                echo "<script>alert('Data added successfully.')</script>";
                                 echo "<script>window.location.href = 'divisionlist.php'</script>";
                                 exit();
                             } else {

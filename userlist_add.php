@@ -99,15 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       );
 
       mysqli_stmt_execute($stmt);
-      echo "<script type='text/javascript'>
-
-      Swal.fire(
-        'Good job!',
-        'You clicked the button!',
-        'success'
-      )
-      
-      </script>";
+      echo "<script>alert('Data added successfully');</script>";
       echo "<script>window.location.replace('userlist.php')</script>";
     }
   } else {
