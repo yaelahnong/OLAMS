@@ -91,11 +91,22 @@ if (isset($_POST['update']) && isset($_POST['overtime_id'])) {
         if (empty($reason)) {
             $reasonErr = "Reason is required";
         }
-        if (isset($effective_time) && (!is_numeric($effective_time) || intval($effective_time) <= 0)) {
-            $effective_timeErr = "Effective Time must be a positive integer.";
+        if ($status === 'Approved') {
+            // Validasi jika status sudah "Approved" dan "Effective Time" harus diisi dan tidak boleh angka minus
+            if (empty($effective_time)) {
+                $effective_timeErr = "Effective Time is required.";
+            } elseif (!is_numeric($effective_time) || intval($effective_time) < 0) {
+                $effective_timeErr = "Effective Time must be a non-negative integer.";
+            }
+        } else {
+            // Jika status bukan "Approved", pastikan "Effective Time" tidak diisi
+            if (!empty($effective_time)) {
+                $effective_timeErr = "Effective Time can only be filled when status is Approved.";
+            }
         }
-
-        if (empty($fullnameErr) && empty($projectErr) && empty($divisionErr) && empty($categoryErr) && empty($typeErr) && empty($start_dateErr) && empty($finish_dateErr) && empty($reasonErr)) {
+        // var_dump($effective_timeErr);
+        // exit;
+        if (empty($fullnameErr) && empty($projectErr) && empty($divisionErr) && empty($categoryErr) && empty($typeErr) && empty($start_dateErr) && empty($finish_dateErr) && empty($reasonErr) && empty($effective_timeErr)) {
             if ($status === 'Approved') {
                 // Query update dengan kolom "Effective Time"
                 $updateQuery = "UPDATE overtimes SET user_id = ?, project_id = ?, divisi_id = ?, category = ?, type = ?, start_date = ?, finish_date = ?, reason = ?, effective_time = ?, updated_by = ? WHERE overtime_id = ?";
@@ -107,7 +118,6 @@ if (isset($_POST['update']) && isset($_POST['overtime_id'])) {
                 $updateStatement = mysqli_prepare($conn, $updateQuery);
                 mysqli_stmt_bind_param($updateStatement, "iiisssssii", $fullname, $project_id, $divisi_id, $category, $type, $start_date, $finish_date, $reason, $user_id, $overtimeId);
             }
-
             if (mysqli_stmt_execute($updateStatement)) {
                 echo "<script>alert('Overtime data updated successfully.')</script>";
                 echo "<script>window.location.href = 'overtimelist.php'</script>";

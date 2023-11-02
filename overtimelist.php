@@ -98,22 +98,18 @@ if ($user_role == 4) {
     $show_overtime .= " WHERE (overtimes.status = 'Pending' OR overtimes.status = 'Approved' OR overtimes.status = 'Rejected')";
     $show_overtime .= " AND (overtimes.submitted_by_admin IS NOT NULL AND overtimes.sent_by_admin IS NOT NULL AND overtimes.checked_by_leader IS NOT NULL AND overtimes.checked_by_leader_at IS NOT NULL) OR 
     (overtimes.submitted_by_admin IS NOT NULL AND overtimes.sent_by_admin IS NOT NULL AND overtimes.checked_by_leader IS NOT NULL AND overtimes.checked_by_leader_at IS NOT NULL AND overtimes.status_updated_at IS NOT NULL AND overtimes.status_updated_at IS NOT NULL) OR
-    (overtimes.submitted_by_admin IS NULL AND overtimes.sent_by_admin IS NULL AND overtimes.checked_by_leader IS NULL AND overtimes.checked_by_leader_at IS NULL AND overtimes.status_updated_at IS NOT NULL AND overtimes.status_updated_at IS NOT NULL)";
+    (overtimes.submitted_by_admin IS NULL AND overtimes.sent_by_admin IS NULL AND overtimes.checked_by_leader IS NULL AND overtimes.checked_by_leader_at IS NULL AND overtimes.status_updated_at IS NOT NULL AND overtimes.status_updated_at IS NOT NULL) ";
 } elseif ($user_role == 3) {
     $show_overtime .= " WHERE (overtimes.status = 'Pending' OR overtimes.status = 'Approved' OR overtimes.status = 'Rejected')";
     $show_overtime .= " AND (overtimes.checked_by_leader IS NOT NULL AND overtimes.checked_by_leader_at IS NOT NULL AND overtimes.submitted_by_admin IS NULL AND overtimes.sent_by_admin IS NULL) OR 
     (overtimes.submitted_by_admin IS NOT NULL AND overtimes.sent_by_admin IS NOT NULL AND overtimes.checked_by_leader IS NOT NULL AND overtimes.checked_by_leader_at IS NOT NULL) OR 
-    (overtimes.submitted_by_admin IS NULL AND overtimes.sent_by_admin IS NULL AND overtimes.checked_by_leader IS NULL AND overtimes.checked_by_leader_at IS NULL AND overtimes.status_updated_at IS NOT NULL AND overtimes.status_updated_at IS NOT NULL)";
+    (overtimes.submitted_by_admin IS NULL AND overtimes.sent_by_admin IS NULL AND overtimes.checked_by_leader IS NULL AND overtimes.checked_by_leader_at IS NULL AND overtimes.status_updated_at IS NOT NULL AND overtimes.status_updated_at IS NOT NULL) ";
 } elseif ($user_role == 2) {
     $show_overtime .= " WHERE (overtimes.status = 'Pending' OR overtimes.status = 'Approved' OR overtimes.status = 'Rejected')";
-    $show_overtime .= " AND (overtimes.checked_by_leader IS NULL AND overtimes.checked_by_leader_at IS NULL) OR (overtimes.checked_by_leader IS NOT NULL AND overtimes.checked_by_leader_at IS NOT NULL)";
+    $show_overtime .= " AND (overtimes.checked_by_leader IS NULL AND overtimes.checked_by_leader_at IS NULL) OR (overtimes.checked_by_leader IS NOT NULL AND overtimes.checked_by_leader_at IS NOT NULL) ";
 } elseif ($user_role === 1) {
-    $show_overtime .= " WHERE overtimes.user_id = $user_id";
+    $show_overtime .= " WHERE overtimes.user_id = $user_id ";
 }
-
-
-
-
 // var_dump($show_overtime);
 // exit;
 
@@ -373,7 +369,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                                     <?php if ($value['type'] == 'Urgent') : ?>
                                                                     <td><button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['status_updated_by'] ? "{$value['status']} to leader" : "-" ?></button></td>
                                                                 <?php else : ?>
-                                                                    <td><button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['checked_by_leader'] ? "{$value['status']} to admin" : "-" ?></button></td>
+                                                                    <td><button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['checked_by_leader'] ? "{$value['status']}" : "-" ?></button></td>
                                                                 <?php endif; ?>
                                                                 <td>
                                                                     <button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['submitted_by_admin'] ? "{$value['status']} to supervisor" : "{$value['status']} to supervisor"?></button>
