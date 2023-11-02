@@ -26,14 +26,14 @@ $roleOptions = mysqli_fetch_all($roleData, MYSQLI_ASSOC);
 $fullnameErr = $usernameErr = $passwordErr = $emailErr = $roleErr = "";
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   if (isset($_POST['csrf_token']) && isCsrfTokenValid($_POST['csrf_token'])) {
-    
+
     $fullname = isset($_POST['name']) ? cleanValue($_POST['name']) : NULL;
     $username = isset($_POST['username']) ? cleanValue($_POST['username']) : NULL;
     $email = isset($_POST['email']) ? cleanValue($_POST['email']) : NULL;
     $password = isset($_POST['password']) ? cleanValue($_POST['password']) : NULL;
     $role = isset($_POST['role_id']) ? cleanValue($_POST['role_id']) : null;
 
-    if(empty($password)) {
+    if (empty($password)) {
       echo "<script> alert ('Nothink has change')</script>";
       echo "<script>window.location.replace('userlist.php')</script>";
       exit;
@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $fullnameErr = "The name should consist of 3 to 60 characters of letters, quotes and periods are allowed.";
     }
 
-     if (empty($username)) {
+    if (empty($username)) {
       $usernameErr = "Username is required.";
     } elseif (!preg_match("/^[A-Za-z.' ]*$/", $username) || strlen($username) < 3 || strlen($username) > 60) {
       $usernameErr = "Usernames should consist of 3 to 60 characters of letters, quotes, and periods.";
@@ -57,14 +57,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $emailErr = "Invalid email. Must be between 6 to 30 characters long.";
     }
 
-    
-      if (strlen($password) < 8) {
-        $passwordErr = 'Passwords must be at least 8 characters long.';
-      } elseif (!preg_match("/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/", $password)) {
-        $passwordErr = 'Passwords must contain at least one lowercase letter, one uppercase letter, and one number.';      } else {
-          // Hash password 
-          $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-      }
+
+    if (strlen($password) < 8) {
+      $passwordErr = 'Passwords must be at least 8 characters long.';
+    } elseif (!preg_match("/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/", $password)) {
+      $passwordErr = 'Passwords must contain at least one lowercase letter, one uppercase letter, and one number.';
+    } else {
+      // Hash password 
+      $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+    }
 
     if (empty($role)) {
       $roleErr = "Please select (role).";
@@ -197,7 +198,11 @@ if (isset($_GET['id'])) {
                     </div>
                     <div class="row">
                       <div class="col">
-                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <?php if ($_SERVER['REQUEST_METHOD'] == 'POST') : ?>
+                          <button type="button" name="update" class="btn btn-primary">Update</button>
+                        <?php else : ?>
+                          <button type="submit" name="update" class="btn btn-primary" onclick="return confirm('are you sure you will update?')">Update</button>
+                        <?php endif; ?>
                         <a href="userlist.php" class="btn btn-light text-dark text-decoration-none">Cancel</a>
                       </div>
                     </div>

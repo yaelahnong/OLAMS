@@ -14,7 +14,7 @@ if ($_SESSION['role_id'] != 3 && $_SESSION['role_id'] != 4 && $_SESSION['role_id
     header("Location: dashboard.php");
     exit();
 }
-  
+
 $user_id = $_SESSION["user_id"];
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if (isset($_POST['csrf_token']) && isCsrfTokenValid($_POST['csrf_token'])) {
@@ -119,7 +119,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                         </div>
                                         <div class="row">
                                             <div class="col">
-                                                <button type="submit" class="btn btn-primary">Submit</button>
+                                                <?php if ($_SERVER['REQUEST_METHOD'] == 'POST') : ?>
+                                                    <button type="button" class="btn btn-primary">Submit</button>
+                                                <?php else : ?>
+                                                    <button type="submit" class="btn btn-primary" onclick="return confirm('Are you sure you want to add it?')">Submit</button>
+                                                <?php endif; ?>
                                                 <a href="projectlist.php" class="btn btn-light text-dark text-decoration-none">Cancel</a>
                                             </div>
                                         </div>

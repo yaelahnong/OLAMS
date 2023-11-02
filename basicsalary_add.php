@@ -62,12 +62,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   if (isset($_POST['csrf_token']) && isCsrfTokenValid($_POST['csrf_token'])) {
     if (isset($_POST["user_id"]) && isset($_POST["total_basic_salary"]) && !empty($_POST["user_id"]) && !empty($_POST["total_basic_salary"])) {
       $user_id = cleanValue($_POST["user_id"]);
-      $total_basic_salary = cleanValue($_POST["total_basic_salary"]);
+      $total_basic_salary = cleanValue(str_replace(',', '', $_POST["total_basic_salary"]));
 
       // Validasi input total_basic_salary harus berisi angka
-      if (is_numeric($total_basic_salary)) {
+      if (empty($total_basic_salary)) {
         // Memformat angka sesuai dengan pemisah ribuan yang digunakan di negara Anda
         $formatted_total_basic_salary = number_format($total_basic_salary);
+      } else {
+        $error = "Total basic salary must be a numeric value.";
+      }
 
         // Validasi apakah nama sudah ada di database
         $queryCheckName = "SELECT COUNT(*) FROM m_basic_salaries WHERE user_id = ?";
@@ -111,9 +114,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         } else {
           $error = "Failed to create a prepared statement to check the name.";
         }
-      } else {
-        $error = "Total basic salary must be a numeric value.";
-      }
     } else {
       $error = "User ID and Total Basic Salary are required fields.";
     }
@@ -162,27 +162,33 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         <label class="form-label" for="inputUserId">User</label>
                         <span style="color: red">*</span><br>
                         <select class="form-select" name="user_id" id="inputUserId">
-                          <?php foreach ($users as $user) : ?>
-                            <?php if ($user["role_id"] == 1 && $count == 0) : ?>
-                              <option value="<?= $user['user_id']; ?>"><?= $user['name']; ?></option>
-                            <?php endif; ?>
-                          <?php endforeach; ?>
+                          <?php if ($count == 0) : ?>
+                            <?php foreach ($users as $user) : ?>
+                              <?php if ($user["role_id"] == 1) : ?>
+                                <option value="<?= $user['user_id']; ?>"><?= $user['name']; ?></option>
+                              <?php endif; ?>
+                            <?php endforeach; ?>
+                          <?php endif; ?>
                         </select>
                       </div>
                     </div>
                     <div class="row">
                       <div class="mb-3 col-md-6">
-                        <label class="form-label" for="rupiah">Total Basic Salary</label>
+                        <label class="form-label" for="inputTotalBasicSalary">Total Basic Salary</label>
                         <span style="color: red">*</span><br>
-                        <input type="text" class="form-control" name="rupiah" id="inputTotalBasicSalary" placeholder="Enter Total Basic Salary">
+                        <input type="text" class="form-control" name="total_basic_salary" id="inputTotalBasicSalary" placeholder="Enter Total Basic Salary">
                       </div>
                     </div>
                     <div class="row">
                       <div class="col">
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                        <a href="basicsalary.php" class="btn btn-light text-dark text-decoration-none">Cancel</a>
+                        <div class="col"><?php if ($_SERVER['REQUEST_METHOD'] == 'POST') : ?>
+                            <button type="button" name="submit" class="btn btn-primary">Submit</button>
+                          <?php else : ?>
+                            <button type="submit" name="submit" class="btn btn-primary" onclick="return confirm('Are you sure you want to add it?')">Submit</button>
+                          <?php endif; ?>
+                          <a href="basicsalary.php" class="btn btn-light text-dark text-decoration-none">Cancel</a>
+                        </div>
                       </div>
-                    </div>
                   </form>
                 </div>
               </div>
@@ -194,29 +200,29 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     </div>
   </div>
   <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    const inputTotalBasicSalary = document.getElementById("inputTotalBasicSalary");
+    document.addEventListener("DOMContentLoaded", function() {
+      let inputTotalBasicSalary = document.getElementById("inputTotalBasicSalary");
 
-    inputTotalBasicSalary.addEventListener("input", function (e) {
-      let rawValue = e.target.value.replace(/\D/g, "");
+      inputTotalBasicSalary.addEventListener("input", function(e) {
+        let rawValue = e.target.value.replace(/\D/g, "");
 
-      let formattedValue = addCommas(rawValue);
+        let formattedValue = addCommas(rawValue);
 
-      e.target.value = formattedValue;
+        e.target.value = formattedValue;
+      });
     });
-  });
 
-  function addCommas(value) {
-    const number = parseFloat(value);
-    if (isNaN(number)) {
-      return "";
+    function addCommas(value) {
+      let number = parseFloat(value);
+      if (isNaN(number)) {
+        return "";
+      }
+
+      let formattedValue = number.toLocaleString();
+
+      return formattedValue;
     }
-
-    const formattedValue = number.toLocaleString();
-
-    return formattedValue;
-  }
-</script>
+  </script>
   <?php include "script.inc.php"; ?>
 </body>
 
