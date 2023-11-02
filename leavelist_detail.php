@@ -88,7 +88,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                                     </tr>
                                 </tbody>
                             </table>
-                            <a href="leavelist.php" class="btn btn-warning btn-sm ms-2">Kembali</a>
+                            <a href="leavelist.php" class="btn btn-warning btn-sm ms-2">Back</a>
                         </div>
                     </div>
                 </div>
