@@ -91,11 +91,22 @@ if (isset($_POST['update']) && isset($_POST['overtime_id'])) {
         if (empty($reason)) {
             $reasonErr = "Reason is required";
         }
-        if (isset($effective_time) && (!is_numeric($effective_time) || intval($effective_time) <= 0)) {
-            $effective_timeErr = "Effective Time must be a positive integer.";
+        if ($status === 'Approved') {
+            // Validasi jika status sudah "Approved" dan "Effective Time" harus diisi dan tidak boleh angka minus
+            if (empty($effective_time)) {
+                $effective_timeErr = "Effective Time is required.";
+            } elseif (!is_numeric($effective_time) || intval($effective_time) < 0) {
+                $effective_timeErr = "Effective Time must be a non-negative integer.";
+            }
+        } else {
+            // Jika status bukan "Approved", pastikan "Effective Time" tidak diisi
+            if (!empty($effective_time)) {
+                $effective_timeErr = "Effective Time can only be filled when status is Approved.";
+            }
         }
-
-        if (empty($fullnameErr) && empty($projectErr) && empty($divisionErr) && empty($categoryErr) && empty($typeErr) && empty($start_dateErr) && empty($finish_dateErr) && empty($reasonErr)) {
+        // var_dump($effective_timeErr);
+        // exit;
+        if (empty($fullnameErr) && empty($projectErr) && empty($divisionErr) && empty($categoryErr) && empty($typeErr) && empty($start_dateErr) && empty($finish_dateErr) && empty($reasonErr) && empty($effective_timeErr)) {
             if ($status === 'Approved') {
                 // Query update dengan kolom "Effective Time"
                 $updateQuery = "UPDATE overtimes SET user_id = ?, project_id = ?, divisi_id = ?, category = ?, type = ?, start_date = ?, finish_date = ?, reason = ?, effective_time = ?, updated_by = ? WHERE overtime_id = ?";
@@ -107,7 +118,6 @@ if (isset($_POST['update']) && isset($_POST['overtime_id'])) {
                 $updateStatement = mysqli_prepare($conn, $updateQuery);
                 mysqli_stmt_bind_param($updateStatement, "iiisssssii", $fullname, $project_id, $divisi_id, $category, $type, $start_date, $finish_date, $reason, $user_id, $overtimeId);
             }
-        
             if (mysqli_stmt_execute($updateStatement)) {
                 echo "<script>alert('Overtime data updated successfully.')</script>";
                 echo "<script>window.location.href = 'overtimelist.php'</script>";
@@ -115,10 +125,9 @@ if (isset($_POST['update']) && isset($_POST['overtime_id'])) {
             } else {
                 echo "Failed to update data.";
             }
-        
+
             mysqli_stmt_close($updateStatement);
         }
-        
     } else {
         $TokenErr = "Invalid CSRF token";
     }
@@ -150,19 +159,11 @@ if (isset($_POST['update']) && isset($_POST['overtime_id'])) {
                                     <form action="<?= cleanValue($_SERVER['PHP_SELF'] . "?id=" . $overtimeId) ?>" method="post">
                                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
                                         <div class="row">
-                                            <div class="mb-3 col-md-6">
+                                            <div class="mb-3 col-md-6 d-none">
                                                 <label class="form-label" for="inputUser">User</label>
-                                                <select name="user_id" id="inputUser" class="form-select">
-                                                    <option value="">Select User</option>
-                                                    <?php foreach ($resultUsers as $user) : ?>
-                                                        <option value="<?= $user['user_id'] ?>" <?= $user['user_id'] == $user_id ? 'selected' : '' ?>>
-                                                            <?= $user['name'] ?>
-                                                        </option>
-                                                    <?php endforeach; ?>
-                                                </select>
+                                                <input type="text" name="user_id" id="inputUser" class="form-control" value="<?= $_SESSION["user_id"]; ?>" readonly>
                                                 <span class="error" style="color: red;"> <?= $fullnameErr; ?> </span>
                                             </div>
-
                                             <div class="mb-3 col-md-6">
                                                 <label class="form-label" for="inputProject">Project</label>
                                                 <select name="project_id" id="inputProject" class="form-select">
@@ -173,8 +174,6 @@ if (isset($_POST['update']) && isset($_POST['overtime_id'])) {
                                                 </select>
                                                 <span class="error" style="color: red;"> <?= $projectErr; ?> </span>
                                             </div>
-                                        </div>
-                                        <div class="row">
                                             <div class="mb-3 col-md-6">
                                                 <label class="form-label" for="inputDivision">Division</label>
                                                 <select name="divisi_id" id="inputDivision" class="form-select">
@@ -186,72 +185,72 @@ if (isset($_POST['update']) && isset($_POST['overtime_id'])) {
                                                 </select>
                                                 <span class="error" style="color: red;"> <?= $divisionErr; ?> </span>
                                             </div>
+                                        </div>
+                                        <div class="row">
                                             <div class="col-md-6">
-                                                <label class="form-label">Category</label>
-                                                <div class="form-check">
+                                                <label class="form-label">Category</label><br>
+                                                <div class="form-check form-check-inline">
                                                     <?php echo $category; ?>
                                                     <input class="form-check-input" type="radio" name="category" id="category_weekend" value="Weekend" <?php if (isset($category) && $category === "Weekend") echo "checked"; ?>>
                                                     <label class="form-check-label" for="category_weekend">Weekend</label>
                                                 </div>
-                                                <div class="form-check">
+                                                <div class="form-check form-check-inline">
                                                     <input class="form-check-input" type="radio" name="category" id="category_weekday" value="Weekday" <?php if (isset($category) && $category === "Weekday") echo "checked"; ?>>
                                                     <label class="form-check-label" for="category_weekday">Weekday</label>
                                                 </div>
                                                 <span class="error" style="color: red;"><?= $categoryErr; ?></span>
                                             </div>
-                                        </div>
-                                        <div class="row">
                                             <div class="col-md-6">
-                                                <label class="form-label">Type</label>
-                                                <div class="form-check">
+                                                <label class="form-label">Type</label><br>
+                                                <div class="form-check form-check-inline">
                                                     <input class="form-check-input" type="radio" name="type" id="type_Normal" value="Normal" <?php if (isset($type) && $type === "Normal") echo "checked"; ?>>
                                                     <label class="form-check-label" for="type_Normal">Normal</label>
                                                 </div>
-                                                <div class="form-check">
+                                                <div class="form-check form-check-inline">
                                                     <input class="form-check-input" type="radio" name="type" id="type_Urgent" value="Urgent" <?php if (isset($type) && $type === "Urgent") echo "checked"; ?>>
                                                     <label class="form-check-label" for="type_Urgent">Urgent</label>
                                                 </div>
-                                                <div class="form-check">
+                                                <div class="form-check form-check-inline">
                                                     <input class="form-check-input" type="radio" name="type" id="type_BusinessTrip" value="Business Trip" <?php if (isset($type) && $type === "Business Trip") echo "checked"; ?>>
                                                     <label class="form-check-label" for="type_BusinessTrip">Business Trip</label>
                                                 </div>
                                                 <span class="error" style="color: red;"><?= $typeErr; ?></span>
                                             </div>
-
+                                        </div>
+                                        <div class="row">
                                             <div class="mb-3 col-md-6">
                                                 <label class="form-label" for="inputStartDate">Start Date</label>
                                                 <input type="datetime-local" class="form-control" name="start_date" id="inputStartDate" value="<?= $start_date; ?>">
                                                 <span class="error" style="color: red;"> <?= $start_dateErr; ?> </span>
                                             </div>
-                                        </div>
-                                        <div class="row">
                                             <div class="mb-3 col-md-6">
                                                 <label class="form-label" for="inputFinishDate">Finish Date</label>
                                                 <input type="datetime-local" class="form-control" name="finish_date" id="inputFinishDate" value="<?= $finish_date; ?>">
                                                 <span class="error" style="color: red;"> <?= $finish_dateErr; ?> </span>
                                             </div>
+                                        </div>
+                                        <div class="row">
                                             <div class="mb-3 col-md-6">
                                                 <label class="form-label" for="inputReason">Reason</label>
                                                 <textarea class="form-control" name="reason" id="inputReason" placeholder="Enter Reason"><?= $reason; ?></textarea>
                                                 <span class="error" style="color: red;"> <?= $reasonErr; ?> </span>
                                             </div>
+                                            <?php if (isset($status) && ($status === 'Pending' || $status === 'Rejected')) : ?>
+                                                
+                                                    <div class="mb-3 col-md-6 d-none">
+                                                        <label class="form-label" for="inputEffectiveTime">Effective Time</label>
+                                                        <input type="number" class="form-control" name="effective_time" id="inputEffectiveTime" placeholder="Enter effective time...">
+                                                    </div>
+                                            <?php elseif (isset($status) && ($status === 'Approved')) : ?>
+                                                
+                                                    <div class="mb-3 col-md-6">
+                                                        <label class="form-label" for="inputEffectiveTime">Effective Time (Hours)</label>
+                                                        <input type="number" class="form-control" name="effective_time" id="inputEffectiveTime" placeholder="Enter effective time..." value="<?= $effective_time; ?>">
+                                                        <span class="error" style="color: red;"> <?= $effective_timeErr; ?> </span>
+                                                    </div>
+                                                
+                                            <?php endif; ?>
                                         </div>
-                                        <?php if (isset($status) && ($status === 'Pending' || $status === 'Rejected')) : ?>
-                                            <div class="row d-none">
-                                                <div class="mb-3 col-md-6">
-                                                    <label class="form-label" for="inputEffectiveTime">Effective Time</label>
-                                                    <input type="number" class="form-control" name="effective_time" id="inputEffectiveTime" placeholder="Enter effective time...">
-                                                </div>
-                                            </div>
-                                        <?php elseif (isset($status) && ($status === 'Approved')) : ?>
-                                            <div class="row">
-                                                <div class="mb-3 col-md-6">
-                                                    <label class="form-label" for="inputEffectiveTime">Effective Time (Hours)</label>
-                                                    <input type="number" class="form-control" name="effective_time" id="inputEffectiveTime" placeholder="Enter effective time..." value="<?= $effective_time; ?>">
-                                                    <span class="error" style="color: red;"> <?= $effective_timeErr; ?> </span>
-                                                </div>
-                                            </div>
-                                        <?php endif; ?>
                                         <input type="hidden" name="overtime_id" value="<?= $overtimeId; ?>">
                                         <div class="row">
                                             <div class="col">

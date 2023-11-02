@@ -121,14 +121,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                     <form action="<?= cleanValue($_SERVER['PHP_SELF']) ?>" method="post">
                                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
                                         <div class="row">
-                                            <div class="mb-3 col-md-6">
+                                            <div class="mb-3 col-md-6 d-none">
                                                 <label class="form-label" for="inputUser">User</label>
-                                                <select name="user_id" id="inputUser" class="form-select">
-                                                    <option value="">Select User</option>
-                                                    <?php foreach ($resultUsers as $user) : ?>
-                                                        <option value="<?= $user['user_id'] ?>"><?= $user['name'] ?></option>
-                                                    <?php endforeach; ?>
-                                                </select>
+                                                <input type="text" name="user_id" id="inputUser" class="form-control" value="<?= $_SESSION["user_id"]; ?>" readonly>
                                                 <span class="error" style="color: red;"> <?= $fullnameErr; ?> </span>
                                             </div>
                                             <div class="mb-3 col-md-6">
@@ -141,8 +136,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                                 </select>
                                                 <span class="error" style="color: red;"> <?= $projectErr; ?> </span>
                                             </div>
-                                        </div>
-                                        <div class="row">
                                             <div class="mb-3 col-md-6">
                                                 <label class="form-label" for="inputDivision">Division</label>
                                                 <select name="divisi_id" id="inputDivision" class="form-select">
@@ -153,48 +146,50 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                                 </select>
                                                 <span class="error" style="color: red;"> <?= $divisionErr; ?> </span>
                                             </div>
+                                        </div>
+                                        <div class="row">
                                             <div class="col-md-6">
-                                                <label class="form-label">Category</label>
-                                                <div class="form-check">
+                                                <label class="form-label">Category</label><br>
+                                                <div class="form-check form-check-inline">
                                                     <input class="form-check-input" type="radio" name="category" id="category_weekend" value="Weekend" <?php if (isset($category) && $category === "Weekend") echo "checked"; ?>>
                                                     <label class="form-check-label" for="category_weekend">Weekend</label>
                                                 </div>
-                                                <div class="form-check">
+                                                <div class="form-check form-check-inline">
                                                     <input class="form-check-input" type="radio" name="category" id="category_weekday" value="Weekday" <?php if (isset($category) && $category === "Weekday") echo "checked"; ?>>
                                                     <label class="form-check-label" for="category_weekday">Weekday</label>
                                                 </div>
                                                 <span class="error" style="color: red;"><?= $categoryErr; ?></span>
                                             </div>
-                                        </div>
-                                        <div class="row">
                                             <div class="col-md-6">
-                                                <label class="form-label">Type</label>
-                                                <div class="form-check">
+                                                <label class="form-label">Type</label><br>
+                                                <div class="form-check form-check-inline">
                                                     <input class="form-check-input" type="radio" name="type" id="type_Normal" value="Normal" <?php if (isset($type) && $type === "Normal") echo "checked"; ?>>
                                                     <label class="form-check-label" for="type_Normal">Normal</label>
                                                 </div>
-                                                <div class="form-check">
+                                                <div class="form-check form-check-inline">
                                                     <input class="form-check-input" type="radio" name="type" id="type_Urgent" value="Urgent" <?php if (isset($type) && $type === "Urgent") echo "checked"; ?>>
                                                     <label class="form-check-label" for="type_Urgent">Urgent</label>
                                                 </div>
-                                                <div class="form-check">
+                                                <div class="form-check form-check-inline">
                                                     <input class="form-check-input" type="radio" name="type" id="type_BusinessTrip" value="Business Trip" <?php if (isset($type) && $type === "Business Trip") echo "checked"; ?>>
                                                     <label class="form-check-label" for="type_BusinessTrip">Business Trip</label>
                                                 </div>
                                                 <span class="error" style="color: red;"><?= $typeErr; ?></span>
                                             </div>
+                                        </div>
+                                        <div class="row">
                                             <div class="mb-3 col-md-6">
                                                 <label class="form-label" for="datepickerStart">Start Date</label>
                                                 <input type="text" class="form-control" name="start_date" id="datepickerStart">
                                                 <span class="error" style="color: red;"> <?= $start_dateErr; ?> </span>
                                             </div>
-                                        </div>
-                                        <div class="row">
                                             <div class="mb-3 col-md-6">
                                                 <label class="form-label" for="datepickerFinish">Finish Date</label>
                                                 <input type="text" class="form-control" name="finish_date" id="datepickerFinish">
                                                 <span class="error" style="color: red;"> <?= $finish_dateErr; ?> </span>
                                             </div>
+                                        </div>
+                                        <div class="row">
                                             <div class="mb-3 col-md-6">
                                                 <label class="form-label" for="inputReason">Reason</label>
                                                 <textarea class="form-control" name="reason" id="inputReason" placeholder="Enter Reason"><?= $reason; ?></textarea>
