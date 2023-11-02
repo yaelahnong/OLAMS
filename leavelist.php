@@ -46,15 +46,21 @@ $divisionOptions = mysqli_fetch_all($divisionData, MYSQLI_ASSOC);
 if ($user_role === 1) {
   $query .= " WHERE leaves.user_id = $user_id";
 }
-
 if ($user_role === 4) { // Supervisor
-  $query .= " WHERE (leaves.status = 'Pending' OR leaves.status = 'Rejected' OR leaves.status = 'Approved') ";
-  $query .= " AND (leaves.submitted_by_admin IS NOT NULL AND leaves.sent_by_admin IS NOT NULL) ";
+  $query .= " WHERE (
+      (leaves.status = 'Pending' OR leaves.status = 'Rejected' OR leaves.status = 'Approved') 
+      AND ((leaves.submitted_by_admin IS NOT NULL AND leaves.sent_by_admin IS NOT NULL) 
+      )
+    )";
 }
-elseif ($user_role === 3) { // Admin
-  $query .= " WHERE (leaves.status = 'Pending' OR leaves.status = 'Rejected' OR leaves.status = 'Approved') ";
-  $query .= " AND (leaves.submitted_by_admin IS NULL OR leaves.sent_by_admin IS NULL) OR (leaves.submitted_by_admin IS NOT NULL OR leaves.sent_by_admin IS NOT NULL) ";
+if ($user_role === 3) { // Admin
+  $query .= " WHERE ((leaves.status = 'Pending' OR leaves.status = 'Rejected' OR leaves.status = 'Approved') 
+    AND ((leaves.submitted_by_admin IS NULL AND leaves.sent_by_admin IS NULL) 
+    OR (leaves.submitted_by_admin IS NOT NULL OR leaves.sent_by_admin IS NOT NULL)
+    )
+  )";
 }
+
 
 $filter_division = "";
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['filter_division']) && !empty($_GET['filter_division'])) {

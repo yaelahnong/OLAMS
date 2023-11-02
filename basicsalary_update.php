@@ -45,6 +45,8 @@ if ($_SERVER["REQUEST_METHOD"] === "GET" && isset($_GET["id"])) {
     if (mysqli_stmt_fetch($stmt)) {
       $formatted_total_basic_salary = $total_basic_salary;
       // Data ditemukan, kita bisa menampilkan form untuk mengupdate gaji
+      $formatted_total_basic_salary = number_format($total_basic_salary); // Format angka
+
     } else {
       echo "Data not found."; // Tampilkan pesan jika data tidak ditemukan
       exit;
@@ -61,11 +63,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   if (isset($_POST['csrf_token']) && isCsrfTokenValid($_POST['csrf_token'])) {
     if (isset($_POST["id"]) && isset($_POST["total_basic_salary"]) && !empty($_POST["id"]) && !empty($_POST["total_basic_salary"])) {
       $id = cleanValue($_POST["id"]);
-      $total_basic_salary = cleanValue($_POST["total_basic_salary"]);
+      $total_basic_salary = cleanValue(str_replace(',', '', $_POST["total_basic_salary"]));
 
       // Validasi input total_basic_salary harus berisi angka
       if (is_numeric($total_basic_salary)) {
-        $formatted_total_basic_salary = number_format($total_basic_salary); // Format angka
         $updateQuery = "UPDATE m_basic_salaries SET total_basic_salary = ?, update_by = ? WHERE basic_salary_id = ?";
         $stmt = mysqli_prepare($conn, $updateQuery);
 
@@ -148,7 +149,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                       <div class="mb-3 col-md-6">
                         <label class="form-label" for="inputTotalBasicSalary">Total Basic Salary</label>
                         <span style="color: red">*</span><br>
-                        <input type="text" class="form-control" name="total_basic_salary" id="inputTotalBasicSalary" placeholder="Enter Total Basic Salary" pattern="[0-9,]*" title="Enter a numeric value with optional commas (e.g., 1,000,000)" value="<?= $formatted_total_basic_salary ?>">
+                        <input type="text" class="form-control" name="total_basic_salary" id="inputTotalBasicSalary" placeholder="Enter Total Basic Salary" value="<?= $formatted_total_basic_salary ?>">
                       </div>
                     </div>
                     <div class="row">
@@ -171,7 +172,30 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       <?php include "components/footer.inc.php"; ?>
     </div>
   </div>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      let inputTotalBasicSalary = document.getElementById("inputTotalBasicSalary");
 
+      inputTotalBasicSalary.addEventListener("input", function(e) {
+        let rawValue = e.target.value.replace(/\D/g, "");
+
+        let formattedValue = addCommas(rawValue);
+
+        e.target.value = formattedValue;
+      });
+    });
+
+    function addCommas(value) {
+      let number = parseFloat(value);
+      if (isNaN(number)) {
+        return "";
+      }
+
+      let formattedValue = number.toLocaleString();
+
+      return formattedValue;
+    }
+  </script>
   <?php include "script.inc.php"; ?>
 </body>
 

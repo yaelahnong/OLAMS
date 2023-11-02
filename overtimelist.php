@@ -57,18 +57,35 @@ if ($user_role === 1) {
 }
 
 if ($user_role == 4) {
-    $show_overtime .= " WHERE (overtimes.status = 'Pending' OR overtimes.status = 'Approved' OR overtimes.status = 'Rejected')";
-    $show_overtime .= " AND (overtimes.submitted_by_admin IS NOT NULL AND overtimes.sent_by_admin IS NOT NULL AND overtimes.checked_by_leader IS NOT NULL AND overtimes.checked_by_leader_at IS NOT NULL) OR 
-    (overtimes.submitted_by_admin IS NOT NULL AND overtimes.sent_by_admin IS NOT NULL AND overtimes.checked_by_leader IS NOT NULL AND overtimes.checked_by_leader_at IS NOT NULL AND overtimes.status_updated_at IS NOT NULL AND overtimes.status_updated_at IS NOT NULL) OR
-    (overtimes.submitted_by_admin IS NULL AND overtimes.sent_by_admin IS NULL AND overtimes.checked_by_leader IS NULL AND overtimes.checked_by_leader_at IS NULL AND overtimes.status_updated_at IS NOT NULL AND overtimes.status_updated_at IS NOT NULL) ";
-} elseif ($user_role == 3) {
-    $show_overtime .= " WHERE (overtimes.status = 'Pending' OR overtimes.status = 'Approved' OR overtimes.status = 'Rejected')";
-    $show_overtime .= " AND (overtimes.checked_by_leader IS NOT NULL AND overtimes.checked_by_leader_at IS NOT NULL AND overtimes.submitted_by_admin IS NULL AND overtimes.sent_by_admin IS NULL) OR 
-    (overtimes.submitted_by_admin IS NOT NULL AND overtimes.sent_by_admin IS NOT NULL AND overtimes.checked_by_leader IS NOT NULL AND overtimes.checked_by_leader_at IS NOT NULL) OR 
-    (overtimes.submitted_by_admin IS NULL AND overtimes.sent_by_admin IS NULL AND overtimes.checked_by_leader IS NULL AND overtimes.checked_by_leader_at IS NULL AND overtimes.status_updated_at IS NOT NULL AND overtimes.status_updated_at IS NOT NULL) ";
-} elseif ($user_role == 2) {
-    $show_overtime .= " WHERE (overtimes.status = 'Pending' OR overtimes.status = 'Approved' OR overtimes.status = 'Rejected')";
-    $show_overtime .= " AND (overtimes.checked_by_leader IS NULL AND overtimes.checked_by_leader_at IS NULL) OR (overtimes.checked_by_leader IS NOT NULL AND overtimes.checked_by_leader_at IS NOT NULL) ";
+    $show_overtime .= " WHERE (
+        (overtimes.status = 'Pending' OR overtimes.status = 'Approved' OR overtimes.status = 'Rejected')
+        AND (
+            (overtimes.submitted_by_admin IS NOT NULL AND overtimes.sent_by_admin IS NOT NULL AND overtimes.checked_by_leader IS NOT NULL AND overtimes.checked_by_leader_at IS NOT NULL )
+            OR (overtimes.submitted_by_admin IS NOT NULL AND overtimes.sent_by_admin IS NOT NULL AND overtimes.checked_by_leader IS NOT NULL AND overtimes.checked_by_leader_at IS NOT NULL AND overtimes.status_updated_at IS NOT NULL AND overtimes.status_updated_at IS NOT NULL )
+            OR (overtimes.submitted_by_admin IS NULL AND overtimes.sent_by_admin IS NULL AND overtimes.checked_by_leader IS NULL AND overtimes.checked_by_leader_at IS NULL AND overtimes.status_updated_at IS NOT NULL AND overtimes.status_updated_at IS NOT NULL )
+        )
+    )";
+}
+
+if ($user_role == 3) {
+    $show_overtime .= " WHERE (
+        (overtimes.status = 'Pending' OR overtimes.status = 'Approved' OR overtimes.status = 'Rejected')
+        AND (
+            (overtimes.checked_by_leader IS NOT NULL AND overtimes.checked_by_leader_at IS NOT NULL AND overtimes.submitted_by_admin IS NULL AND overtimes.sent_by_admin IS NULL)
+            OR (overtimes.submitted_by_admin IS NOT NULL AND overtimes.sent_by_admin IS NOT NULL AND overtimes.checked_by_leader IS NOT NULL AND overtimes.checked_by_leader_at IS NOT NULL)
+            OR (overtimes.submitted_by_admin IS NULL AND overtimes.sent_by_admin IS NULL AND overtimes.checked_by_leader IS NULL AND overtimes.checked_by_leader_at IS NULL AND overtimes.status_updated_at IS NOT NULL AND overtimes.status_updated_at IS NOT NULL)
+        )
+    )";
+}
+
+if ($user_role == 2) {
+    $show_overtime .= " WHERE (
+        (overtimes.status = 'Pending' OR overtimes.status = 'Approved' OR overtimes.status = 'Rejected')
+        AND (
+            (overtimes.checked_by_leader IS NULL AND overtimes.checked_by_leader_at IS NULL)
+            OR (overtimes.checked_by_leader IS NOT NULL AND overtimes.checked_by_leader_at IS NOT NULL)
+        )
+    )";
 }
 $filter_division = "";
 if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['filter_division']) && !empty($_GET['filter_division'])) {
