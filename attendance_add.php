@@ -17,16 +17,13 @@ mysqli_stmt_execute($usersData);
 $resultUsers = mysqli_stmt_get_result($usersData);
 $resultUsers = mysqli_fetch_all($resultUsers, MYSQLI_ASSOC);
 
-
-
 $queryDivision = "SELECT division_id, division_name FROM m_divisions";
 $divisionData = mysqli_prepare($conn, $queryDivision);
 mysqli_stmt_execute($divisionData);
 $resultDivision = mysqli_stmt_get_result($divisionData);
 $resultDivision = mysqli_fetch_all($resultDivision, MYSQLI_ASSOC);
 
-
-$queryType = "SELECT DISTINCT  type FROM attendances";
+$queryType = "SELECT DISTINCT type FROM attendances";
 $typeData = mysqli_prepare($conn, $queryType);
 mysqli_stmt_execute($typeData);
 $resultType = mysqli_stmt_get_result($typeData);
@@ -42,6 +39,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $type = isset($_POST["type"]) ? cleanValue($_POST["type"]) : NULL;
         $startDate = isset($_POST["startDate"]) ? cleanValue($_POST["startDate"]) : NULL;
         $finishDate = isset($_POST["finishDate"]) ? cleanValue($_POST["finishDate"]) : NULL;
+
+        // Validasi data yang diterima dari formulir
         if (empty($_POST["name"])) {
             $fullnameErr = "Full Name is required.";
         }
@@ -103,8 +102,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $TokenErr = "Invalid CSRF token";
     }
 }
-
-
 ?>
 
 <!DOCTYPE html>
@@ -134,7 +131,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                             <div class="alert-message">
                                                 <?php echo $error; ?>
                                             </div>
-                                            <button type="button" class="btn-close align-items-end" data-bs-dismiss="alert" aria-label="Close"></button>
+                                            <button type="button" class="btn-close align-items-end" data-bs-dismiss="alert"
+                                                aria-label="Close"></button>
                                         </div>
                                     <?php } ?>
                                     <form method="post" action="<?= cleanValue($_SERVER['PHP_SELF']); ?>">
@@ -146,7 +144,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                                 <select class="form-select" id="inputName" name="name">
                                                     <option value="">Select Name</option>
                                                     <?php foreach ($resultUsers as $key => $user) { ?>
-                                                        <option value="<?= $user['user_id'] ?>"><?= $user['name'] ?></option>
+                                                    <option value="<?= $user['user_id'] ?>"><?= $user['name'] ?></option>
                                                     <?php } ?>
                                                 </select>
                                                 <span class="text-danger"><?php echo $fullnameErr; ?></span>
@@ -157,7 +155,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                                 <select class="form-select" id="inputDivision" name="division">
                                                     <option value="">Select Division</option>
                                                     <?php foreach ($resultDivision as $key => $division) { ?>
-                                                        <option value="<?= $division['division_id'] ?>"><?= $division['division_name'] ?></option>
+                                                    <option value="<?= $division['division_id'] ?>"><?= $division['division_name'] ?></option>
                                                     <?php } ?>
                                                 </select>
                                                 <span class="text-danger"><?php echo $divisionErr; ?></span>
@@ -176,7 +174,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                                 <select class="form-select" id="inputType" name="type">
                                                     <option value="">Select Type</option>
                                                     <?php foreach ($resultType as $type) { ?>
-                                                        <option value="<?= $type['type'] ?>"><?= $type['type'] ?></option>
+                                                    <option value="<?= $type['type'] ?>"><?= $type['type'] ?></option>
                                                     <?php } ?>
                                                 </select>
                                                 <span class="text-danger"><?php echo $typeErr; ?></span>
@@ -184,15 +182,17 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                         </div>
                                         <div class="row">
                                             <div class="mb-3 col-md-6">
-                                                <label class="form-label" for="inputStartDate">Start Date</label>
+                                                <label class="form-label" for="datepickerStart">Start Date</label>
                                                 <span style="color: red">*</span>
-                                                <input type="date" class="form-control" id="inputStartDate" name="startDate">
+                                                <input type="text" class="form-control datepicker" id="datepickerStart"
+                                                    name="startDate">
                                                 <span class="text-danger"><?php echo $startDateErr; ?></span>
                                             </div>
                                             <div class="mb-3 col-md-6">
-                                                <label class="form-label" for="inputFinishDate">Finish Date</label>
+                                                <label class="form-label" for="datepickerFinish">Finish Date</label>
                                                 <span style="color: red">*</span>
-                                                <input type="date" class="form-control" id="inputFinishDate" name="finishDate">
+                                                <input type="text" class="form-control" id="datepickerFinish"
+                                                    name="finishDate">
                                                 <span class="text-danger"><?php echo $finishDateErr; ?></span>
                                             </div>
                                         </div>
@@ -203,10 +203,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                                     <button type="submit" name="submit" class="btn btn-primary" onclick="return confirm('Are you sure you want to add it?')">Submit</button>
                                                 <?php endif; ?>
                                                 <a href="attendancelist.php" class="btn btn-light text-dark text-decoration-none">Cancel</a>
+
                                             </div>
                                         </div>
                                     </form>
-
                                 </div>
                             </div>
                         </div>

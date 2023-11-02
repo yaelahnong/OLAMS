@@ -37,14 +37,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($fullname)) {
       $fullnameErr = "Name is required.";
-    } elseif (!preg_match("/^[A-Za-z.' ]*$/", $fullname) || strlen($fullname) < 3 || strlen($fullname) > 60) {
-      $fullnameErr = "The name should consist of 3 to 60 characters of letters, quotes and periods are allowed.";
+    } elseif (!preg_match("/^[A-Za-z._ ]*$/", $fullname) || strlen($fullname) < 3 || strlen($fullname) > 20) {
+      $fullnameErr = "The name should consist of 3 to 20 characters of letters, quotes and periods are allowed.";
     }
 
     if (empty($username)) {
       $usernameErr = "Username is required.";
-    } elseif (!preg_match("/^[A-Za-z.' ]*$/", $username) || strlen($username) < 3 || strlen($username) > 60) {
-      $usernameErr = "Usernames should consist of 3 to 60 characters of letters, quotes, and periods.";
+    } elseif (!preg_match("/^[A-Za-z._ ]*$/", $username) || strlen($username) < 3 || strlen($username) > 20) {
+      $usernameErr = "Usernames should consist of 3 to 20 characters of letters, quotes, and periods.";
     }
 
     if (empty($email)) {
@@ -99,7 +99,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       );
 
       mysqli_stmt_execute($stmt);
-      echo "<script>alert('Data user added successfully')</script>";
+      echo "<script type='text/javascript'>
+
+      Swal.fire(
+        'Good job!',
+        'You clicked the button!',
+        'success'
+      )
+      
+      </script>";
       echo "<script>window.location.replace('userlist.php')</script>";
     }
   } else {
@@ -190,6 +198,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <?php include "components/footer.inc.php"; ?>
     </div>
   </div>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="sweetalert2.all.min.js"></script>
+<script src="sweetalert2.min.js"></script>
   <?php include "script.inc.php"; ?>
 </body>
 
