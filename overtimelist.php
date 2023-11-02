@@ -185,7 +185,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                         mysqli_stmt_bind_param($insertHistoryStatement, "iisii", $overtimeId, $userId, $newStatus, $userId, $user_id);
 
                         if (mysqli_stmt_execute($insertHistoryStatement) && mysqli_stmt_execute($updateStatement)) {
-                            echo "<script>alert('Data lembur Diperbarui dengan sukses.')</script>";
+                            echo "<script>alert('Overtime data updated successfully.')</script>";
                             echo "<script>window.location.href = 'overtimelist.php'</script>";
                             exit();
                         } else {
