@@ -127,7 +127,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                         </div>
                                         <div class="row">
                                             <div class="col">
-                                                <?php if ($_SERVER['REQUEST_METHOD'] == 'POST') : ?>
+                                                <?php if ($_SERVER['REQUEST_METHOD'] == 'POST' && !$error) : ?>
                                                     <button type="button" name="update" class="btn btn-primary">Update</button>
                                                 <?php else : ?>
                                                     <button type="submit" name="update" class="btn btn-primary" onclick="return confirm('are you sure you will update?')">Update</button>

@@ -254,7 +254,7 @@ if (isset($_POST['update']) && isset($_POST['overtime_id'])) {
                                         <input type="hidden" name="overtime_id" value="<?= $overtimeId; ?>">
                                         <div class="row">
                                             <div class="col">
-                                                <?php if ($_SERVER['REQUEST_METHOD'] == 'POST') : ?>
+                                                <?php if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($fullnameErr) && !empty($projectErr) && !empty($divisionErr) && !empty($categoryErr) && !empty($typeErr) && !empty($start_dateErr) && !empty($finish_dateErr) && !empty($reasonErr) && !empty($effective_timeErr) ) : ?>
                                                     <button type="button" name="update" class="btn btn-primary">Update</button>
                                                 <?php else : ?>
                                                     <button type="submit" name="update" class="btn btn-primary" onclick="return confirm('are you sure you will update?')">Update</button>
