@@ -200,7 +200,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     </div>
                     <div class="row">
                       <div class="col">
-                        <?php if ($_SERVER['REQUEST_METHOD'] == 'POST') : ?>
+                        <?php if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($fullnameErr) && !empty($divisionErr) && !empty($reasonErr) && !empty($categoryErr) && !empty($startDateErr) && !empty($finishDateErr)) : ?>
                           <button type="button" class="btn btn-primary">Submit</button>
                         <?php else : ?>
                           <button type="submit" class="btn btn-primary" onclick="return confirm('Are you sure you want to add it?')">Submit</button>

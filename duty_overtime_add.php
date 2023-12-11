@@ -165,7 +165,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                 <span class="error" style="color: red;"> <?= $noteErr; ?> </span>
                                             </div>
                                         </div>
-                                        <?php if ($_SERVER['REQUEST_METHOD'] == 'POST') : ?>
+                                        <?php if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($fullnameErr) && !empty($projectErr) && !empty($divisionErr) && !empty($leadCountErr) && !empty($customerCountErr) && !empty($noteErr)) : ?>
                                             <button type="button" name="submit" class="btn btn-primary">Submit</button>
                                         <?php else : ?>
                                             <button type="submit" name="submit" class="btn btn-primary" onclick="return confirm('Are you sure you want to add it?')">Submit</button>
