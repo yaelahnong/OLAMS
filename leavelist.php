@@ -24,6 +24,7 @@ $query = "SELECT
   leaves.category,
   leaves.start_date,
   leaves.finish_date,
+  leaves.submitted_by_admin,
   leaves.status,
   leaves.status_updated_at,
   leaves.status_updated_by
@@ -218,7 +219,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                       <tbody>
                         <?php if (count($leaveArray) > 0) : ?>
                           <?php foreach ($leaveArray as $key => $value) : ?>
-                            <tr>
+                            <?php
+                            // Menentukan class untuk baris berdasarkan status
+                            $rowClass = '';
+                            if ($value['status'] == 'Pending') {
+                              $rowClass = 'bg-primary-subtle'; // Ganti dengan nama kelas CSS yang sesuai
+                            } elseif ($value['status'] == 'Rejected') {
+                              $rowClass = 'bg-danger-subtle'; // Ganti dengan nama kelas CSS yang sesuai
+                            }
+                            ?>
+                            <tr class="<?= $rowClass ?>">
                               <td><?= $key + 1 + $offset ?></td>
                               <td><?= $value['name'] ?></td>
                               <td><?= $value['division_name'] ?></td>
@@ -248,7 +258,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                     <form method="post" action="<?= cleanValue($_SERVER['PHP_SELF']); ?>" style="display: inline;">
                                       <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
                                       <input type="hidden" name="leaves_id" value="<?= $value['leaves_id'] ?>">
-                                      <?php if ($value['status'] !== 'Approved' && $value['status'] !== 'Rejected') : ?>
+                                      <?php if ($value['status'] !== 'Approved' && $value['status'] !== 'Rejected' && $value['submitted_by_admin'] == NULL) : ?>
                                         <button type="submit" name="submit" value="Checked" class="btn btn-success btn-sm ms-2" onclick="return confirm('are you sure you will submit it?')">Submit</button>
                                       <?php endif; ?>
                                     </form>
@@ -298,7 +308,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                       <tbody>
                         <?php if (count($leaveArray) > 0) : ?>
                           <?php foreach ($leaveArray as $key => $value) : ?>
-                            <tr>
+                            <?php
+                            // Menentukan class untuk baris berdasarkan status
+                            $rowClass = '';
+                            if ($value['status'] == 'Pending') {
+                              $rowClass = 'bg-primary-subtle'; // Ganti dengan nama kelas CSS yang sesuai
+                            } elseif ($value['status'] == 'Rejected') {
+                              $rowClass = 'bg-danger-subtle'; // Ganti dengan nama kelas CSS yang sesuai
+                            }
+                            ?>
+                            <tr class="<?= $rowClass ?>">
                               <td><?= $key + 1 + $offset ?></td>
                               <td><?= $value['division_name'] ?></td>
                               <td><?= $value['reason'] ?></td>

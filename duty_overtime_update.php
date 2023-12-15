@@ -199,7 +199,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                             <?php else : ?>
                                                 <button type="submit" name="submit" class="btn btn-primary" onclick="return confirm('are you sure you will update?')">Update</button>
                                                 <?php endif; ?>
-                                        <a href="duty_overtimelist.php" class="btn btn-danger text-white text-decoration-none">Cancel</a>
+                                        <a href="duty_overtimelist.php" class="btn btn-light text-dark text-decoration-none">Cancel</a>
                                     </form>
                                 </div>
                             </div>

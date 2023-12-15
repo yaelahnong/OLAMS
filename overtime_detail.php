@@ -25,6 +25,7 @@ $show_overtime_query = "SELECT
     overtimes.status AS status,
     overtimes.status_updated_at AS status_updated_at,
     overtimes.status_updated_by AS status_updated_by,
+    overtimes.created_at AS created_at,
     overtimes.checked_by_leader_at AS checked_by_leader_at
 FROM overtimes 
 LEFT JOIN users ON overtimes.user_id = users.user_id
@@ -32,23 +33,23 @@ LEFT JOIN m_projects ON overtimes.project_id = m_projects.project_id
 LEFT JOIN m_divisions ON overtimes.divisi_id = m_divisions.division_id
 WHERE overtime_id = ?";
 
-$userQuery = "SELECT user_id, name FROM users";
-$userData = mysqli_prepare($conn, $userQuery);
-mysqli_stmt_execute($userData);
-$userData = mysqli_stmt_get_result($userData);
-$userOptions = mysqli_fetch_all($userData, MYSQLI_ASSOC);
+// $userQuery = "SELECT user_id, name FROM users";
+// $userData = mysqli_prepare($conn, $userQuery);
+// mysqli_stmt_execute($userData);
+// $userData = mysqli_stmt_get_result($userData);
+// $userOptions = mysqli_fetch_all($userData, MYSQLI_ASSOC);
 
-$divisionQuery = "SELECT division_id, division_name FROM m_divisions";
-$divisionData = mysqli_prepare($conn, $divisionQuery);
-mysqli_stmt_execute($divisionData);
-$divisionData = mysqli_stmt_get_result($divisionData);
-$divisionOptions = mysqli_fetch_all($divisionData, MYSQLI_ASSOC);
+// $divisionQuery = "SELECT division_id, division_name FROM m_divisions";
+// $divisionData = mysqli_prepare($conn, $divisionQuery);
+// mysqli_stmt_execute($divisionData);
+// $divisionData = mysqli_stmt_get_result($divisionData);
+// $divisionOptions = mysqli_fetch_all($divisionData, MYSQLI_ASSOC);
 
-$projectQuery = "SELECT project_id, project_name FROM m_projects";
-$projectData = mysqli_prepare($conn, $projectQuery);
-mysqli_stmt_execute($projectData);
-$projectData = mysqli_stmt_get_result($projectData);
-$projectOptions = mysqli_fetch_all($projectData, MYSQLI_ASSOC);
+// $projectQuery = "SELECT project_id, project_name FROM m_projects";
+// $projectData = mysqli_prepare($conn, $projectQuery);
+// mysqli_stmt_execute($projectData);
+// $projectData = mysqli_stmt_get_result($projectData);
+// $projectOptions = mysqli_fetch_all($projectData, MYSQLI_ASSOC);
 
 
 if (isset($_GET['id']) && is_numeric($_GET['id'])) {
@@ -125,31 +126,35 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                                     <!-- <tr>
                                         <td><strong>Submitted by Admin</strong></td>
                                         <td><?= $overtimeDetails['submitted_by_admin'] ?></td>
-                                    </tr>
+                                    </tr> -->
                                     <tr>
                                         <td><strong>Sent by Admin</strong></td>
-                                        <td><?= $overtimeDetails['sent_by_admin'] ?></td>
+                                        <td><?= $overtimeDetails['sent_by_admin'] ? date('d-M-Y H:i', strtotime($overtimeDetails['sent_by_admin'])) : '-' ?></td>
                                     </tr>
-                                    <tr>
+                                    <!-- <tr>
                                         <td><strong>Checked by Leader</strong></td>
                                         <td><?= $overtimeDetails['checked_by_leader'] ?></td>
-                                    </tr>
+                                    </tr> -->
                                     <tr>
                                         <td><strong>Checked by Leader At</strong></td>
-                                        <td><?= $overtimeDetails['checked_by_leader_at'] ?></td>
+                                        <td><?= $overtimeDetails['checked_by_leader_at'] ? date('d-M-Y H:i', strtotime($overtimeDetails['checked_by_leader_at'])) : '-' ?></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Status Updated At</strong></td>
+                                        <td><?= $overtimeDetails['status_updated_at'] ? date('d-M-Y H:i', strtotime($overtimeDetails['status_updated_at'])) : '-' ?></td>
+                                    </tr>
+                                    <!-- <tr>
+                                        <td><strong>Status Updated By</strong></td>
+                                        <td><?= $overtimeDetails['status_updated_by'] ?></td>
                                     </tr> -->
+                                    <tr>
+                                        <td><strong>Created At</strong></td>
+                                        <td><?= $overtimeDetails['status_updated_at'] ? date('d-M-Y H:i', strtotime($overtimeDetails['created_at'])) : '-' ?></td>
+                                    </tr>
                                     <tr>
                                         <td><strong>Status</strong></td>
                                         <td><?= $overtimeDetails['status'] ?></td>
                                     </tr>
-                                    <!-- <tr>
-                                        <td><strong>Status Updated At</strong></td>
-                                        <td><?= $overtimeDetails['status_updated_at'] ?></td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Status Updated By</strong></td>
-                                        <td><?= $overtimeDetails['status_updated_by'] ?></td>
-                                    </tr> -->
                                 </tbody>
                             </table>
                             <a href="overtimelist.php" class="btn btn-warning btn-sm ms-2">Back</a>
