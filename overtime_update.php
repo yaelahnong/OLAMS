@@ -30,7 +30,23 @@ $resultProject = mysqli_fetch_all($resultProject, MYSQLI_ASSOC);
 
 if (isset($_GET['id'])) {
     $overtimeId = cleanValue($_GET['id']);
-    $queryOvertime = "SELECT user_id, project_id, divisi_id, category, type, reason, start_date, finish_date, effective_time, status FROM overtimes WHERE overtime_id = ?";
+    $queryOvertime = "SELECT 
+    overtimes.user_id, 
+    m_projects.project_name AS project_name,
+    m_divisions.division_name AS divisi_name,
+    overtimes.project_id, 
+    overtimes.divisi_id, 
+    overtimes.category, 
+    overtimes.type, 
+    overtimes.reason, 
+    overtimes.start_date, 
+    overtimes.finish_date, 
+    overtimes.effective_time, 
+    overtimes.status 
+    FROM overtimes 
+    LEFT JOIN m_projects ON overtimes.project_id = m_projects.project_id 
+    LEFT JOIN m_divisions ON overtimes.divisi_id = m_divisions.division_id 
+    WHERE overtime_id = ?";
     $stmt = mysqli_prepare($conn, $queryOvertime);
     mysqli_stmt_bind_param($stmt, "i", $overtimeId);
     mysqli_stmt_execute($stmt);
@@ -40,7 +56,9 @@ if (isset($_GET['id'])) {
         $row = mysqli_fetch_assoc($resultOvertime);
         $user_id = $row['user_id'];
         $project_id = $row['project_id'];
+        $project_name = $row['project_name'];
         $divisi_id = $row['divisi_id'];
+        $divisi_name = $row['divisi_name'];
         $category = $row['category'];
         $type = $row['type'];
         $reason = $row['reason'];
@@ -53,10 +71,8 @@ if (isset($_GET['id'])) {
 
 
 $fullnameErr = $divisionErr = $reasonErr = $typeErr = $start_dateErr = $finish_dateErr = $categoryErr = $projectErr = $effective_timeErr = "";
-// $fullname = $division = $reason = $type = $startDate = $finishDate = $category = $project = $effective_time = NULL;
 if (isset($_POST['update']) && isset($_POST['overtime_id'])) {
     if (isset($_POST['csrf_token']) && isCsrfTokenValid($_POST['csrf_token'])) {
-        // $overtimeId = cleanValue($_POST['overtime_id']);
         $fullname = isset($_POST["user_id"]) ? cleanValue($_POST["user_id"]) : NULL;
         $project_id = isset($_POST["project_id"]) ? cleanValue($_POST["project_id"]) : NULL;
         $divisi_id = isset($_POST["divisi_id"]) ? cleanValue($_POST["divisi_id"]) : NULL;
@@ -104,8 +120,6 @@ if (isset($_POST['update']) && isset($_POST['overtime_id'])) {
                 $effective_timeErr = "Effective Time can only be filled when status is Approved.";
             }
         }
-        // var_dump($effective_timeErr);
-        // exit;
         if (empty($fullnameErr) && empty($projectErr) && empty($divisionErr) && empty($categoryErr) && empty($typeErr) && empty($start_dateErr) && empty($finish_dateErr) && empty($reasonErr) && empty($effective_timeErr)) {
             if ($status === 'Approved') {
                 // Query update dengan kolom "Effective Time"
@@ -139,7 +153,7 @@ if (isset($_POST['update']) && isset($_POST['overtime_id'])) {
 
 <head>
     <?php include "head.inc.php"; ?>
-    <title>OLAMS - Add Overtime</title>
+    <title>OLAMS - Update Overtime</title>
 </head>
 
 <body>
@@ -158,103 +172,145 @@ if (isset($_POST['update']) && isset($_POST['overtime_id'])) {
                                 <div class="card-body">
                                     <form action="<?= cleanValue($_SERVER['PHP_SELF'] . "?id=" . $overtimeId) ?>" method="post">
                                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
-                                        <div class="row">
-                                            <div class="mb-3 col-md-6 d-none">
-                                                <label class="form-label" for="inputUser">User</label>
-                                                <input type="text" name="user_id" id="inputUser" class="form-control" value="<?= $_SESSION["user_id"]; ?>" readonly>
-                                                <span class="error" style="color: red;"> <?= $fullnameErr; ?> </span>
-                                            </div>
-                                            <div class="mb-3 col-md-6">
-                                                <label class="form-label" for="inputProject">Project</label>
-                                                <select name="project_id" id="inputProject" class="form-select">
-                                                    <option value="">Select Project</option>
-                                                    <?php foreach ($resultProject as $project) : ?>
-                                                        <option value="<?= $project['project_id'] ?>" <?= $project['project_id'] == $project_id ? 'selected' : '' ?>><?= $project['project_name'] ?></option>
-                                                    <?php endforeach; ?>
-                                                </select>
-                                                <span class="error" style="color: red;"> <?= $projectErr; ?> </span>
-                                            </div>
-                                            <div class="mb-3 col-md-6">
-                                                <label class="form-label" for="inputDivision">Division</label>
-                                                <select name="divisi_id" id="inputDivision" class="form-select">
-                                                    <?php echo $division; ?>
-                                                    <option value="">Select Division</option>
-                                                    <?php foreach ($resultDivision as $division) : ?>
-                                                        <option value="<?= $division['division_id'] ?>" <?= $division['division_id'] == $divisi_id ? 'selected' : '' ?>><?= $division['division_name'] ?></option>
-                                                    <?php endforeach; ?>
-                                                </select>
-                                                <span class="error" style="color: red;"> <?= $divisionErr; ?> </span>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <label class="form-label">Category</label><br>
-                                                <div class="form-check form-check-inline">
-                                                    <?php echo $category; ?>
-                                                    <input class="form-check-input" type="radio" name="category" id="category_weekend" value="Weekend" <?php if (isset($category) && $category === "Weekend") echo "checked"; ?>>
-                                                    <label class="form-check-label" for="category_weekend">Weekend</label>
-                                                </div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="category" id="category_weekday" value="Weekday" <?php if (isset($category) && $category === "Weekday") echo "checked"; ?>>
-                                                    <label class="form-check-label" for="category_weekday">Weekday</label>
-                                                </div>
-                                                <span class="error" style="color: red;"><?= $categoryErr; ?></span>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label class="form-label">Type</label><br>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="type" id="type_Normal" value="Normal" <?php if (isset($type) && $type === "Normal") echo "checked"; ?>>
-                                                    <label class="form-check-label" for="type_Normal">Normal</label>
-                                                </div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="type" id="type_Urgent" value="Urgent" <?php if (isset($type) && $type === "Urgent") echo "checked"; ?>>
-                                                    <label class="form-check-label" for="type_Urgent">Urgent</label>
-                                                </div>
-                                                <div class="form-check form-check-inline">
-                                                    <input class="form-check-input" type="radio" name="type" id="type_BusinessTrip" value="Business Trip" <?php if (isset($type) && $type === "Business Trip") echo "checked"; ?>>
-                                                    <label class="form-check-label" for="type_BusinessTrip">Business Trip</label>
-                                                </div>
-                                                <span class="error" style="color: red;"><?= $typeErr; ?></span>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="mb-3 col-md-6">
-                                                <label class="form-label" for="inputStartDate">Start Date</label>
-                                                <input type="datetime-local" class="form-control" name="start_date" id="inputStartDate" value="<?= $start_date; ?>">
-                                                <span class="error" style="color: red;"> <?= $start_dateErr; ?> </span>
-                                            </div>
-                                            <div class="mb-3 col-md-6">
-                                                <label class="form-label" for="inputFinishDate">Finish Date</label>
-                                                <input type="datetime-local" class="form-control" name="finish_date" id="inputFinishDate" value="<?= $finish_date; ?>">
-                                                <span class="error" style="color: red;"> <?= $finish_dateErr; ?> </span>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="mb-3 col-md-6">
-                                                <label class="form-label" for="inputReason">Reason</label>
-                                                <textarea class="form-control" name="reason" id="inputReason" placeholder="Enter Reason"><?= $reason; ?></textarea>
-                                                <span class="error" style="color: red;"> <?= $reasonErr; ?> </span>
-                                            </div>
-                                            <?php if (isset($status) && ($status === 'Pending' || $status === 'Rejected')) : ?>
-
+                                        <?php if (isset($status) && ($status === 'Pending' || $status === 'Rejected')) : ?>
+                                            <div class="row">
                                                 <div class="mb-3 col-md-6 d-none">
-                                                    <label class="form-label" for="inputEffectiveTime">Effective Time</label>
-                                                    <input type="number" class="form-control" name="effective_time" id="inputEffectiveTime" placeholder="Enter effective time...">
+                                                    <label class="form-label" for="inputUser">User</label>
+                                                    <input type="text" name="user_id" id="inputUser" class="form-control" value="<?= $_SESSION["user_id"]; ?>" readonly>
+                                                    <span class="error" style="color: red;"> <?= $fullnameErr; ?> </span>
                                                 </div>
-                                            <?php elseif (isset($status) && ($status === 'Approved')) : ?>
-
+                                                <div class="mb-3 col-md-6">
+                                                    <label class="form-label" for="inputProject">Project</label>
+                                                    <select name="project_id" id="inputProject" class="form-select">
+                                                        <option value="">Select Project</option>
+                                                        <?php foreach ($resultProject as $project) : ?>
+                                                            <option value="<?= $project['project_id'] ?>" <?= $project['project_id'] == $project_id ? 'selected' : '' ?>><?= $project['project_name'] ?></option>
+                                                        <?php endforeach; ?>
+                                                    </select>
+                                                    <span class="error" style="color: red;"> <?= $projectErr; ?> </span>
+                                                </div>
+                                                <div class="mb-3 col-md-6">
+                                                    <label class="form-label" for="inputDivision">Division</label>
+                                                    <select name="divisi_id" id="inputDivision" class="form-select">
+                                                        <option value="">Select Division</option>
+                                                        <?php foreach ($resultDivision as $division) : ?>
+                                                            <option value="<?= $division['division_id'] ?>" <?= $division['division_id'] == $divisi_id ? 'selected' : '' ?>><?= $division['division_name'] ?></option>
+                                                        <?php endforeach; ?>
+                                                    </select>
+                                                    <span class="error" style="color: red;"> <?= $divisionErr; ?> </span>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Category</label><br>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" name="category" id="category_weekend" value="Weekend" <?php if (isset($category) && $category === "Weekend") echo "checked"; ?>>
+                                                        <label class="form-check-label" for="category_weekend">Weekend</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" name="category" id="category_weekday" value="Weekday" <?php if (isset($category) && $category === "Weekday") echo "checked"; ?>>
+                                                        <label class="form-check-label" for="category_weekday">Weekday</label>
+                                                    </div>
+                                                    <span class="error" style="color: red;"><?= $categoryErr; ?></span>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Type</label><br>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" name="type" id="type_Normal" value="Normal" <?php if (isset($type) && $type === "Normal") echo "checked"; ?>>
+                                                        <label class="form-check-label" for="type_Normal">Normal</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" name="type" id="type_Urgent" value="Urgent" <?php if (isset($type) && $type === "Urgent") echo "checked"; ?>>
+                                                        <label class="form-check-label" for="type_Urgent">Urgent</label>
+                                                    </div>
+                                                    <div class="form-check form-check-inline">
+                                                        <input class="form-check-input" type="radio" name="type" id="type_BusinessTrip" value="Business Trip" <?php if (isset($type) && $type === "Business Trip") echo "checked"; ?>>
+                                                        <label class="form-check-label" for="type_BusinessTrip">Business Trip</label>
+                                                    </div>
+                                                    <span class="error" style="color: red;"><?= $typeErr; ?></span>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="mb-3 col-md-6">
+                                                    <label class="form-label" for="inputStartDate">Start Date</label>
+                                                    <input type="datetime-local" class="form-control" name="start_date" id="inputStartDate" value="<?= $start_date; ?>">
+                                                    <span class="error" style="color: red;"> <?= $start_dateErr; ?> </span>
+                                                </div>
+                                                <div class="mb-3 col-md-6">
+                                                    <label class="form-label" for="inputFinishDate">Finish Date</label>
+                                                    <input type="datetime-local" class="form-control" name="finish_date" id="inputFinishDate" value="<?= $finish_date; ?>">
+                                                    <span class="error" style="color: red;"> <?= $finish_dateErr; ?> </span>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="mb-3 col-md-6">
+                                                    <label class="form-label" for="inputReason">Reason</label>
+                                                    <textarea class="form-control" name="reason" id="inputReason" placeholder="Enter Reason"><?= $reason; ?></textarea>
+                                                    <span class="error" style="color: red;"> <?= $reasonErr; ?> </span>
+                                                </div>
+                                            </div>
+                                        <?php elseif (isset($status) && ($status === 'Approved')) : ?>
+                                            <!-- perbedaan complit dan edit -->
+                                            <div class="row">
+                                                <div class="mb-3 col-md-6 d-none">
+                                                    <label class="form-label" for="inputUser">User</label>
+                                                    <input type="text" name="user_id" id="inputUser" class="form-control" value="<?= $_SESSION["user_id"]; ?>" readonly>
+                                                    <span class="error" style="color: red;"> <?= $fullnameErr; ?> </span>
+                                                </div>
+                                                <div class="mb-3 col-md-6">
+                                                    <label class="form-label" for="inputProject">Proyek</label>
+                                                    <input type="text" name="project_name" id="inputProjectName" class="form-control" value="<?= $project_name; ?>" readonly>
+                                                    <input type="hidden" name="project_id" value="<?= $project_id; ?>">
+                                                    <span class="error" style="color: red;"> <?= $projectErr; ?> </span>
+                                                </div>
+                                                <div class="mb-3 col-md-6">
+                                                    <label class="form-label" for="inputDivision">Divisi</label>
+                                                    <input type="text" name="division_name" id="inputDivisionName" class="form-control" value="<?= $divisi_name; ?>" readonly>
+                                                    <input type="hidden" name="divisi_id" value="<?= $divisi_id; ?>">
+                                                    <span class="error" style="color: red;"> <?= $divisionErr; ?> </span>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Category</label><br>
+                                                    <input class="form-control" type="text" name="category" value="<?= $category; ?>" readonly>
+                                                    <span class="error" style="color: red;"><?= $categoryErr; ?></span>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label">Type</label><br>
+                                                    <input class="form-control" type="text" name="type" value="<?= $type ?>" readonly>
+                                                    <span class="error" style="color: red;"><?= $typeErr; ?></span>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="mb-3 col-md-6">
+                                                    <label class="form-label" for="inputStartDate">Start Date</label>
+                                                    <input type="datetime-local" class="form-control" name="start_date" id="inputStartDate" value="<?= $start_date; ?>" readonly>
+                                                    <span class="error" style="color: red;"> <?= $start_dateErr; ?> </span>
+                                                </div>
+                                                <div class="mb-3 col-md-6">
+                                                    <label class="form-label" for="inputFinishDate">Finish Date</label>
+                                                    <input type="datetime-local" class="form-control" name="finish_date" id="inputFinishDate" value="<?= $finish_date; ?>" readonly>
+                                                    <span class="error" style="color: red;"> <?= $finish_dateErr; ?> </span>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="mb-3 col-md-6">
+                                                    <label class="form-label" for="inputReason">Reason</label>
+                                                    <textarea class="form-control" name="reason" id="inputReason" placeholder="Enter Reason" readonly><?= $reason; ?></textarea>
+                                                    <span class="error" style="color: red;"> <?= $reasonErr; ?> </span>
+                                                </div>
                                                 <div class="mb-3 col-md-6">
                                                     <label class="form-label" for="inputEffectiveTime">Effective Time (Hours)</label>
                                                     <input type="number" class="form-control" name="effective_time" id="inputEffectiveTime" placeholder="Enter effective time..." value="<?= $effective_time; ?>">
                                                     <span class="error" style="color: red;"> <?= $effective_timeErr; ?> </span>
                                                 </div>
-
-                                            <?php endif; ?>
-                                        </div>
+                                            </div>
+                                        <?php endif; ?>
                                         <input type="hidden" name="overtime_id" value="<?= $overtimeId; ?>">
                                         <div class="row">
                                             <div class="col">
-                                                <?php if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($fullnameErr) && !empty($projectErr) && !empty($divisionErr) && !empty($categoryErr) && !empty($typeErr) && !empty($start_dateErr) && !empty($finish_dateErr) && !empty($reasonErr) && !empty($effective_timeErr) ) : ?>
+                                                <?php if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($fullnameErr) && !empty($projectErr) && !empty($divisionErr) && !empty($categoryErr) && !empty($typeErr) && !empty($start_dateErr) && !empty($finish_dateErr) && !empty($reasonErr) && !empty($effective_timeErr)) : ?>
                                                     <button type="button" name="update" class="btn btn-primary">Update</button>
                                                 <?php else : ?>
                                                     <button type="submit" name="update" class="btn btn-primary" onclick="return confirm('are you sure you will update?')">Update</button>

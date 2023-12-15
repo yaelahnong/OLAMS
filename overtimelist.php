@@ -282,7 +282,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                     <th scope="col">Type</th>
                                                     <th scope="col" style="min-width : 200px;">Start Date</th>
                                                     <th scope="col" style="min-width : 200px;">Finish Date</th>
-                                                    <th scope="col">Status</th>
                                                     <th scope="col" style="min-width : 210px;">Action</th>
                                                     <?php if ($user_role === 2) : ?>
                                                         <th scope="col" style="min-width : 210px;">Status Leader</th>
@@ -290,12 +289,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                         <th scope="col" style="min-width : 210px;">Status Leader</th>
                                                         <th scope="col" style="min-width : 210px;">Status Admin</th>
                                                     <?php endif; ?>
+                                                    <th scope="col">Status</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <?php if (count($karyawanArray) > 0) : ?>
                                                     <?php foreach ($karyawanArray as $key => $value) : ?>
-                                                        <tr>
+                                                        <?php
+                                                        // Menentukan class untuk baris berdasarkan status
+                                                        $rowClass = '';
+                                                        if ($value['status'] == 'Pending') {
+                                                            $rowClass = 'bg-primary-subtle'; // Ganti dengan nama kelas CSS yang sesuai
+                                                        }
+                                                        elseif ($value['status'] == 'Rejected') {
+                                                            $rowClass = 'bg-danger-subtle'; // Ganti dengan nama kelas CSS yang sesuai
+                                                        }
+                                                        ?>
+                                                        <tr class="<?= $rowClass ?>">
                                                             <td><?= $key + 1 + $offset ?></td>
                                                             <td><?= $value['name'] ?></td>
                                                             <td><?= $value['project_name'] ?></td>
@@ -303,20 +313,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                             <td><?= $value['type'] ?></td>
                                                             <td><?= date('d-M-Y H:i', strtotime($value['start_date'])) ?></td>
                                                             <td><?= date('d-M-Y H:i', strtotime($value['finish_date'])) ?></td>
-                                                            <td>
-                                                                <?php
-                                                                if ($value['status'] === 'Pending') {
-                                                                    $statusClass = 'badge bg-warning'; // Status "pending"
-                                                                } elseif ($value['status'] === 'Rejected') {
-                                                                    $statusClass = 'badge bg-danger'; // Status "reject"
-                                                                } elseif ($value['status'] === 'Approved') {
-                                                                    $statusClass = 'badge bg-success'; // Status "approved"
-                                                                }
-                                                                ?>
-                                                                <button class="btn btn-sm text-white <?= $statusClass ?>" disabled>
-                                                                    <?= $value['status'] ?>
-                                                                </button>
-                                                            </td>
                                                             <td>
                                                                 <div class="d-flex">
                                                                     <?php if ($user_role === 3) : // Cek apakah peran sama dengan admin 
@@ -348,7 +344,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                                             <input type="hidden" name="overtime_id" value="<?= $value['overtime_id'] ?>">
                                                                             <?php if ($value['status'] === 'Pending' && $value['checked_by_leader'] == NULL) : ?>
                                                                                 <?php if ($user_role === 2 && $value['type'] === 'Urgent') : ?>
-                                                                                    <button type="submit" name="submit" value="Approve" class="btn btn-success btn-sm ms-2" onclick="return confirm('are you sure you will approve it?')">Approve</button>
+                                                                                    <button type="submit" name="submit" value="Approve" class="btn btn-success btn-sm ms-2" onclick="return confirm('are you sure you will approve it?')">Confirm</button>
                                                                                 <?php else : ?>
                                                                                     <button type="submit" name="submit" value="Check" class="btn btn-success btn-sm ms-2" onclick="return confirm('Are you sure you have checked?')">Check</button>
                                                                                 <?php endif; ?>
@@ -359,6 +355,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                                 </div>
                                                             </td>
                                                             <?php
+                                                            if ($value['status'] === 'Pending') {
+                                                                $statusClass = 'badge bg-warning'; // Status "pending"
+                                                            } elseif ($value['status'] === 'Rejected') {
+                                                                $statusClass = 'badge bg-danger'; // Status "reject"
+                                                            } elseif ($value['status'] === 'Approved') {
+                                                                $statusClass = 'badge bg-success'; // Status "approved"
+                                                            }
+                                                            ?>
+                                                            <?php if ($user_role === 2) : //Leader 
+                                                            ?>
+                                                                <?php if ($value['type'] == 'Urgent') : ?>
+                                                                    <td><button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['status_updated_by'] ? "{$value['status']} leader" : "Approved By Leader" ?></button></td>
+                                                                <?php else : ?>
+                                                                    <td><button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['checked_by_leader'] ? "{$value['status']} admin" : "Check By Leader" ?></button></td>
+                                                                <?php endif; ?>
+                                                            <?php elseif ($user_role === 3) : //Admin 
+                                                            ?>
+                                                                <?php if ($value['type'] == 'Urgent') : ?>
+                                                                    <td><button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['status_updated_by'] ? "{$value['status']} leader" : "Pending" ?></button></td>
+                                                                <?php else : ?>
+                                                                    <td><button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['checked_by_leader'] ? "{$value['status']}" : "Pending" ?></button></td>
+                                                                <?php endif; ?>
+                                                                <td>
+                                                                    <button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['submitted_by_admin'] ? "{$value['status']} supervisor" : "{$value['status']} supervisor" ?></button>
+                                                                </td>
+                                                            <?php elseif ($user_role === 4) : //Admin 
+                                                            ?>
+                                                                <?php if ($value['type'] == 'Urgent') : ?>
+                                                                    <td><button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['status_updated_by'] ? "{$value['status']} leader" : "Pending" ?></button></td>
+                                                                <?php else : ?>
+                                                                    <td><button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['checked_by_leader'] ? "{$value['status']} admin" : "Pending" ?></button></td>
+                                                                <?php endif; ?>
+                                                                <td>
+                                                                    <button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['submitted_by_admin'] ? "{$value['status']} supervisor" : "{$value['status']} admin" ?></button>
+                                                                </td>
+                                                            <?php endif; ?>
+                                                            <td>
+                                                                <?php
                                                                 if ($value['status'] === 'Pending') {
                                                                     $statusClass = 'badge bg-warning'; // Status "pending"
                                                                 } elseif ($value['status'] === 'Rejected') {
@@ -367,31 +401,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                                     $statusClass = 'badge bg-success'; // Status "approved"
                                                                 }
                                                                 ?>
-                                                            <?php if ($user_role === 2) : //Leader ?>
-                                                                <?php if ($value['type'] == 'Urgent') : ?>
-                                                                    <td><button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['status_updated_by'] ? "{$value['status']} to leader" : "-" ?></button></td>
-                                                                <?php else : ?>
-                                                                    <td><button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['checked_by_leader'] ? "{$value['status']} to admin" : "-" ?></button></td>
-                                                                <?php endif; ?>
-                                                                <?php elseif ($user_role === 3) : //Admin ?>
-                                                                    <?php if ($value['type'] == 'Urgent') : ?>
-                                                                    <td><button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['status_updated_by'] ? "{$value['status']} to leader" : "-" ?></button></td>
-                                                                <?php else : ?>
-                                                                    <td><button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['checked_by_leader'] ? "{$value['status']}" : "-" ?></button></td>
-                                                                <?php endif; ?>
-                                                                <td>
-                                                                    <button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['submitted_by_admin'] ? "{$value['status']} to supervisor" : "{$value['status']} to supervisor"?></button>
-                                                                </td>
-                                                                <?php elseif ($user_role === 4) : //Admin ?>
-                                                                    <?php if ($value['type'] == 'Urgent') : ?>
-                                                                    <td><button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['status_updated_by'] ? "{$value['status']} to leader" : "-" ?></button></td>
-                                                                <?php else : ?>
-                                                                    <td><button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['checked_by_leader'] ? "{$value['status']} to admin" : "-" ?></button></td>
-                                                                <?php endif; ?>
-                                                                <td>
-                                                                    <button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['submitted_by_admin'] ? "{$value['status']} to supervisor" : "{$value['status']} to admin"?></button>
-                                                                </td>
-                                                            <?php endif; ?>
+                                                                <button class="btn btn-sm text-white <?= $statusClass ?>" disabled>
+                                                                    <?= $value['status'] ?>
+                                                                </button>
+                                                            </td>
                                                         </tr>
                                                     <?php endforeach; ?>
                                                 <?php else : ?>
@@ -415,16 +428,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                     <th scope="col">Type</th>
                                                     <th scope="col" style="min-width : 200px;">Start Date</th>
                                                     <th scope="col" style="min-width : 200px;">Finish Date</th>
-                                                    <th scope="col">Status</th>
                                                     <th scope="col" style="min-width : 210px;">Action</th>
                                                     <th scope="col" style="min-width : 210px;">Status Leader</th>
                                                     <th scope="col" style="min-width : 210px;">Status Admin</th>
+                                                    <th scope="col">Status</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <?php if (count($karyawanArray) > 0) : ?>
                                                     <?php foreach ($karyawanArray as $key => $value) : ?>
-                                                        <tr>
+                                                        <?php
+                                                        // Menentukan class untuk baris berdasarkan status
+                                                        $rowClass = '';
+                                                        if ($value['status'] == 'Pending') {
+                                                            $rowClass = 'bg-primary-subtle'; // Ganti dengan nama kelas CSS yang sesuai
+                                                        }
+                                                        elseif ($value['status'] == 'Rejected') {
+                                                            $rowClass = 'bg-danger-subtle'; // Ganti dengan nama kelas CSS yang sesuai
+                                                        }
+                                                        ?>
+                                                        <tr class="<?= $rowClass ?>">
                                                             <td><?= $key + 1 + $offset ?></td>
                                                             <td><?= $value['name'] ?></td>
                                                             <td><?= $value['project_name'] ?></td>
@@ -432,21 +455,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                             <td><?= $value['type'] ?></td>
                                                             <td><?= date('d-M-Y H:i', strtotime($value['start_date'])) ?></td>
                                                             <td><?= date('d-M-Y H:i', strtotime($value['finish_date'])) ?></td>
-                                                            <td>
-                                                                <?php
-                                                                if ($value['status'] === 'Pending') {
-                                                                    $statusClass = 'badge bg-warning'; // Status "pending"
-                                                                } elseif ($value['status'] === 'Rejected') {
-                                                                    $statusClass = 'badge bg-danger'; // Status "reject"
-                                                                } elseif ($value['status'] === 'Approved') {
-                                                                    $statusClass = 'badge bg-success'; // Status "approved"
-                                                                }
-
-                                                                ?>
-                                                                <button class="btn btn-sm text-white <?= $statusClass ?>" disabled>
-                                                                    <?= $value['status'] ?>
-                                                                </button>
-                                                            </td>
                                                             <td>
                                                                 <div class="d-flex">
                                                                     <?php if ($user_role === 1) : // Cek apakah peran sama dengan user
@@ -466,6 +474,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                                 </div>
                                                             </td>
                                                             <?php
+                                                            if ($value['status'] === 'Pending') {
+                                                                $statusClass = 'badge bg-warning'; // Status "pending"
+                                                            } elseif ($value['status'] === 'Rejected') {
+                                                                $statusClass = 'badge bg-danger'; // Status "reject"
+                                                            } elseif ($value['status'] === 'Approved') {
+                                                                $statusClass = 'badge bg-success'; // Status "approved"
+                                                            }
+                                                            ?>
+                                                            <?php if ($value['type'] == 'Urgent') : ?>
+                                                                <td><button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['status_updated_by'] ? "{$value['status']} leader" : "Pending" ?></button></td>
+                                                            <?php else : ?>
+                                                                <td><button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['checked_by_leader'] ? "{$value['status']} admin" : "Pending" ?></button></td>
+                                                            <?php endif; ?>
+                                                            <td>
+                                                                <button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['submitted_by_admin'] ? "{$value['status']} Supervisor" : "{$value['status']}" ?></button>
+                                                            </td>
+                                                            <td>
+                                                                <?php
                                                                 if ($value['status'] === 'Pending') {
                                                                     $statusClass = 'badge bg-warning'; // Status "pending"
                                                                 } elseif ($value['status'] === 'Rejected') {
@@ -473,14 +499,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                                 } elseif ($value['status'] === 'Approved') {
                                                                     $statusClass = 'badge bg-success'; // Status "approved"
                                                                 }
+
                                                                 ?>
-                                                            <?php if ($value['type'] == 'Urgent') : ?>
-                                                                <td><button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['status_updated_by'] ? "{$value['status']} to leader" : "-" ?></button></td>
-                                                            <?php else : ?>
-                                                                <td><button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['checked_by_leader'] ? "{$value['status']} to admin" : "-" ?></button></td>
-                                                            <?php endif; ?>
-                                                            <td>
-                                                                <button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['submitted_by_admin'] ? "{$value['status']} to Supervisor" : '-' ?></button>
+                                                                <button class="btn btn-sm text-white <?= $statusClass ?>" disabled>
+                                                                    <?= $value['status'] ?>
+                                                                </button>
                                                             </td>
                                                         </tr>
                                                     <?php endforeach; ?>

@@ -17,6 +17,8 @@ $show_leave_query = "SELECT
     leaves.category AS category,
     leaves.start_date AS start_date,
     leaves.finish_date AS finish_date,
+    leaves.sent_by_admin AS sent_by_admin,
+    leaves.status_updated_at AS status_updated_at,
     leaves.status AS status
 FROM leaves
 LEFT JOIN users ON leaves.user_id = users.user_id
@@ -81,6 +83,14 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                                     <tr>
                                         <td><strong>Finish Date</strong></td>
                                         <td><?= date('d-M-Y H:i', strtotime($leaveDetails['finish_date'])) ?></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Sent by Admin</strong></td>
+                                        <td><?= $leaveDetails['sent_by_admin'] ? date('d-M-Y H:i', strtotime($leaveDetails['sent_by_admin'])) : '-' ?></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Status Updated At</strong></td>
+                                        <td><?= $leaveDetails['status_updated_at'] ? date('d-M-Y H:i', strtotime($leaveDetails['status_updated_at'])) : '-' ?></td>
                                     </tr>
                                     <tr>
                                         <td><strong>Status</strong></td>

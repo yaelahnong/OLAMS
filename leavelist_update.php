@@ -23,6 +23,12 @@ mysqli_stmt_execute($divisionData);
 $resultDivision = mysqli_stmt_get_result($divisionData);
 $resultDivision = mysqli_fetch_all($resultDivision, MYSQLI_ASSOC);
 
+$queryCategory = "SELECT DISTINCT category FROM leaves";
+$categoryData = mysqli_prepare($conn, $queryCategory);
+mysqli_stmt_execute($categoryData);
+$resultCategory = mysqli_stmt_get_result($categoryData);
+$categoryList = mysqli_fetch_all($resultCategory, MYSQLI_ASSOC);
+
 $fullnameErr = $divisionErr = $reasonErr = $categoryErr = $startDateErr = $finishDateErr = "";
 $fullname = $division = $reason = $category = $startDate = $finishDate = "";
 $leave_id = null;
@@ -188,7 +194,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                             <div class="mb-3 col-md-6">
                                                 <label class="form-label" for="inputCategory">Category</label>
                                                 <span style="color: red">*</span>
-                                                <input type="text" class="form-control" id="inputCategory" name="category" value="<?= $category ?>">
+                                                <select class="form-select" id="inputCategory" name="category">
+                                                    <?php foreach ($categoryList as $categoryOption) { ?>
+                                                        <option value="<?= $categoryOption['category'] ?>" <?= ($categoryOption['category'] == $category) ? 'selected' : '' ?>>
+                                                            <?= $categoryOption['category'] ?>
+                                                        </option>
+                                                    <?php } ?>
+                                                </select>
                                                 <span class="text-danger"><?php echo $categoryErr; ?></span>
                                             </div>
                                         </div>
@@ -218,8 +230,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                             <div class="col">
                                                 <?php if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($fullnameErr) && !empty($divisionErr) && !empty($reasonErr) && !empty($categoryErr) && !empty($startDateErr) && !empty($finishDateErr)) : ?>
                                                     <button type="button" class="btn btn-primary">Update</button>
-                                                    <?php else : ?>
-                                                        <button type="submit" class="btn btn-primary" onclick="return confirm('are you sure you will update?')">Update</button>
+                                                <?php else : ?>
+                                                    <button type="submit" class="btn btn-primary" onclick="return confirm('are you sure you will update?')">Update</button>
                                                 <?php endif; ?>
                                                 <a href="leavelist.php" class="btn btn-light text-dark text-decoration-none">Cancel</a>
                                             </div>

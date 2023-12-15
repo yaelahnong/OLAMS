@@ -229,7 +229,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                             <tbody>
                                                 <?php if (count($karyawanArray) > 0) : ?>
                                                     <?php foreach ($karyawanArray as $key => $value) : ?>
-                                                        <tr>
+                                                        <?php
+                                                        // Menentukan class untuk baris berdasarkan status
+                                                        $rowClass = '';
+                                                        if ($value['status'] == 'Pending') {
+                                                            $rowClass = 'bg-primary-subtle'; // Ganti dengan nama kelas CSS yang sesuai
+                                                        }
+                                                        elseif ($value['status'] == 'Rejected') {
+                                                            $rowClass = 'bg-danger-subtle'; // Ganti dengan nama kelas CSS yang sesuai
+                                                        }
+                                                        ?>
+                                                        <tr class="<?= $rowClass ?>">
                                                             <td><?= $key + 1 + $offset ?></td>
                                                             <td><?= $value['name'] ?></td>
                                                             <td><?= $value['project_name'] ?></td>
@@ -260,7 +270,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                                             <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
                                                                             <input type="hidden" name="duty_overtime_id" value="<?= $value['duty_overtime_id'] ?>">
                                                                             <?php if ($value['status'] !== 'Approved') : ?>
-                                                                                <button type="submit" name="submit" value="Approve" class="btn btn-success btn-sm ms-2" onclick="return confirm('are you sure you will approve it?')">Submit</button>
+                                                                                <button type="submit" name="submit" value="Approve" class="btn btn-success btn-sm ms-2" onclick="return confirm('are you sure you will approve it?')">Approve</button>
                                                                             <?php else : ?>
                                                                             <?php endif; ?>
                                                                         </form>
@@ -302,7 +312,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                             <tbody>
                                                 <?php if (count($karyawanArray) > 0) : ?>
                                                     <?php foreach ($karyawanArray as $key => $value) : ?>
-                                                        <tr>
+                                                        <?php
+                                                        // Menentukan class untuk baris berdasarkan status
+                                                        $rowClass = '';
+                                                        if ($value['status'] == 'Pending') {
+                                                            $rowClass = 'bg-primary-subtle'; // Ganti dengan nama kelas CSS yang sesuai
+                                                        }
+                                                        elseif ($value['status'] == 'Rejected') {
+                                                            $rowClass = 'bg-danger-subtle'; // Ganti dengan nama kelas CSS yang sesuai
+                                                        }
+                                                        ?>
+                                                        <tr class="<?= $rowClass ?>">
                                                             <td><?= $key + 1 + $offset ?></td>
                                                             <td><?= $value['project_name'] ?></td>
                                                             <td><?= $value['division_name'] ?></td>
