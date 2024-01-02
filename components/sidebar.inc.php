@@ -74,6 +74,12 @@
           <i class="align-middle" data-feather="user-plus"></i> <span class="align-middle">User List</span>
         </a>
       </li>
+      
+      <li class="sidebar-item  <?= (basename($_SERVER['PHP_SELF']) == 'report.php') ? 'active' : ''; ?>">
+        <a class="sidebar-link" href="report.php">
+          <i class="align-middle" data-feather="book"></i> <span class="align-middle">Report</span>
+        </a>
+      </li>
 
       <?php elseif($_SESSION['role_id'] === 2) : ?>
       <li class="sidebar-header">
