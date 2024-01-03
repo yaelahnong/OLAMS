@@ -212,6 +212,9 @@ $leaveData = mysqli_stmt_get_result($leaveData);
 $jumlahCutiTahunan = 12; // Jumlah cuti tahunan awal
 $sisaHariCuti = $jumlahCutiTahunan; // Set sisa cuti tahunan awal
 
+$jumlahCutiTahunan = 12; // Jumlah cuti tahunan awal
+$sisaHariCuti = $jumlahCutiTahunan; // Set sisa cuti tahunan awal
+
 while ($row = mysqli_fetch_assoc($leaveData)) {
   $start_date = new DateTime($row["start_date"]);
   $finish_date = new DateTime($row["finish_date"]);
@@ -220,10 +223,29 @@ while ($row = mysqli_fetch_assoc($leaveData)) {
   $interval = $start_date->diff($finish_date);
   $jumlahHariCuti = $interval->days;
 
-  if ($row['category'] === 'Annual') {
-    $sisaHariCuti -= $jumlahHariCuti;
+  // Menambahkan kondisi untuk memeriksa apakah hari cuti bukan hari Sabtu atau Minggu
+  for ($i = 0; $i < $jumlahHariCuti; $i++) {
+    $currentDate = clone $start_date; // Clone objek DateTime agar tidak mengubah tanggal asli
+
+    // Jika hari saat ini bukan Sabtu atau Minggu, kurangkan cuti
+    if ($currentDate->format("N") != 6 && $currentDate->format("N") != 7) {
+      if ($row['category'] === 'Annual') {
+        $sisaHariCuti--;
+      }
+    }
+
+    // Pindahkan ke hari berikutnya
+    $start_date->modify('+1 day');
+  }
+
+  // Menambahkan kondisi untuk memeriksa apakah sisa cuti tahunan sudah habis
+  if ($sisaHariCuti <= 0) {
+    echo "Maaf, cuti tahunan Anda sudah habis. Tidak dapat mengajukan cuti annual lagi.";
+    break; // Menghentikan loop karena cuti tahunan sudah habis
   }
 }
+
+
 
 
 $queryLeaveUser = "SELECT COUNT(leaves_id) AS leaves_id FROM leaves WHERE user_id = ?";
