@@ -240,7 +240,7 @@ while ($row = mysqli_fetch_assoc($leaveData)) {
 
   // Menambahkan kondisi untuk memeriksa apakah sisa cuti tahunan sudah habis
   if ($sisaHariCuti <= 0) {
-    echo "Maaf, cuti tahunan Anda sudah habis. Tidak dapat mengajukan cuti annual lagi.";
+    $error = "Sorry, your annual leave has expired. You cannot apply for annual leave again.";
     break; // Menghentikan loop karena cuti tahunan sudah habis
   }
 }
@@ -513,51 +513,51 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
               </div>
             </div>
             <div class="">
-            <div class="container-fluid p-0">
-              <div class="row">
-                <div class="col-12">
-                  <div class="card">
-                    <div class="card-header">
-                      <h1 class="h1 mb-3 judul_halaman"><strong>Attendance List</strong></h1>
-                    </div>
-                    <div class="table-responsive">
-                      <table class="table mb-0 mt-3">
-                        <thead>
-                          <tr>
-                            <th scope="col">No</th>
-                            <th scope="col">Full Name</th>
-                            <th scope="col">Division</th>
-                            <th scope="col">Reason</th>
-                            <th scope="col">Type</th>
-                            <th scope="col">Start Date</th>
-                            <th scope="col">Finish Date</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <?php if (count($attendanceArray) > 0) : ?>
-                            <?php foreach ($attendanceArray as $key => $value) : ?>
-                              <tr>
-                                <td><?= $key + 1 + $offset ?></td>
-                                <td><?= $value['name'] ?></td>
-                                <td><?= $value['division_name'] ?></td>
-                                <td><?= $value['reason'] ?></td>
-                                <td><?= $value['type'] ?></td>
-                                <td><?= date('d-M-Y H:i', strtotime($value['start_date'])) ?></td>
-                                <td><?= date('d-M-Y H:i', strtotime($value['finish_date'])) ?></td>
-                              </tr>
-                            <?php endforeach; ?>
-                          <?php else : ?>
+              <div class="container-fluid p-0">
+                <div class="row">
+                  <div class="col-12">
+                    <div class="card">
+                      <div class="card-header">
+                        <h1 class="h1 mb-3 judul_halaman"><strong>Attendance List</strong></h1>
+                      </div>
+                      <div class="table-responsive">
+                        <table class="table mb-0 mt-3">
+                          <thead>
                             <tr>
-                              <td colspan="7" style="text-align: center;">No records found!!!</td>
+                              <th scope="col">No</th>
+                              <th scope="col">Full Name</th>
+                              <th scope="col">Division</th>
+                              <th scope="col">Reason</th>
+                              <th scope="col">Type</th>
+                              <th scope="col">Start Date</th>
+                              <th scope="col">Finish Date</th>
                             </tr>
-                          <?php endif; ?>
-                        </tbody>
-                      </table>
+                          </thead>
+                          <tbody>
+                            <?php if (count($attendanceArray) > 0) : ?>
+                              <?php foreach ($attendanceArray as $key => $value) : ?>
+                                <tr>
+                                  <td><?= $key + 1 + $offset ?></td>
+                                  <td><?= $value['name'] ?></td>
+                                  <td><?= $value['division_name'] ?></td>
+                                  <td><?= $value['reason'] ?></td>
+                                  <td><?= $value['type'] ?></td>
+                                  <td><?= date('d-M-Y H:i', strtotime($value['start_date'])) ?></td>
+                                  <td><?= date('d-M-Y H:i', strtotime($value['finish_date'])) ?></td>
+                                </tr>
+                              <?php endforeach; ?>
+                            <?php else : ?>
+                              <tr>
+                                <td colspan="7" style="text-align: center;">No records found!!!</td>
+                              </tr>
+                            <?php endif; ?>
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
             </div>
             <div class="">
               <div class="container-fluid p-0">
@@ -701,6 +701,14 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
           <!-- Tampilan untuk User -->
           <div class="container-fluid p-0">
             <h1 class="h1 mb-3 judul_halaman"><strong>Dashboard</strong></h1>
+            <?php if ($sisaHariCuti <= 0) : ?>
+              <div class="alert alert-danger alert-dismissible p-3 rounded" role="alert">
+                <div class="alert-message">
+                  <?php echo $error; ?>
+                </div>
+                <button type="button" class="btn-close align-items-end" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            <?php endif; ?>
             <div class="row">
               <div class="col-md-3">
                 <div class="card ml-auto">
