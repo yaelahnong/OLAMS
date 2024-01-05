@@ -8,9 +8,7 @@
 <link rel="stylesheet" href="styles/custom.css">
 <link rel="shortcut icon" href="images/icons/favicon.ico" type="image/x-icon">
 <link rel="icon" href="images/icons/favicon.ico" type="image/x-icon">
-
-<!-- Sweet Alert -->
-<link rel="stylesheet" href="sweetalert2.min.css">
+<link rel="stylesheet" href="library/DataTables/datatables.min.css">
 
 <!-- Fullcalendar -->
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/smoothness/jquery-ui.css">

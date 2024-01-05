@@ -42,6 +42,11 @@ $userOptions = mysqli_fetch_all($userData, MYSQLI_ASSOC);
 <head>
     <?php include "head.inc.php"; ?>
     <title>OLAMS - Report</title>
+    <style>
+        th.non-orderable::after {
+            display: none !important;
+        }
+    </style>
 </head>
 
 <body>
@@ -55,29 +60,27 @@ $userOptions = mysqli_fetch_all($userData, MYSQLI_ASSOC);
                     <div class="row">
                         <div class="col-12">
                             <div class="card">
-                                <div class="card-header">
-
-                                </div>
+                                <div class="card-header"></div>
                                 <div class="table-responsive">
-                                    <table class="table mb-0 mt-3 d-nowarp" id="eksportpdf">
+                                    <table id="reportOvertimes" class="table mb-0 mt-3 d-nowarp">
                                         <thead>
                                             <tr>
-                                                <th></th>
+                                                <th class="non-orderable"></th>
                                                 <?php foreach ($projectOptions as $project) : ?>
                                                     <th colspan="3" class="text-center"><?php echo $project['project_name'] ?></th>
                                                 <?php endforeach; ?>
                                                 <th colspan="3" class="text-center">TOTAL</th>
                                             </tr>
                                             <tr>
-                                                <th scope="col" style="min-width : 210px;" class="text-center">Nama</th>
+                                                <th scope="col" style="min-width: 210px;" class="text-center">Nama</th>
                                                 <?php foreach ($projectOptions as $project) : ?>
                                                     <th scope="col">Normal</th>
                                                     <th scope="col">Holiday</th>
-                                                    <th scope="col" style="min-width : 90px;">On Duty</th>
+                                                    <th scope="col" style="min-width: 90px;">On Duty</th>
                                                 <?php endforeach; ?>
                                                 <th scope="col">Normal</th>
                                                 <th scope="col">Holiday</th>
-                                                <th scope="col" style="min-width : 90px;">On Duty</th>
+                                                <th scope="col" style="min-width: 90px;">On Duty</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -158,14 +161,15 @@ $userOptions = mysqli_fetch_all($userData, MYSQLI_ASSOC);
     <?php include "script.inc.php"; ?>
     <script>
         $(document).ready(function() {
-            $('#eksportpdf').DataTable({
+            $('#reportOvertimes').DataTable({
                 dom: 'Bfrtip',
                 buttons: [
                     'excel', 'pdf'
-                ]
+                ],
             });
         });
     </script>
+
 </body>
 
 </html>
