@@ -362,18 +362,22 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
               <div class="col-md-3">
                 <div class="card">
                   <div class="card-body">
-                    <h5 class="card-title">Filter Laporan</h5>
+                    <h5 class="card-title">Filter Report</h5>
                     <form action="<?= cleanValue($_SERVER['PHP_SELF']) ?>" method="get">
                       <div class="form-group row">
-                        <div class="col-12">
-                          <label for="monthSelect">Pilih Bulan:</label>
-                          <select id="monthSelect" name="month" class="form-select">
-                            <option value="this_month" <?= ($selectedMonth === 'this_month') ? 'selected' : '' ?>>Bulan Ini</option>
-                            <option value="last_month" <?= ($selectedMonth === 'last_month') ? 'selected' : '' ?>>Bulan Kemarin</option>
-                          </select>
+                        <div class="col">
+                          <label for="monthSelect">Select Month:</label>
+                          <select id="monthSelect" name="month" class="form-select" onchange="updateTotalOvertimeText()">
+                            <option value="this_month" <?= ($selectedMonth === 'this_month') ? 'selected' : '' ?>>
+                              <?= date('F') ?> <!-- Menggunakan date('F') untuk mendapatkan nama bulan saat ini -->
+                            </option>
+                            <option value="last_month" <?= ($selectedMonth === 'last_month') ? 'selected' : '' ?>>
+                              <?= date('F', strtotime('last month')) ?> <!-- Menggunakan strtotime untuk mendapatkan nama bulan kemarin -->
+                            </option>
+                          </select><br>
                         </div>
                         <div class="col mt-4">
-                          <button type="submit" class="btn btn-primary float-right">Tampilkan</button>
+                          <button type="submit" name="showTotalOvertime" class="btn btn-sm btn-primary float-right">Show</button>
                         </div>
                       </div>
                     </form>
@@ -391,7 +395,8 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
                     <h1 class="mt-1 mb-3 text-center"><?= $totalOvertimeThisMonth ?></h1>
                     <div class="mb-0 text-center">
                       <span class="badge badge-primary-light"> <i class="mdi mdi-arrow-bottom-right"></i></span>
-                      <span class="text-muted">Total Overtime This Month</span>
+                      <span class="text-muted">
+                        Total Overtime <?= ($selectedMonth === 'this_month') ? date('F') : date('F', strtotime('last month')) ?></span>
                     </div>
                   </div>
                 </div>
@@ -407,7 +412,7 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
                     <h1 class="mt-1 mb-3 text-center"><?= $totalLeavesThisMonth ?></h1>
                     <div class="mb-0 text-center">
                       <span class="badge badge-primary-light"> <i class="mdi mdi-arrow-bottom-right"></i></span>
-                      <span class="text-muted">Total Leave This Month</span>
+                      <span class="text-muted">Total Leave <?= ($selectedMonth === 'this_month') ? date('F') : date('F', strtotime('last month')) ?></span>
                     </div>
                   </div>
                 </div>
@@ -423,7 +428,7 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
                     <h1 class="mt-1 mb-3 text-center"><?= $totalAttendanceThisMonth ?></h1>
                     <div class="mb-0 text-center">
                       <span class="badge badge-primary-light"> <i class="mdi mdi-arrow-bottom-right"></i> </span>
-                      <span class="text-muted">Total Attendance This Month</span>
+                      <span class="text-muted">Total Attendance <?= ($selectedMonth === 'this_month') ? date('F') : date('F', strtotime('last month')) ?></span>
                     </div>
                   </div>
                 </div>
@@ -959,6 +964,13 @@ $overtimeArrayUser = mysqli_fetch_all($dataOvertimeUser, MYSQLI_ASSOC);
     </div>
   </div>
   <?php include "script.inc.php"; ?>
+  <script>
+    function updateTotalOvertimeText() {
+        var selectElement = document.getElementById('monthSelect');
+        var selectedValue = selectElement.options[selectElement.selectedIndex].text;
+        document.getElementById('totalOvertimeText').innerText = 'Total Overtime ' + selectedValue;
+    }
+</script>
 </body>
 
 </html>
