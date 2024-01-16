@@ -141,34 +141,27 @@ $data = mysqli_fetch_all($result2, MYSQLI_ASSOC);
                 </div>
                 <div class="dataTables_paginate paging_simple_numbers ms-3 mt-3" id="datatables-reponsive_paginate">
                   <ul class="pagination justify-content-end">
-                    <?php if (!$search_basic_salary || (count($data) > 5 && $halaman_aktif > 1)) : ?>
+                    <?php if ($jumlah_semua_data > $limit) : ?>
                       <?php if ($halaman_aktif > 1) : ?>
+                        <?php $prevPage = $halaman_aktif - 1; ?>
                         <li class="page-item">
-                          <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $prevPage; ?><?php if (!empty($search_basic_salary)) {
-                                                                                                                      echo '&search=' . $search_basic_salary;
-                                                                                                                    } ?>">Previous</a>
+                          <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $prevPage . ($search ? '&search=' . $search : '') . ($filter_division ? '&filter_division=' . $filter_division : '') . ($filter_project ? '&filter_project=' . $filter_project : '') . ($filter_status ? '&filter_status=' . $filter_status : ''); ?>">Previous</a>
                         </li>
                       <?php else : ?>
                         <li class="page-item disabled">
                           <span class="page-link">Previous</span>
                         </li>
                       <?php endif; ?>
-
-                      <!-- Display page links -->
                       <?php for ($i = 1; $i <= $jumlah_halaman; $i++) : ?>
-                        <li class="page-item<?= $i == $halaman_aktif ? ' active' : '' ?>">
-                          <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $i; ?><?php if (!empty($search_basic_salary)) {
-                                                                                                                echo '&search=' . $search_basic_salary;
-                                                                                                              } ?>"><?= $i ?></a>
+                        <li class="page-item<?= $i == $halaman_aktif ? ' active' : ''; ?>">
+                          <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $i . ($search ? '&search=' . $search : '') . ($filter_division ? '&filter_division=' . $filter_division : '') . ($filter_project ? '&filter_project=' . $filter_project : '') . ($filter_status ? '&filter_sta$filter_status=' . $filter_status : ''); ?>"><?= $i ?></a>
                         </li>
                       <?php endfor; ?>
 
-                      <!-- Display "Next" link if not on the last page -->
                       <?php if ($halaman_aktif < $jumlah_halaman) : ?>
+                        <?php $nextPage = $halaman_aktif + 1; ?>
                         <li class="page-item">
-                          <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $nextPage; ?><?php if (!empty($search_basic_salary)) {
-                                                                                                                      echo '&search=' . $search_basic_salary;
-                                                                                                                    } ?>">Next</a>
+                          <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $nextPage . ($search ? '&search=' . $search : '') . ($filter_division ? '&filter_division=' . $filter_division : '') . ($filter_project ? '&filter_project=' . $filter_project : '') . ($filter_status ? '&filter_status=' . $filter_status : ''); ?>">Next</a>
                         </li>
                       <?php else : ?>
                         <li class="page-item disabled">

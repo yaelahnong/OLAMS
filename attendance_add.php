@@ -172,9 +172,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['submit'])) {
                                                 <span style="color: red">*</span>
                                                 <select class="form-select" id="inputType" name="type">
                                                     <option value="">Select Type</option>
-                                                    <?php foreach ($resultType as $type) { ?>
-                                                        <option value="<?= $type['type'] ?>"><?= $type['type'] ?></option>
-                                                    <?php } ?>
+                                                    <option value="Sick" <?= ($type == "Sick") ? 'selected' : '' ?>>Sick</option>
+                                                    <option value="National Holiday" <?= ($type == "National Holiday") ? 'selected' : '' ?>>National Holiday</option>
                                                 </select>
                                                 <span class="text-danger"><?php echo $typeErr; ?></span>
                                             </div>

@@ -57,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['search']) && !empty($_G
   $show_project .= " AND project_name LIKE ?";
   $parameters[] = "%" . $search_project . "%";
 }
-$show_project .= "ORDER BY project_id DESC";
+$show_project .= " ORDER BY project_id DESC";
 
 $show_project .= " LIMIT $limit OFFSET $offset ";
 $jumlah_halaman = ceil($jumlah_semua_data / $limit);
