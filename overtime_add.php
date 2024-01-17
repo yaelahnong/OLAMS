@@ -127,6 +127,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                             </div>
                                             <div class="mb-3 col-md-6">
                                                 <label class="form-label" for="inputProject">Project</label>
+                                                <span style="color: red">*</span>
                                                 <select name="project_id" id="inputProject" class="form-select">
                                                     <option value="">Select Project</option>
                                                     <?php foreach ($resultProject as $project) : ?>
@@ -137,6 +138,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                             </div>
                                             <div class="mb-3 col-md-6">
                                                 <label class="form-label" for="inputDivision">Division</label>
+                                                <span style="color: red">*</span>
                                                 <select name="divisi_id" id="inputDivision" class="form-select">
                                                     <option value="">Select Division</option>
                                                     <?php foreach ($resultDivision as $division) : ?>
@@ -148,7 +150,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         </div>
                                         <div class="row">
                                             <div class="col-md-6">
-                                                <label class="form-label">Category</label><br>
+                                                <label class="form-label">Category</label>
+                                                <span style="color: red">*</span><br>
                                                 <div class="form-check form-check-inline">
                                                     <input class="form-check-input" type="radio" name="category" id="category_weekend" value="Weekend" <?php if (isset($category) && $category === "Weekend") echo "checked"; ?>>
                                                     <label class="form-check-label" for="category_weekend">Weekend</label>
@@ -160,7 +163,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                                 <span class="error" style="color: red;"><?= $categoryErr; ?></span>
                                             </div>
                                             <div class="col-md-6">
-                                                <label class="form-label">Type</label><br>
+                                                <label class="form-label">Type</label>
+                                                <span style="color: red">*</span><br>
                                                 <div class="form-check form-check-inline">
                                                     <input class="form-check-input" type="radio" name="type" id="type_Normal" value="Normal" <?php if (isset($type) && $type === "Normal") echo "checked"; ?>>
                                                     <label class="form-check-label" for="type_Normal">Normal</label>
@@ -179,11 +183,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         <div class="row">
                                             <div class="mb-3 col-md-6">
                                                 <label class="form-label" for="inputStartDate">Start Date</label>
+                                                <span style="color: red">*</span>
                                                 <input type="datetime-local" class="form-control" name="start_date" id="inputStartDate">
                                                 <span class="error" style="color: red;"> <?= $start_dateErr; ?> </span>
                                             </div>
                                             <div class="mb-3 col-md-6">
                                                 <label class="form-label" for="inputFinishDate">Finish Date</label>
+                                                <span style="color: red">*</span>
                                                 <input type="datetime-local" class="form-control" name="finish_date" id="inputFinishDate">
                                                 <span class="error" style="color: red;"> <?= $finish_dateErr; ?> </span>
                                             </div>
@@ -191,6 +197,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         <div class="row">
                                             <div class="mb-3 col-md-6">
                                                 <label class="form-label" for="inputReason">Reason</label>
+                                                <span style="color: red">*</span>
                                                 <textarea class="form-control" name="reason" id="inputReason" placeholder="Enter Reason"><?= $reason; ?></textarea>
                                                 <span class="error" style="color: red;"> <?= $reasonErr; ?> </span>
                                             </div>
