@@ -28,8 +28,8 @@ mysqli_stmt_execute($projectData);
 $resultProject = mysqli_stmt_get_result($projectData);
 $resultProject = mysqli_fetch_all($resultProject, MYSQLI_ASSOC);
 
-$fullnameErr = $divisionErr = $noteErr = $customerCountErr = $leadCountErr = $projectErr = "";
-$fullname = $division = $note = $customerCount = $leadCount = $project = NULL;
+$fullnameErr = $divisionErr = $noteErr = $customerCountErr = $leadCountErr = $projectErr = $start_date = $finish_date = "";
+$fullname = $division = $note = $customerCount = $leadCount = $project = $start_dateErr = $finish_dateErr = NULL;
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     if (isset($_POST['csrf_token']) && isCsrfTokenValid($_POST['csrf_token'])) {
         $fullname = isset($_POST["user_id"]) ? cleanValue($_POST["user_id"]) : NULL;
@@ -38,6 +38,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
         $lead_count = isset($_POST["lead_count"]) ? cleanValue($_POST["lead_count"]) : NULL;
         $customer_count = isset($_POST["customer_count"]) ? cleanValue($_POST["customer_count"]) : NULL;
         $note = isset($_POST["note"]) ? cleanValue($_POST["note"]) : NULL;
+        $start_date = isset($_POST["start_date"]) ? cleanValue($_POST["start_date"]) : NULL;
+        $finish_date = isset($_POST["finish_date"]) ? cleanValue($_POST["finish_date"]) : NULL;
 
         if (empty($fullname)) {
             $fullnameErr = "Full Name is required";
@@ -54,13 +56,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
         } elseif ($lead_count < 0) {
             $leadCountErr = "leads cannot be minus numbers.";
         }
-
         if (!is_numeric($customer_count)) {
             $customerCountErr = "Customer Count must be a number.";
         } elseif ($customer_count < 0) {
             $customerCountErr = "customer cannot be minus numbers.";
         }
-
+        if (empty($start_date)) {
+            $start_dateErr = "Start Date is required";
+        }
+        if (empty($finish_date)) {
+            $finish_dateErr = "Finish Date is required";
+        } elseif (strtotime($finish_date) < strtotime($start_date)) {
+            $finish_dateErr = "Finish Date cannot be earlier than Start Date.";
+        }
         if (!preg_match('/^[A-Za-z0-9.,\s]*$/', $note)) {
             $noteErr = "Note should only contain letters, numbers, spaces, dots, and commas.";
         }
@@ -71,11 +79,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
         }
 
         if (empty($fullnameErr) && empty($projectErr) && empty($divisionErr) && empty($leadCountErr) && empty($customerCountErr) && empty($noteErr)) {
-            $insertQuery = "INSERT INTO duty_overtimes (user_id, project_id, division_id, lead_count, customer_count, note, created_by, time_duty_overtime)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            $insertQuery = "INSERT INTO duty_overtimes (user_id, project_id, division_id, lead_count, customer_count, note, start_date, finish_date, created_by, time_duty_overtime)
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             $insertStatement = mysqli_prepare($conn, $insertQuery);
-            mysqli_stmt_bind_param($insertStatement, "iiiiissi", $fullname, $project, $division, $lead_count, $customer_count, $note, $user_id, $time_duty_overtime);
+            mysqli_stmt_bind_param($insertStatement, "iiiiisssii", $fullname, $project, $division, $lead_count, $customer_count, $note,$start_date, $finish_date, $user_id, $time_duty_overtime);
 
             if (mysqli_stmt_execute($insertStatement)) {
                 echo "<script>alert('Duty overtime data added successfully.')</script>";
@@ -156,6 +164,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                 <span style="color: red">*</span>
                                                 <input type="number" name="customer_count" id="customer_count" class="form-control">
                                                 <span class="error" style="color: red;"> <?= $customerCountErr; ?> </span>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="mb-3 col-md-6">
+                                                <label class="form-label" for="inputStartDate">Start Date</label>
+                                                <span style="color: red">*</span>
+                                                <input type="datetime-local" class="form-control" name="start_date" id="inputStartDate">
+                                                <span class="error" style="color: red;"> <?= $start_dateErr; ?> </span>
+                                            </div>
+                                            <div class="mb-3 col-md-6">
+                                                <label class="form-label" for="inputFinishDate">Finish Date</label>
+                                                <span style="color: red">*</span>
+                                                <input type="datetime-local" class="form-control" name="finish_date" id="inputFinishDate">
+                                                <span class="error" style="color: red;"> <?= $finish_dateErr; ?> </span>
                                             </div>
                                         </div>
                                         <div class="row">

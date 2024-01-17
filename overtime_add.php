@@ -61,6 +61,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         if (empty($finish_date)) {
             $finish_dateErr = "Finish Date is required";
+        } elseif (strtotime($finish_date) < strtotime($start_date)) {
+            $finish_dateErr = "Finish Date cannot be earlier than Start Date.";
         }
         if (empty($reason)) {
             $reasonErr = "Reason is required";

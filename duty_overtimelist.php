@@ -22,6 +22,8 @@ m_divisions.division_name AS division_name,
 duty_overtimes.lead_count, 
 duty_overtimes.customer_count, 
 duty_overtimes.note,
+duty_overtimes.start_date,
+duty_overtimes.finish_date,
 duty_overtimes.status
 FROM duty_overtimes
 LEFT JOIN users ON duty_overtimes.user_id = users.user_id
@@ -219,8 +221,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                     <th scope="col" style="min-width : 200px;">Full Name</th>
                                                     <th scope="col" style="min-width : 200px;">Project</th>
                                                     <th scope="col" style="min-width : 200px;">Division</th>
-                                                    <th scope="col">Lead Count</th>
-                                                    <th scope="col">Customer Count</th>
+                                                    <th scope="col" style="min-width : 120px;">Lead Count</th>
+                                                    <th scope="col" style="min-width : 145px;">Customer Count</th>
+                                                    <th scope="col" style="min-width : 200px;">Start Date</th>
+                                                    <th scope="col" style="min-width : 200px;">Finish Date</th>
                                                     <th scope="col" style="min-width : 210px;">Note</th>
                                                     <th scope="col" style="min-width : 200px;">Status</th>
                                                     <th scope="col">Action</th>
@@ -234,8 +238,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                         $rowClass = '';
                                                         if ($value['status'] == 'Pending') {
                                                             $rowClass = 'bg-primary-subtle'; // Ganti dengan nama kelas CSS yang sesuai
-                                                        }
-                                                        elseif ($value['status'] == 'Rejected') {
+                                                        } elseif ($value['status'] == 'Rejected') {
                                                             $rowClass = 'bg-danger-subtle'; // Ganti dengan nama kelas CSS yang sesuai
                                                         }
                                                         ?>
@@ -246,6 +249,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                             <td><?= $value['division_name'] ?></td>
                                                             <td><?= $value['lead_count'] ?></td>
                                                             <td><?= $value['customer_count'] ?></td>
+                                                            <td><?= date('d-M-Y H:i', strtotime($value['start_date'])) ?></td>
+                                                            <td><?= date('d-M-Y H:i', strtotime($value['finish_date'])) ?></td>
                                                             <td><?= empty($value['note']) ? '-' : $value['note'] ?></td>
                                                             <td>
                                                                 <?php
@@ -302,10 +307,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                     <th scope="col">No</th>
                                                     <th scope="col" style="min-width : 200px;">Project</th>
                                                     <th scope="col" style="min-width : 200px;">Division</th>
-                                                    <th scope="col">Lead Count</th>
-                                                    <th scope="col">Customer Count</th>
+                                                    <th scope="col" style="min-width : 100px;">Lead Count</th>
+                                                    <th scope="col" style="min-width : 100px;">Customer Count</th>
+                                                    <th scope="col" style="min-width : 200px;">Start Date</th>
+                                                    <th scope="col" style="min-width : 200px;">Finish Date</th>
                                                     <th scope="col" style="min-width : 200px;">Note</th>
-                                                    <th scope="col">Status</th>
+                                                    <th scope="col" style="min-width : 200px;">Status</th>
                                                     <th scope="col" style="min-width : 210px;">Action</th>
                                                 </tr>
                                             </thead>
@@ -317,8 +324,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                         $rowClass = '';
                                                         if ($value['status'] == 'Pending') {
                                                             $rowClass = 'bg-primary-subtle'; // Ganti dengan nama kelas CSS yang sesuai
-                                                        }
-                                                        elseif ($value['status'] == 'Rejected') {
+                                                        } elseif ($value['status'] == 'Rejected') {
                                                             $rowClass = 'bg-danger-subtle'; // Ganti dengan nama kelas CSS yang sesuai
                                                         }
                                                         ?>
@@ -328,6 +334,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                             <td><?= $value['division_name'] ?></td>
                                                             <td><?= $value['lead_count'] ?></td>
                                                             <td><?= $value['customer_count'] ?></td>
+                                                            <td><?= date('d-M-Y H:i', strtotime($value['start_date'])) ?></td>
+                                                            <td><?= date('d-M-Y H:i', strtotime($value['finish_date'])) ?></td>
                                                             <td><?= empty($value['note']) ? '-' : $value['note'] ?></td>
                                                             <td>
                                                                 <?php

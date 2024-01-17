@@ -17,7 +17,7 @@ $limit = 5;
 $halaman_aktif = isset($_GET['page']) ? $_GET['page'] : 1;
 $offset = ($halaman_aktif - 1) * $limit;
 
-$projectQuery = "SELECT project_id, project_name FROM m_projects";
+$projectQuery = "SELECT project_id, project_name FROM m_projects WHERE is_deleted = 'N'";
 $projectData = mysqli_prepare($conn, $projectQuery);
 mysqli_stmt_execute($projectData);
 $projectData = mysqli_stmt_get_result($projectData);
