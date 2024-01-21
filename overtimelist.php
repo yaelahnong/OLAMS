@@ -142,22 +142,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                 echo "Data tidak ditemukan";
             }
 
-            if (isset($_POST['submit']) && ($_POST['submit'] === "Reject" || $_POST['submit'] === "Approve" || $_POST['submit'] === "Check")) {
+            if (isset($_POST['submit']) && ($_POST['submit'] === "Rejected" || $_POST['submit'] === "Approved" || $_POST['submit'] === "Check")) {
                 if ($user_role === 4) { // jika peran adalah "supervisor"
-                    $newStatus = ($_POST['submit'] === "Reject") ? 'Rejected' : 'Approved';
+                    $newStatus = ($_POST['submit'] === "Rejected") ? 'Rejected' : 'Approved';
                     $updateQuery = "UPDATE overtimes SET status = ?, status_updated_by = ?, status_updated_at = NOW() WHERE overtime_id = ?";
                 } elseif ($user_role === 2) { // Jika peran adalah "leader"
                     // Periksa tipe lembur
-                    $newStatus = ($_POST['submit'] === "Reject") ? 'Rejected' : 'Approved';
+                    $newStatus = ($_POST['submit'] === "Rejected") ? 'Rejected' : 'Approved';
                     if ($type === "Urgent") {
                         $updateQuery = "UPDATE overtimes SET status = ?, status_updated_by = ?, status_updated_at = NOW() WHERE overtime_id = ?";
-                    } elseif ($type === "Normal" && $_POST['submit'] === "Reject") {
-                        $updateQuery = "UPDATE overtimes SET status = ?, status_updated_by = ?, status_updated_at = NOW() WHERE overtime_id = ?";
+                    } elseif ($type === "Normal" && $_POST['submit'] === "Rejected") {
+                        $updateQuery = "UPDATE overtimes SET status = ?, checked_by_leader = ?, checked_by_leader_at = NOW(), status_updated_by = ?, status_updated_at = NOW() WHERE overtime_id = ?";
                     } else {
                         $updateQuery = "UPDATE overtimes SET checked_by_leader_at = NOW(), checked_by_leader = ?, updated_by = ? WHERE overtime_id = ?";
                     }
                 } elseif ($user_role === 3) { // Jika peran adalah "admin"
-                    $newStatus = ($_POST['submit'] === "Reject") ? 'Rejected' : 'Approved';
+                    $newStatus = ($_POST['submit'] === "Rejected") ? 'Rejected' : 'Approved';
                     $updateQuery = "UPDATE overtimes SET sent_by_admin = NOW(), submitted_by_admin = ?, updated_by = ? WHERE overtime_id = ?";
                 } else {
                     echo "<script>alert('Overtime data failed to be modified.')</script>";
@@ -172,7 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                     } elseif ($user_role === 2 && $type === "Urgent") {
                         mysqli_stmt_bind_param($updateStatement, "sii", $newStatus, $user_id, $overtimeId);
                     } elseif ($user_role === 2 && $type === "Normal") {
-                        mysqli_stmt_bind_param($updateStatement, "iii", $user_id, $user_id, $overtimeId);
+                        mysqli_stmt_bind_param($updateStatement, "siii", $newStatus, $user_id, $user_id, $overtimeId);
                     } else {
                         mysqli_stmt_bind_param($updateStatement, "iii", $user_id, $user_id, $overtimeId);
                     }
@@ -332,8 +332,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                                             <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
                                                                             <input type="hidden" name="overtime_id" value="<?= $value['overtime_id'] ?>">
                                                                             <?php if ($value['status'] === 'Pending') : ?>
-                                                                                <button type="submit" name="submit" value="Approve" class="btn btn-success btn-sm ms-2" onclick="return confirm('are you sure you will approve it?')">Approve</button>
-                                                                                <button type="submit" name="submit" value="Reject" class="btn btn-danger btn-sm ms-2" onclick="return confirm('are you sure you will reject it?')">Reject</button>
+                                                                                <button type="submit" name="submit" value="Approved" class="btn btn-success btn-sm ms-2" onclick="return confirm('are you sure you will approve it?')">Approve</button>
+                                                                                <button type="submit" name="submit" value="Rejected" class="btn btn-danger btn-sm ms-2" onclick="return confirm('are you sure you will reject it?')">Reject</button>
                                                                             <?php endif; ?>
                                                                         </form>
                                                                     <?php elseif ($user_role === 2) : // Cek apakah peran sama dengan leader 
@@ -344,11 +344,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                                             <input type="hidden" name="overtime_id" value="<?= $value['overtime_id'] ?>">
                                                                             <?php if ($value['status'] === 'Pending' && $value['checked_by_leader'] == NULL) : ?>
                                                                                 <?php if ($user_role === 2 && $value['type'] === 'Urgent') : ?>
-                                                                                    <button type="submit" name="submit" value="Approve" class="btn btn-success btn-sm ms-2" onclick="return confirm('are you sure you will approve it?')">Confirm</button>
+                                                                                    <button type="submit" name="submit" value="Approved" class="btn btn-success btn-sm ms-2" onclick="return confirm('are you sure you will approve it?')">Confirm</button>
                                                                                 <?php else : ?>
                                                                                     <button type="submit" name="submit" value="Check" class="btn btn-success btn-sm ms-2" onclick="return confirm('Are you sure you have checked?')">Check</button>
                                                                                 <?php endif; ?>
-                                                                                <button type="submit" name="submit" value="Reject" class="btn btn-danger btn-sm ms-2" onclick="return confirm('are you sure you will reject it?')">Reject</button>
+                                                                                <button type="submit" name="submit" value="Rejected" class="btn btn-danger btn-sm ms-2" onclick="return confirm('are you sure you will reject it?')">Reject</button>
                                                                             <?php endif; ?>
                                                                         </form>
                                                                     <?php endif; ?>

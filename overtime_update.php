@@ -108,11 +108,25 @@ if (isset($_POST['update']) && isset($_POST['overtime_id'])) {
             $reasonErr = "Reason is required";
         }
         if ($status === 'Approved') {
-            // Validasi jika status sudah "Approved" dan "Effective Time" harus diisi dan tidak boleh angka minus
-            if (empty($effective_time)) {
-                $effective_timeErr = "Effective Time is required.";
-            } elseif (!is_numeric($effective_time) || intval($effective_time) < 0) {
-                $effective_timeErr = "Effective Time must be a non-negative integer.";
+            if($category == 'Weekend' && $type == 'Urgent'){
+                // Validasi jika status sudah "Approved" dan "Effective Time" harus diisi dan tidak boleh angka minus
+                if (empty($effective_time)) {
+                    $effective_timeErr = "Effective Time is required.";
+                } elseif (!is_numeric($effective_time) || intval($effective_time) < 0) {
+                    $effective_timeErr = "Effective Time must be a non-negative integer.";
+                }elseif(intval($effective_time) > 12){
+                    $effective_timeErr = "Effective Time is limited to 12 hours.";
+                }
+                // var_dump($_POST);
+                // exit();
+            }elseif($category == 'Weekday' || $category == 'Weekend' || $type == 'Normal' || $type == 'Business Trip' || $type == 'Urgent'){
+                if (empty($effective_time)) {
+                    $effective_timeErr = "Effective Time is required.";
+                } elseif (!is_numeric($effective_time) || intval($effective_time) < 0) {
+                    $effective_timeErr = "Effective Time must be a non-negative integer.";
+                }elseif(intval($effective_time) > 8){
+                    $effective_timeErr = "Effective Time is limited to 8 hours.";
+                }
             }
         } else {
             // Jika status bukan "Approved", pastikan "Effective Time" tidak diisi
