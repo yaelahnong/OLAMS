@@ -21,6 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id']) && is_numeric($_G
                 attendances.type, 
                 attendances.start_date, 
                 attendances.finish_date,
+                attendances.foto,
                 m_divisions.division_name AS division_name,
                 users.name AS name
               FROM attendances
@@ -91,6 +92,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id']) && is_numeric($_G
                                             <td><strong>Finish Date:</strong></td>
                                             <td><?= date('d-M-Y', strtotime($attendanceDetails['finish_date'])) ?></td>
                                         </tr>
+                                        <tr>
+                                            <td><strong>Foto:</strong></td>
+                                            <td>
+                                                <?php if (!empty($attendanceDetails['foto']) && file_exists($attendanceDetails['foto'])) : ?>
+                                                    <img src="<?= $attendanceDetails['foto'] ?>" alt="Preview" class="rounded" style="width: 300px; height: 300px;">
+                                                <?php else : ?>
+                                                    <p>-</p>
+                                                <?php endif; ?>
+                                            </td>
+                                        </tr>
                                     </table>
                                 </div>
                                 <div class="card-footer">
@@ -108,4 +119,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id']) && is_numeric($_G
 </body>
 
 </html>
-
