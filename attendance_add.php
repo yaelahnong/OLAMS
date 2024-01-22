@@ -29,8 +29,8 @@ mysqli_stmt_execute($typeData);
 $resultType = mysqli_stmt_get_result($typeData);
 $resultType = mysqli_fetch_all($resultType, MYSQLI_ASSOC);
 
-$fullnameErr = $divisionErr = $reasonErr = $typeErr = $startDateErr = $finishDateErr = "";
-$fullname = $division = $reason = $type = $startDate = $finishDate = NULL;
+$fullnameErr = $divisionErr = $reasonErr = $typeErr = $startDateErr = $finishDateErr = $fotoErr = "";
+$fullname = $division = $reason = $type = $startDate = $finishDate = $foto = NULL;
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['submit'])) {
     if (isset($_POST['csrf_token']) && isCsrfTokenValid($_POST['csrf_token'])) {
         $fullname = isset($_POST["name"]) ? cleanValue($_POST["name"]) : NULL;
@@ -39,6 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['submit'])) {
         $type = isset($_POST["type"]) ? cleanValue($_POST["type"]) : NULL;
         $startDate = isset($_POST["startDate"]) ? cleanValue($_POST["startDate"]) : NULL;
         $finishDate = isset($_POST["finishDate"]) ? cleanValue($_POST["finishDate"]) : NULL;
+        $foto = isset($_FILES["foto"]["name"]) ? cleanValue($_FILES["foto"]["name"]) : NULL;
 
         // Validasi data yang diterima dari formulir
         if (empty($_POST["name"])) {
@@ -67,6 +68,41 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['submit'])) {
             $finishDateErr = "Finish Date cannot be earlier than Start Date.";
         }
 
+        if (!empty($_FILES['foto']['size']) > 0) {
+            $allowedFormats = ['jpg', 'png', 'jpeg', 'svg'];
+            $fileName = $_FILES['foto']['name'];
+            $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+            foreach ($resultUsers as $user) {
+                if ($user['user_id'] == $fullname) {
+                    $user_name = $user['name'];
+                    // break;
+                }
+            }
+
+            // Validasi ukuran file (maksimal 5MB)
+            if ($_FILES['foto']['size'] > 5 * 1024 * 1024) {
+                $fotoErr = 'File size should not exceed 5MB.';
+            } elseif (!in_array($fileExtension, $allowedFormats)) {
+                // Validasi format file (hanya jpg, png, jpeg, svg)
+                $fotoErr = 'Invalid file format. Only jpg, png, jpeg, and svg are allowed.';
+            } else {
+                // Pindahkan file ke folder uploads
+                $uploadDirectory = 'images/sick/';
+
+                // Membuat nama file yang unik dengan menggunakan beberapa variabel
+                $newFileName = "Sick leave " . $user_name . " " . $startDate . " to " . $finishDate . "." . $fileExtension;
+
+                $targetFile = $uploadDirectory . $newFileName;
+
+                if (move_uploaded_file($_FILES['foto']['tmp_name'], $targetFile)) {
+                    // File berhasil diunggah
+                    $foto = $targetFile;
+                } else {
+                    $fotoErr = 'Failed to upload the file.';
+                }
+            }
+        }
+
         if (empty($fullnameErr) && empty($divisionErr) && empty($reasonErr) && empty($typeErr) && empty($startDateErr) && empty($finishDateErr)) {
             $checkDuplicateQuery = "SELECT COUNT(*) FROM attendances WHERE user_id = ? AND DATE(start_date) = ?";
             $checkDuplicateStmt = mysqli_prepare($conn, $checkDuplicateQuery);
@@ -81,10 +117,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['submit'])) {
                 $error = "Attendance data with the same name and start date already exists for the selected date.";
             } else {
 
-                $insertQuery = "INSERT INTO attendances (user_id, division_id, reason, type, start_date, finish_date, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                $insertQuery = "INSERT INTO attendances (user_id, division_id, reason, type, start_date, finish_date, foto, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
                 $insertStmt = mysqli_prepare($conn, $insertQuery);
                 if ($insertStmt) {
-                    mysqli_stmt_bind_param($insertStmt, "iissssi", $fullname, $division, $reason, $type, $startDate, $finishDate, $user_id);
+                    mysqli_stmt_bind_param($insertStmt, "iisssssi", $fullname, $division, $reason, $type, $startDate, $finishDate, $foto, $user_id);
                     if (mysqli_stmt_execute($insertStmt)) {
                         echo "<script>alert('Attendance data added successfully.')</script>";
                         echo "<script>window.location.href = 'attendancelist.php'</script>";
@@ -134,7 +170,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['submit'])) {
                                             <button type="button" class="btn-close align-items-end" data-bs-dismiss="alert" aria-label="Close"></button>
                                         </div>
                                     <?php } ?>
-                                    <form method="post" action="<?= cleanValue($_SERVER['PHP_SELF']); ?>">
+                                    <form method="post" enctype="multipart/form-data" action="<?= cleanValue($_SERVER['PHP_SELF']); ?>">
                                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
                                         <div class="row">
                                             <div class="mb-3 col-md-6">
@@ -193,8 +229,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['submit'])) {
                                             </div>
                                         </div>
                                         <div class="row">
+                                            <div class="mb-3 col-md-6">
+                                                <label class="form-label" for="inputFoto">Foto</label>
+                                                <input type="file" class="form-control" id="inputFoto" name="foto">
+                                                <span class="text-danger"><?php echo $fotoErr; ?></span>
+                                            </div>
+                                        </div>
+                                        <div class="row">
                                             <div class="col">
-                                                <?php if ($_SERVER['REQUEST_METHOD'] == 'POST' && empty($fullnameErr) && empty($divisionErr) && empty($reasonErr) && empty($typeErr) && empty($startDateErr) && empty($finishDateErr)) : ?>
+                                                <?php if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($fullnameErr) && !empty($divisionErr) && !empty($reasonErr) && !empty($typeErr) && !empty($startDateErr) && !empty($finishDateErr)) : ?>
                                                     <button type="button" name="submit" class="btn btn-primary">Submit</button>
                                                 <?php else : ?>
                                                     <button type="submit" name="submit" class="btn btn-primary" onclick="return confirm('Are you sure you want to add it?')">Submit</button>

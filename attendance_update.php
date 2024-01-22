@@ -27,14 +27,14 @@ mysqli_stmt_execute($typeData);
 $resultType = mysqli_stmt_get_result($typeData);
 $resultType = mysqli_fetch_all($resultType, MYSQLI_ASSOC);
 
-$fullnameErr = $divisionErr = $reasonErr = $typeErr = $startDateErr = $finishDateErr = "";
-$fullname = $division = $reason = $type = $startDate = $finishDate = "";
+$fullnameErr = $divisionErr = $reasonErr = $typeErr = $startDateErr = $finishDateErr = $fotoErr = "";
+$fullname = $division = $reason = $type = $startDate = $finishDate = $foto =  "";
 $attendance_id = null;
 
 if (isset($_GET['id'])) {
     $attendance_id = cleanValue($_GET['id']);
 
-    $queryAttendance = "SELECT user_id, division_id, reason, type, start_date, finish_date FROM attendances WHERE attendance_id = ?";
+    $queryAttendance = "SELECT user_id, division_id, reason, type, start_date, finish_date, foto FROM attendances WHERE attendance_id = ?";
     $stmt = mysqli_prepare($conn, $queryAttendance);
     mysqli_stmt_bind_param($stmt, "i", $attendance_id);
     mysqli_stmt_execute($stmt);
@@ -48,13 +48,15 @@ if (isset($_GET['id'])) {
         $type = $attendanceData['type'];
         $startDate = $attendanceData['start_date'];
         $finishDate = $attendanceData['finish_date'];
+        $foto = $attendanceData['foto'];
     } else {
         echo "Invalid attendance ID.";
         exit();
     }
 }
+$oldFotoPath = $attendanceData['foto'];
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['submit'])) {
     if (isset($_POST['csrf_token']) && isCsrfTokenValid($_POST['csrf_token'])) {
         $fullname = isset($_POST["name"]) ? cleanValue($_POST["name"]) : "";
         $division = isset($_POST["division"]) ? cleanValue($_POST["division"]) : "";
@@ -62,6 +64,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $type = isset($_POST["type"]) ? cleanValue($_POST["type"]) : "";
         $startDate = isset($_POST["startDate"]) ? cleanValue($_POST["startDate"]) : "";
         $finishDate = isset($_POST["finishDate"]) ? cleanValue($_POST["finishDate"]) : "";
+        $foto = isset($_FILES["foto"]["name"]) ? cleanValue($_FILES["foto"]["name"]) : "";
 
         if (empty($fullname)) {
             $fullnameErr = "Full Name is required.";
@@ -89,21 +92,67 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $finishDateErr = "Finish Date must be later than Start Date.";
         }
 
-        if (empty($fullnameErr) && empty($divisionErr) && empty($reasonErr) && empty($typeErr) && empty($startDateErr) && empty($finishDateErr)) {
-            $checkDuplicateQuery = "SELECT COUNT(*) FROM attendances WHERE user_id = ? AND start_date = ? AND attendance_id != ?";
-            $stmt = mysqli_prepare($conn, $checkDuplicateQuery);
-            mysqli_stmt_bind_param($stmt, "isi", $fullname, $startDate, $attendance_id);
-            mysqli_stmt_execute($stmt);
-            $result = mysqli_stmt_get_result($stmt);
-
-            if (mysqli_num_rows($result) > 0) {
-                $error = "An entry for the selected user and start date already exists. Update is not allowed.";
+        if (!empty($_FILES['foto']['size']) && $_FILES['foto']['size'] > 0) {
+            if (!empty($foto) && file_exists($foto)) {
+                if (!empty($oldFotoPath) && file_exists($oldFotoPath)) {
+                    unlink($oldFotoPath);
+                } else {
+                    $fotoErr = 'Failed to delete the old file.';
+                }
+            }
+            $allowedFormats = ['jpg', 'png', 'jpeg', 'svg'];
+            $fileName = $_FILES['foto']['name'];
+            $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+            foreach ($resultUsers as $user) {
+                if ($user['user_id'] == $fullname) {
+                    $user_name = $user['name'];
+                    // break;
+                }
+            }
+            // Validasi ukuran file (maksimal 5MB)
+            if ($_FILES['foto']['size'] > 5 * 1024 * 1024) {
+                $fotoErr = 'File size should not exceed 5MB.';
+            } elseif (!in_array($fileExtension, $allowedFormats)) {
+                // Validasi format file (hanya jpg, png, jpeg, svg)
+                $fotoErr = 'Invalid file format. Only jpg, png, jpeg, and svg are allowed.';
             } else {
-                $updateQuery = "UPDATE attendances SET user_id = ?, division_id = ?, reason = ?, type = ?, start_date = ?, finish_date = ?, updated_by = ? WHERE attendance_id = ?";
+                // Pindahkan file ke folder uploads
+                $uploadDirectory = 'images/sick/';
+
+                // Membuat nama file yang unik dengan menggunakan beberapa variabel
+                $newFileName = "Sick leave " . $user_name . " " . $startDate . " to " . $finishDate . "." . $fileExtension;
+
+                $targetFile = $uploadDirectory . $newFileName;
+
+                if (move_uploaded_file($_FILES['foto']['tmp_name'], $targetFile)) {
+                    // File berhasil diunggah
+                    $foto = $targetFile;
+                } else {
+                    $fotoErr = 'Failed to upload the file.';
+                }
+            }
+        } elseif(empty($foto)) {
+            // Tidak ada file baru diunggah, tetap gunakan foto lama
+            $foto = $attendanceData['foto'];
+        }
+
+        if (empty($fullnameErr) && empty($divisionErr) && empty($reasonErr) && empty($typeErr) && empty($startDateErr) && empty($finishDateErr)) {
+            // $checkDuplicateQuery = "SELECT COUNT(*) FROM attendances WHERE user_id = ? AND start_date = ? AND attendance_id != ?";
+            // // var_dump($_POST);
+            // // exit();
+            // $stmt = mysqli_prepare($conn, $checkDuplicateQuery);
+            // mysqli_stmt_bind_param($stmt, "isi", $fullname, $startDate, $attendance_id);
+            // mysqli_stmt_execute($stmt);
+            // $result = mysqli_stmt_get_result($stmt);
+
+            // if (mysqli_num_rows($result) > 0) {
+            //     $error = "An entry for the selected user and start date already exists. Update is not allowed.";
+            // } else {
+                $updateQuery = "UPDATE attendances SET user_id = ?, division_id = ?, reason = ?, type = ?, start_date = ?, finish_date = ?, foto = ?, updated_by = ? WHERE attendance_id = ?";
                 $stmt = mysqli_prepare($conn, $updateQuery);
                 if ($stmt) {
                     $user_id = $_SESSION["user_id"];
-                    mysqli_stmt_bind_param($stmt, "iissssii", $fullname, $division, $reason, $type, $startDate, $finishDate, $user_id, $attendance_id);
+                    mysqli_stmt_bind_param($stmt, "iisssssii", $fullname, $division, $reason, $type, $startDate, $finishDate, $foto, $user_id, $attendance_id);
                     if (mysqli_stmt_execute($stmt)) {
                         echo "<script>alert('Attendance data updated successfully.')</script>";
                         echo "<script>window.location.href = 'attendancelist.php'</script>";
@@ -115,7 +164,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 } else {
                     $error = "Failed to create a prepared statement for data update.";
                 }
-            }
+            // }
         }
     } else {
         $TokenErr = "Invalid CSRF token";
@@ -153,7 +202,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                             <button type="button" class="btn-close align-items-end" data-bs-dismiss="alert" aria-label="Close"></button>
                                         </div>
                                     <?php } ?>
-                                    <form method="post" action="<?= cleanValue($_SERVER['PHP_SELF'] . "?id=" . $attendance_id); ?>">
+                                    <form method="post" enctype="multipart/form-data" action="<?= cleanValue($_SERVER['PHP_SELF'] . "?id=" . $attendance_id); ?>">
                                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
 
                                         <div class="row">
@@ -192,9 +241,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                                 <span style="color: red">*</span>
                                                 <select class="form-select" id="inputType" name="type">
                                                     <option value="">Select Type</option>
-                                                    <?php foreach ($resultType as $typeData) { ?>
-                                                        <option value="<?= $typeData['type'] ?>" <?= ($typeData['type'] == $type) ? 'selected' : '' ?>><?= $typeData['type'] ?></option>
-                                                    <?php } ?>
+                                                    <option value="Sick" <?= ($type == "Sick") ? 'selected' : '' ?>>Sick</option>
+                                                    <option value="National Holiday" <?= ($type == "National Holiday") ? 'selected' : '' ?>>National Holiday</option>
                                                 </select>
                                                 <span class="text-danger"><?php echo $typeErr; ?></span>
                                             </div>
@@ -214,11 +262,22 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                             </div>
                                         </div>
                                         <div class="row">
+                                            <div class="mb-3 col-md-6">
+                                                <label class="form-label" for="inputFoto">Foto</label>
+                                                <input type="file" class="form-control" id="inputFoto" name="foto">
+                                                <span class="text-danger"><?php echo $fotoErr; ?></span>
+                                                <?php if (!empty($foto)) : ?>
+                                                    <img src="<?= $foto ?>" alt="Current Photo" class="img-thumbnail" style="width: 300px; height: 300px;">
+                                                <?php endif; ?>
+                                            </div>
+
+                                        </div>
+                                        <div class="row">
                                             <div class="col">
                                                 <?php if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($fullnameErr) && !empty($divisionErr) && !empty($reasonErr) && !empty($typeErr) && !empty($startDateErr) && !empty($finishDateErr)) : ?>
                                                     <button type="button" name="submit" class="btn btn-primary">Update</button>
                                                 <?php else : ?>
-                                                    <button type="submit" class="btn btn-primary" onclick="return confirm('are you sure you will update?')">Update</button>
+                                                    <button type="submit" name="submit" class="btn btn-primary" onclick="return confirm('are you sure you will update?')">Update</button>
                                                 <?php endif; ?>
                                                 <a href="attendancelist.php" class="btn btn-light text-dark text-decoration-none">Cancel</a>
                                             </div>
