@@ -67,8 +67,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (empty($reason)) {
             $reasonErr = "Reason is required";
         }
+        if ($type == "Normal") {
+            $queryFinishDate = "SELECT finish_date FROM m_projects WHERE project_id = ?";
+            $stmtFinishDate = mysqli_prepare($conn, $queryFinishDate);
+            mysqli_stmt_bind_param($stmtFinishDate, "i", $project_id);
+            mysqli_stmt_execute($stmtFinishDate);
+            $resultFinishDate = mysqli_stmt_get_result($stmtFinishDate);
+            if ($row = mysqli_fetch_assoc($resultFinishDate)) {
+                $projectFinishDate = new DateTime($row['finish_date']);
+                $currentDate = new DateTime();
+                $interval = $currentDate->diff($projectFinishDate);
+                $daysDifference = $interval->days;
 
-        if (empty($fullnameErr) && empty($projectErr) && empty($divisionErr) && empty($categoryErr) && empty($typeErr) && empty($start_dateErr) && empty($finish_dateErr) && empty($reasonErr)) {
+                if ($daysDifference < 7) {
+                    $error = "For 'Normal' type, the finish date must be at least 7 days from now.";
+                }
+            } else {
+                // Handle jika query finish_date gagal
+                $error = "Failed to retrieve finish date from the project.";
+            }
+        }
+
+
+        if (empty($fullnameErr) && empty($projectErr) && empty($divisionErr) && empty($categoryErr) && empty($typeErr) && empty($start_dateErr) && empty($finish_dateErr) && empty($reasonErr) && empty($error)) {
             $insertQuery = "INSERT INTO overtimes (user_id, project_id, divisi_id, category, type, start_date, finish_date, reason, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             $insertStatement = mysqli_prepare($conn, $insertQuery);
@@ -119,6 +140,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 <div class="card-header">
                                 </div>
                                 <div class="card-body">
+                                    <?php if (isset($error)) { ?>
+                                        <div class="alert alert-danger alert-dismissible p-3 rounded" role="alert">
+                                            <div class="alert-message">
+                                                <?php echo $error; ?>
+                                            </div>
+                                            <button type="button" class="btn-close align-items-end" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        </div>
+                                    <?php } ?>
                                     <form action="<?= cleanValue($_SERVER['PHP_SELF']) ?>" method="post">
                                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
                                         <div class="row">
@@ -178,7 +207,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                                 <div class="form-check form-check-inline">
                                                     <input class="form-check-input" type="radio" name="type" id="type_BusinessTrip" value="Business Trip" <?php if (isset($type) && $type === "Business Trip") echo "checked"; ?>>
                                                     <label class="form-check-label" for="type_BusinessTrip">Business Trip</label>
-                                                </div>
+                                                </div><br>
                                                 <span class="error" style="color: red;"><?= $typeErr; ?></span>
                                             </div>
                                         </div>
@@ -206,7 +235,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         </div>
                                         <div class="row">
                                             <div class="col">
-                                                <?php if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($fullnameErr) && !empty($projectErr) && !empty($divisionErr) && !empty($categoryErr) && !empty($typeErr) && !empty($start_dateErr) && !empty($finish_dateErr) && !empty($reasonErr) ) : ?>
+                                                <?php if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($fullnameErr) && !empty($projectErr) && !empty($divisionErr) && !empty($categoryErr) && !empty($typeErr) && !empty($start_dateErr) && !empty($finish_dateErr) && !empty($reasonErr)) : ?>
                                                     <button type="button" class="btn btn-primary">Submit</button>
                                                 <?php else : ?>
                                                     <button type="submit" class="btn btn-primary" onclick="return confirm('Are you sure you want to add it?')">Submit</button>

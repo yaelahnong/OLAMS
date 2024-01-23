@@ -107,24 +107,44 @@ if (isset($_POST['update']) && isset($_POST['overtime_id'])) {
         if (empty($reason)) {
             $reasonErr = "Reason is required";
         }
+        if ($type == "Normal") {
+            $queryFinishDate = "SELECT finish_date FROM m_projects WHERE project_id = ?";
+            $stmtFinishDate = mysqli_prepare($conn, $queryFinishDate);
+            mysqli_stmt_bind_param($stmtFinishDate, "i", $project_id);
+            mysqli_stmt_execute($stmtFinishDate);
+            $resultFinishDate = mysqli_stmt_get_result($stmtFinishDate);
+            if ($row = mysqli_fetch_assoc($resultFinishDate)) {
+                $projectFinishDate = new DateTime($row['finish_date']);
+                $currentDate = new DateTime();
+                $interval = $currentDate->diff($projectFinishDate);
+                $daysDifference = $interval->days;
+
+                if ($daysDifference < 7) {
+                    $error = "For 'Normal' type, the finish date must be at least 7 days from now.";
+                }
+            } else {
+                // Handle jika query finish_date gagal
+                $error = "Failed to retrieve finish date from the project.";
+            }
+        }
         if ($status === 'Approved') {
-            if($category == 'Weekend' && $type == 'Urgent'){
+            if ($category == 'Weekend' && $type == 'Urgent') {
                 // Validasi jika status sudah "Approved" dan "Effective Time" harus diisi dan tidak boleh angka minus
                 if (empty($effective_time)) {
                     $effective_timeErr = "Effective Time is required.";
                 } elseif (!is_numeric($effective_time) || intval($effective_time) < 0) {
                     $effective_timeErr = "Effective Time must be a non-negative integer.";
-                }elseif(intval($effective_time) > 12){
+                } elseif (intval($effective_time) > 12) {
                     $effective_timeErr = "Effective Time is limited to 12 hours.";
                 }
                 // var_dump($_POST);
                 // exit();
-            }elseif($category == 'Weekday' || $category == 'Weekend' || $type == 'Normal' || $type == 'Business Trip' || $type == 'Urgent'){
+            } elseif ($category == 'Weekday' || $category == 'Weekend' || $type == 'Normal' || $type == 'Business Trip' || $type == 'Urgent') {
                 if (empty($effective_time)) {
                     $effective_timeErr = "Effective Time is required.";
                 } elseif (!is_numeric($effective_time) || intval($effective_time) < 0) {
                     $effective_timeErr = "Effective Time must be a non-negative integer.";
-                }elseif(intval($effective_time) > 8){
+                } elseif (intval($effective_time) > 8) {
                     $effective_timeErr = "Effective Time is limited to 8 hours.";
                 }
             }
@@ -134,7 +154,7 @@ if (isset($_POST['update']) && isset($_POST['overtime_id'])) {
                 $effective_timeErr = "Effective Time can only be filled when status is Approved.";
             }
         }
-        if (empty($fullnameErr) && empty($projectErr) && empty($divisionErr) && empty($categoryErr) && empty($typeErr) && empty($start_dateErr) && empty($finish_dateErr) && empty($reasonErr) && empty($effective_timeErr)) {
+        if (empty($fullnameErr) && empty($projectErr) && empty($divisionErr) && empty($categoryErr) && empty($typeErr) && empty($start_dateErr) && empty($finish_dateErr) && empty($reasonErr) && empty($effective_timeErr) && empty($error)) {
             if ($status === 'Approved') {
                 // Query update dengan kolom "Effective Time"
                 $updateQuery = "UPDATE overtimes SET user_id = ?, project_id = ?, divisi_id = ?, category = ?, type = ?, start_date = ?, finish_date = ?, reason = ?, effective_time = ?, updated_by = ? WHERE overtime_id = ?";
@@ -184,6 +204,14 @@ if (isset($_POST['update']) && isset($_POST['overtime_id'])) {
                                 <div class="card-header">
                                 </div>
                                 <div class="card-body">
+                                    <?php if (isset($error)) { ?>
+                                        <div class="alert alert-danger alert-dismissible p-3 rounded" role="alert">
+                                            <div class="alert-message">
+                                                <?php echo $error; ?>
+                                            </div>
+                                            <button type="button" class="btn-close align-items-end" data-bs-dismiss="alert" aria-label="Close"></button>
+                                        </div>
+                                    <?php } ?>
                                     <form action="<?= cleanValue($_SERVER['PHP_SELF'] . "?id=" . $overtimeId) ?>" method="post">
                                         <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
                                         <?php if (isset($status) && ($status === 'Pending' || $status === 'Rejected')) : ?>
