@@ -4,77 +4,85 @@ include __DIR__ . "/include/conn.inc.php";
 include __DIR__ . "/include/csrf_token.inc.php";
 include __DIR__ . "/include/baseUrl.inc.php";
 
+// Cek apakah pengguna sudah login
 if (!isset($_SESSION["login"])) {
     header("Location: login.php");
     exit();
 }
 
-// membatasi Hak Akses User
+// Batasi Hak Akses User
 if ($_SESSION['role_id'] != 3 && $_SESSION['role_id'] != 4 && $_SESSION['role_id'] != 2) {
     header("Location: dashboard.php");
     exit();
 }
 
 $user_id = $_SESSION["user_id"];
+
+$projectNameErr = $startDateErr = $finishDateErr = "";
+$projectName = $startDate = $finishDate = null;
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if (isset($_POST['csrf_token']) && isCsrfTokenValid($_POST['csrf_token'])) {
-        if (isset($_POST["project_name"]) && !empty($_POST["project_name"])) {
-            $projectName = $_POST["project_name"];
+        $projectName = isset($_POST["project_name"]) ? cleanValue($_POST["project_name"]) : NULL;
+        $startDate = isset($_POST["start_date"]) ? cleanValue($_POST["start_date"]) : NULL;
+        $finishDate = isset($_POST["finish_date"]) ? cleanValue($_POST["finish_date"]) : NULL;
+        
+        if (empty($projectName)) {
+            $projectNameErr = "Project Name is required.";
+        } elseif (!preg_match("/^[a-zA-Z0-9 ]*$/", $projectName)) {
+            $projectNameErr = "Input can only contain letters, numbers, and spaces.";
+        }
+        if (empty($startDate)) {
+            $startDateErr = "Start Date is required.";
+        }
+        if (empty($finishDate)) {
+            $finishDateErr = "Finish Date is required.";
+        } elseif (strtotime($finishDate) < strtotime($startDate)) {
+            $finishDateErr = "Finish Date cannot be earlier than Start Date.";
+        }
 
-            // Validasi input harus berisi huruf, angka, dan spasi
-            if (preg_match("/^[a-zA-Z0-9 ]*$/", $projectName)) {
-                // Jika valid, bersihkan nilai
-                $projectName = cleanValue($projectName);
+        if (empty($projectNameErr) && empty($startDateErr) && empty($finishDateErr)) {
+            $checkProjectName = "SELECT project_name FROM m_projects WHERE project_name = ? AND is_deleted = 'N'";
+            $checkStmt = mysqli_prepare($conn, $checkProjectName);
 
-                $checkProjectName = "SELECT project_name FROM m_projects WHERE project_name = ? AND is_deleted = 'N'";
-                $checkStmt = mysqli_prepare($conn, $checkProjectName);
+            if ($checkStmt) {
+                mysqli_stmt_bind_param($checkStmt, "s", $projectName);
+                mysqli_stmt_execute($checkStmt);
+                $checkResult = mysqli_stmt_get_result($checkStmt);
 
-                if ($checkStmt) {
-                    mysqli_stmt_bind_param($checkStmt, "s", $projectName);
-                    mysqli_stmt_execute($checkStmt);
-                    $checkResult = mysqli_stmt_get_result($checkStmt);
-                    // var_dump(mysqli_fetch_assoc($checkResult));
-                    // exit;
-                    if (mysqli_num_rows($checkResult) > 0) {
-                        $error = "Project with the same name already exists.";
-                    } else {
-                        $insertQuery = "INSERT INTO m_projects (project_name, created_by) VALUES (?, ?)";
-                        $stmt = mysqli_prepare($conn, $insertQuery);
-
-                        if ($stmt) {
-                            mysqli_stmt_bind_param($stmt, "ss", $projectName, $user_id);
-                            if (mysqli_stmt_execute($stmt)) {
-                              echo "<script>alert('Data added successfully');</script>";
-                                echo "<script>window.location.href = 'projectlist.php'</script>";
-                                exit();
-                            } else {
-                                $error = "Failed to save the data.";
-                            }
-
-                            mysqli_stmt_close($stmt);
-                        } else {
-                            $error = "Failed to make a prepared statement.";
-                        }
-                    }
-                    // var_dump($error);
-                    // exit;
-
-                    mysqli_stmt_close($checkStmt);
+                if (mysqli_num_rows($checkResult) > 0) {
+                    $error = "Project with the same name already exists.";
                 } else {
-                    $error = "Failed to make a prepared statement for duplicate check.";
+                    // Hanya membuat prepared statement jika tidak ada error
+                    $insertQuery = "INSERT INTO m_projects (project_name, start_date, finish_date, created_by) VALUES (?, ?, ?, ?)";
+                    $stmt = mysqli_prepare($conn, $insertQuery);
+
+                    if ($stmt) {
+                        mysqli_stmt_bind_param($stmt, "sssi", $projectName, $startDate, $finishDate, $user_id);
+                        
+                        if (mysqli_stmt_execute($stmt)) {
+                            echo "<script>alert('Data added successfully');</script>";
+                            echo "<script>window.location.href = 'projectlist.php'</script>";
+                            exit();
+                        } else {
+                            $error = "Failed to save the data.";
+                        }
+
+                        mysqli_stmt_close($stmt);
+                    } else {
+                        $error = "Failed to make a prepared statement.";
+                    }
                 }
+
+                mysqli_stmt_close($checkStmt);
             } else {
-                $error = "Input can only contain letters, numbers, and spaces.";
+                $error = "Failed to make a prepared statement for duplicate check.";
             }
-        } else {
-            $error = "The project name cannot be empty.";
         }
     } else {
         $TokenErr = "Invalid CSRF token";
     }
 }
-
-
 ?>
 
 <!DOCTYPE html>
@@ -115,11 +123,26 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                                                 <label class="form-label" for="inputProjectName">Project Name</label>
                                                 <span style="color: red">*</span><br>
                                                 <input type="text" class="form-control" name="project_name" id="inputProjectName" placeholder="Enter Project Name">
+                                                <span class="text-danger"><?php echo $projectNameErr; ?></span>
+                                            </div>
+                                            <div class="mb-3 col-md-6">
+                                                <label class="form-label" for="inputStartDate">Start Date</label>
+                                                <span style="color: red">*</span>
+                                                <input type="date" class="form-control datepicker" id="inputStartDate" name="start_date">
+                                                <span class="text-danger"><?php echo $startDateErr; ?></span>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="mb-3 col-md-6">
+                                                <label class="form-label" for="inputFinishDate">Finish Date</label>
+                                                <span style="color: red">*</span>
+                                                <input type="date" class="form-control" id="inputFinishDate" name="finish_date">
+                                                <span class="text-danger"><?php echo $finishDateErr; ?></span>
                                             </div>
                                         </div>
                                         <div class="row">
                                             <div class="col">
-                                                <?php if ($_SERVER['REQUEST_METHOD'] == 'POST' && !$error) : ?>
+                                                <?php if ($_SERVER['REQUEST_METHOD'] == 'POST' && empty($projectNameErr) && empty($startDateErr) && empty($finishDateErr) && !$error) : ?>
                                                     <button type="button" class="btn btn-primary">Submit</button>
                                                 <?php else : ?>
                                                     <button type="submit" class="btn btn-primary" onclick="return confirm('Are you sure you want to add it?')">Submit</button>
@@ -140,16 +163,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="sweetalert2.all.min.js"></script>
     <script>
-    function showSuccessAlert() {
-        Swal.fire({
-            title: 'Good job!',
-            text: 'Project added successfully!',
-            icon: 'success'
-        }).then(function() {
-            window.location.href = 'projectlist.php';
-        });
-    }
-</script>
+        function showSuccessAlert() {
+            Swal.fire({
+                title: 'Good job!',
+                text: 'Project added successfully!',
+                icon: 'success'
+            }).then(function() {
+                window.location.href = 'projectlist.php';
+            });
+        }
+    </script>
     <?php include "script.inc.php"; ?>
 </body>
 

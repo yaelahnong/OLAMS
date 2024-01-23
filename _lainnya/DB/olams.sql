@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 18 Jan 2024 pada 02.43
+-- Waktu pembuatan: 23 Jan 2024 pada 02.09
 -- Versi server: 10.4.28-MariaDB
 -- Versi PHP: 8.1.23
 
@@ -35,6 +35,7 @@ CREATE TABLE `attendances` (
   `type` enum('Sick','National Holiday') NOT NULL,
   `start_date` date DEFAULT NULL,
   `finish_date` date DEFAULT NULL,
+  `foto` varchar(100) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `created_by` tinyint(3) UNSIGNED NOT NULL,
   `updated_at` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
@@ -45,8 +46,10 @@ CREATE TABLE `attendances` (
 -- Dumping data untuk tabel `attendances`
 --
 
-INSERT INTO `attendances` (`attendance_id`, `user_id`, `division_id`, `reason`, `type`, `start_date`, `finish_date`, `created_at`, `created_by`, `updated_at`, `updated_by`) VALUES
-(31, 28, 1, 'Lebaran', 'National Holiday', '2024-01-22', '2024-01-22', '2024-01-16 13:36:15', 26, NULL, NULL);
+INSERT INTO `attendances` (`attendance_id`, `user_id`, `division_id`, `reason`, `type`, `start_date`, `finish_date`, `foto`, `created_at`, `created_by`, `updated_at`, `updated_by`) VALUES
+(43, 28, 1, 'sakit', 'Sick', '2024-01-19', '2024-01-22', 'images/sick/Sick leave userTest 2024-01-19 to 2024-01-22.jpg', '2024-01-22 06:06:10', 30, NULL, NULL),
+(44, 28, 1, 'lebaran', 'National Holiday', '2024-01-26', '2024-01-28', '', '2024-01-22 06:06:42', 30, NULL, NULL),
+(45, 28, 1, 'sakit', 'Sick', '2024-01-24', '2024-01-25', 'images/sick/Sick leave userTest 2024-01-24 to 2024-01-25.jpeg', '2024-01-22 08:10:27', 30, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -62,6 +65,8 @@ CREATE TABLE `duty_overtimes` (
   `lead_count` tinyint(3) UNSIGNED NOT NULL,
   `customer_count` tinyint(3) UNSIGNED NOT NULL,
   `note` text DEFAULT NULL,
+  `start_date` timestamp NULL DEFAULT current_timestamp(),
+  `finish_date` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
   `time_duty_overtime` tinyint(3) UNSIGNED NOT NULL,
   `status` enum('Approved','Pending') NOT NULL DEFAULT 'Pending',
   `approved_by` tinyint(3) UNSIGNED DEFAULT NULL,
@@ -101,7 +106,10 @@ CREATE TABLE `leaves` (
 --
 
 INSERT INTO `leaves` (`leaves_id`, `user_id`, `division_id`, `reason`, `category`, `start_date`, `finish_date`, `submitted_by_admin`, `sent_by_admin`, `status`, `status_updated_at`, `status_updated_by`, `created_at`, `created_by`, `updated_at`, `updated_by`) VALUES
-(31, 28, 1, 'Liburan', 'Annual', '2024-01-17 17:00:00', '2024-01-18 17:00:00', 30, '2024-01-17 14:26:18', 'Approved', '2024-01-17 14:26:32', 27, '2024-01-17 14:25:59', 28, '2024-01-17 14:26:32', NULL);
+(31, 28, 1, 'Liburan', 'Annual', '2024-01-17 17:00:00', '2024-01-18 17:00:00', 30, '2024-01-17 14:26:18', 'Approved', '2024-01-17 14:26:32', 27, '2024-01-17 14:25:59', 28, '2024-01-17 14:26:32', NULL),
+(32, 28, 1, 'liburan', 'Annual', '2024-01-18 02:47:00', '2024-01-19 02:47:00', 30, '2024-01-18 02:48:23', 'Approved', '2024-01-18 02:48:35', 27, '2024-01-18 02:48:00', 28, '2024-01-18 02:48:35', NULL),
+(33, 28, 1, 'liburan', 'Annual', '2024-01-22 03:32:00', '2024-01-30 03:32:00', 30, '2024-01-18 03:32:49', 'Approved', '2024-01-18 03:33:02', 27, '2024-01-18 03:32:26', 28, '2024-01-18 03:33:02', NULL),
+(34, 28, 1, 'liburan', 'Annual', '2024-02-05 03:33:00', '2024-02-09 03:33:00', NULL, NULL, 'Pending', NULL, NULL, '2024-01-18 03:33:54', 28, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -162,6 +170,8 @@ INSERT INTO `m_divisions` (`division_id`, `division_name`, `created_at`, `create
 CREATE TABLE `m_projects` (
   `project_id` tinyint(3) UNSIGNED NOT NULL,
   `project_name` varchar(64) NOT NULL,
+  `start_date` date DEFAULT current_timestamp(),
+  `finish_date` date DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `created_by` tinyint(3) UNSIGNED NOT NULL,
   `updated_at` timestamp NULL DEFAULT NULL ON UPDATE current_timestamp(),
@@ -170,15 +180,6 @@ CREATE TABLE `m_projects` (
   `deleted_by` tinyint(3) UNSIGNED DEFAULT NULL,
   `is_deleted` enum('Y','N') DEFAULT 'N'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data untuk tabel `m_projects`
---
-
-INSERT INTO `m_projects` (`project_id`, `project_name`, `created_at`, `created_by`, `updated_at`, `updated_by`, `deleted_at`, `deleted_by`, `is_deleted`) VALUES
-(2, 'Website Company Profile', '2023-10-18 05:43:50', 1, '2024-01-16 13:27:16', 26, NULL, NULL, 'N'),
-(3, 'Rumah Sakit', '2023-10-18 05:44:09', 1, '2024-01-16 13:26:11', 26, NULL, NULL, 'N'),
-(4, 'OLAMS', '2023-10-18 05:44:09', 1, '2024-01-16 13:25:50', 26, NULL, NULL, 'N');
 
 -- --------------------------------------------------------
 
@@ -216,7 +217,7 @@ CREATE TABLE `overtimes` (
   `user_id` tinyint(3) UNSIGNED NOT NULL,
   `project_id` tinyint(3) UNSIGNED NOT NULL,
   `divisi_id` tinyint(3) UNSIGNED NOT NULL,
-  `type` enum('Normal','Urgent','Business Trip') CHARACTER SET utf8mb4,
+  `type` enum('Normal','Urgent','Business Trip') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_nopad_ci DEFAULT NULL,
   `start_date` timestamp NOT NULL DEFAULT current_timestamp(),
   `finish_date` timestamp NULL DEFAULT NULL,
   `category` enum('Weekday','Weekend') DEFAULT NULL,
@@ -240,7 +241,12 @@ CREATE TABLE `overtimes` (
 --
 
 INSERT INTO `overtimes` (`overtime_id`, `user_id`, `project_id`, `divisi_id`, `type`, `start_date`, `finish_date`, `category`, `effective_time`, `reason`, `submitted_by_admin`, `sent_by_admin`, `checked_by_leader`, `checked_by_leader_at`, `status`, `status_updated_at`, `status_updated_by`, `created_at`, `created_by`, `updated_at`, `updated_by`) VALUES
-(70, 28, 4, 1, 'Normal', '2024-01-17 14:22:00', '2024-01-17 16:22:00', 'Weekday', 2, 'debugging', 30, '2024-01-17 14:23:29', 31, '2024-01-17 14:23:00', 'Approved', '2024-01-17 14:23:44', 27, '2024-01-17 14:22:30', 28, '2024-01-17 14:24:10', 28);
+(70, 28, 4, 1, 'Normal', '2024-01-17 14:22:00', '2024-01-17 16:22:00', 'Weekday', 2, 'debugging', 30, '2024-01-17 14:23:29', 31, '2024-01-17 14:23:00', 'Approved', '2024-01-17 14:23:44', 27, '2024-01-17 14:22:30', 28, '2024-01-17 14:24:10', 28),
+(71, 28, 4, 1, 'Normal', '2024-01-18 01:42:00', '2024-01-18 14:42:00', 'Weekend', 6, 'melakukan revisi', 30, '2024-01-18 02:44:33', 31, '2024-01-18 02:43:45', 'Approved', '2024-01-18 02:45:27', 27, '2024-01-18 02:42:42', 28, '2024-01-18 02:46:29', 28),
+(72, 28, 3, 1, 'Normal', '2024-01-18 03:38:00', '2024-01-18 09:45:00', 'Weekday', 15, 'bugging', 30, '2024-01-18 03:40:02', 31, '2024-01-18 03:39:42', 'Approved', '2024-01-18 03:40:21', 27, '2024-01-18 03:39:24', 28, '2024-01-18 03:43:10', 28),
+(74, 28, 2, 1, 'Urgent', '2024-01-18 03:51:00', '2024-01-18 07:55:00', 'Weekday', NULL, 'urgent', NULL, NULL, NULL, NULL, 'Rejected', '2024-01-18 03:51:39', 31, '2024-01-18 03:51:28', 28, '2024-01-18 03:51:39', NULL),
+(75, 28, 3, 1, 'Business Trip', '2024-01-21 11:27:00', '2024-01-21 15:00:00', 'Weekend', 8, 'debugging', 30, '2024-01-21 09:05:01', 31, '2024-01-21 09:04:14', 'Approved', '2024-01-21 09:05:36', 27, '2024-01-21 08:28:15', 28, '2024-01-21 09:10:02', 28),
+(76, 28, 4, 1, 'Urgent', '2024-01-27 02:00:00', '2024-01-28 14:00:00', 'Weekend', 8, 'server down', NULL, NULL, NULL, NULL, 'Approved', '2024-01-21 08:54:54', 31, '2024-01-21 08:53:06', 28, '2024-01-21 08:59:46', 28);
 
 -- --------------------------------------------------------
 
@@ -267,7 +273,23 @@ INSERT INTO `overtimes_histories` (`overtime_history_id`, `overtime_id`, `user_i
 (140, 70, 28, 'Pending', '2024-01-17 14:22:30', 28, NULL, NULL),
 (141, 70, 31, 'Approved', '2024-01-17 14:23:00', 31, '2024-01-17 14:23:00', 31),
 (142, 70, 30, 'Approved', '2024-01-17 14:23:29', 30, '2024-01-17 14:23:29', 30),
-(143, 70, 27, 'Approved', '2024-01-17 14:23:44', 27, '2024-01-17 14:23:44', 27);
+(143, 70, 27, 'Approved', '2024-01-17 14:23:44', 27, '2024-01-17 14:23:44', 27),
+(144, 71, 28, 'Pending', '2024-01-18 02:42:42', 28, NULL, NULL),
+(145, 71, 31, 'Approved', '2024-01-18 02:43:45', 31, '2024-01-18 02:43:45', 31),
+(146, 71, 30, 'Approved', '2024-01-18 02:44:33', 30, '2024-01-18 02:44:33', 30),
+(147, 71, 27, 'Approved', '2024-01-18 02:45:27', 27, '2024-01-18 02:45:27', 27),
+(148, 72, 28, 'Pending', '2024-01-18 03:39:24', 28, NULL, NULL),
+(149, 72, 31, 'Approved', '2024-01-18 03:39:42', 31, '2024-01-18 03:39:42', 31),
+(150, 72, 30, 'Approved', '2024-01-18 03:40:02', 30, '2024-01-18 03:40:02', 30),
+(151, 72, 27, 'Approved', '2024-01-18 03:40:21', 27, '2024-01-18 03:40:21', 27),
+(154, 74, 28, 'Pending', '2024-01-18 03:51:28', 28, NULL, NULL),
+(155, 74, 31, 'Rejected', '2024-01-18 03:51:39', 31, '2024-01-18 03:51:39', 31),
+(156, 75, 28, 'Pending', '2024-01-21 08:28:15', 28, NULL, NULL),
+(157, 76, 28, 'Pending', '2024-01-21 08:53:06', 28, NULL, NULL),
+(158, 76, 31, 'Approved', '2024-01-21 08:54:54', 31, '2024-01-21 08:54:54', 31),
+(159, 75, 31, 'Approved', '2024-01-21 09:04:14', 31, '2024-01-21 09:04:14', 31),
+(160, 75, 30, 'Approved', '2024-01-21 09:05:01', 30, '2024-01-21 09:05:01', 30),
+(161, 75, 27, 'Approved', '2024-01-21 09:05:36', 27, '2024-01-21 09:05:36', 27);
 
 -- --------------------------------------------------------
 
@@ -386,19 +408,19 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT untuk tabel `attendances`
 --
 ALTER TABLE `attendances`
-  MODIFY `attendance_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+  MODIFY `attendance_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=46;
 
 --
 -- AUTO_INCREMENT untuk tabel `duty_overtimes`
 --
 ALTER TABLE `duty_overtimes`
-  MODIFY `duty_overtime_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
+  MODIFY `duty_overtime_id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
 -- AUTO_INCREMENT untuk tabel `leaves`
 --
 ALTER TABLE `leaves`
-  MODIFY `leaves_id` tinyint(3) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+  MODIFY `leaves_id` tinyint(3) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
 
 --
 -- AUTO_INCREMENT untuk tabel `m_basic_salaries`
@@ -422,13 +444,13 @@ ALTER TABLE `m_projects`
 -- AUTO_INCREMENT untuk tabel `overtimes`
 --
 ALTER TABLE `overtimes`
-  MODIFY `overtime_id` tinyint(3) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=71;
+  MODIFY `overtime_id` tinyint(3) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=78;
 
 --
 -- AUTO_INCREMENT untuk tabel `overtimes_histories`
 --
 ALTER TABLE `overtimes_histories`
-  MODIFY `overtime_history_id` tinyint(3) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=144;
+  MODIFY `overtime_history_id` tinyint(3) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=168;
 
 --
 -- AUTO_INCREMENT untuk tabel `users`
