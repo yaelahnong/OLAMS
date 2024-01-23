@@ -41,10 +41,10 @@ $result1 = mysqli_stmt_get_result($stmt1);
 $projectData = mysqli_fetch_assoc($result1);
 
 
-$jumlah_semua_data = $projectData['jumlah_semua_data']; 
+$jumlah_semua_data = $projectData['jumlah_semua_data'];
 
 // query 2
-$show_project = "SELECT project_id, project_name FROM m_projects WHERE is_deleted = 'N'";
+$show_project = "SELECT project_id, project_name, start_date, finish_date FROM m_projects WHERE is_deleted = 'N'";
 
 $parameters = array();
 
@@ -105,12 +105,12 @@ $data = mysqli_fetch_all($result2, MYSQLI_ASSOC);
                         <label for="inputSearch" class="ms-3 me-2">Search</label>
                         <input type="text" name="search" id="inputSearch" placeholder="Enter project name" class="form-control form-control-sm" value="<?php echo $search_project ?? ''; ?>">
                         <button type="submit" class="btn btn-sm btn-primary ms-2">Search</button>
-                        <a class="btn btn-sm btn-warning mx-2" href="<?php echo cleanValue($_SERVER['PHP_SELF']);?>">Reset</a>
+                        <a class="btn btn-sm btn-warning mx-2" href="<?php echo cleanValue($_SERVER['PHP_SELF']); ?>">Reset</a>
                       </form>
                     </div>
                   </div>
                   <div class="col-md-6 text-end">
-                      <a href="projectlist_add.php" class="btn btn-sm btn-success me-3 text-white text-decoration-none">+ Add Project</a>
+                    <a href="projectlist_add.php" class="btn btn-sm btn-success me-3 text-white text-decoration-none">+ Add Project</a>
                   </div>
                 </div>
                 <div class="table-responsive">
@@ -119,6 +119,8 @@ $data = mysqli_fetch_all($result2, MYSQLI_ASSOC);
                       <tr>
                         <th scope="col">No</th>
                         <th scope="col">Project name</th>
+                        <th scope="col">Start Date</th>
+                        <th scope="col">Finish Date</th>
                         <th scope="col">Action</th>
                       </tr>
                     </thead>
@@ -126,8 +128,10 @@ $data = mysqli_fetch_all($result2, MYSQLI_ASSOC);
                       <?php if (count($data) > 0) : ?>
                         <?php foreach ($data as $key => $row) : ?>
                           <tr>
-                            <th scope="row"><?= $key + 1 + $offset ; ?></th>
+                            <th scope="row"><?= $key + 1 + $offset; ?></th>
                             <td><?= $row['project_name']; ?></td>
+                            <td><?= date('d-M-Y', strtotime($row['start_date'])) ?></td>
+                            <td><?= date('d-M-Y', strtotime($row['finish_date'])) ?></td>
                             <td>
                               <a href="projectlist_update.php?id=<?= $row['project_id']; ?>" class="btn btn-warning btn-sm">Edit</a>
                               <a href="projectlist_delete.php?id=<?= $row['project_id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a>
@@ -145,10 +149,12 @@ $data = mysqli_fetch_all($result2, MYSQLI_ASSOC);
                 <div>
                   <div class="dataTables_paginate paging_simple_numbers ms-3 mt-3" id="datatables-reponsive_paginate">
                     <ul class="pagination justify-content-end">
-                      <?php if($jumlah_semua_data > $limit) : ?>
-                      <?php if ($halaman_aktif > 1) :?>
+                      <?php if ($jumlah_semua_data > $limit) : ?>
+                        <?php if ($halaman_aktif > 1) : ?>
                           <li class="page-item">
-                            <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $prevPage; ?><?php if (!empty($search_project)) { echo '&search=' . $search_project; } ?>">Previous</a>
+                            <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $prevPage; ?><?php if (!empty($search_project)) {
+                                                                                                                        echo '&search=' . $search_project;
+                                                                                                                      } ?>">Previous</a>
                           </li>
                         <?php else : ?>
                           <li class="page-item disabled">
@@ -156,24 +162,28 @@ $data = mysqli_fetch_all($result2, MYSQLI_ASSOC);
                           </li>
                         <?php endif; ?>
 
-                       <!-- Tampilkan tautan halaman -->
-                      <?php for ($i = 1; $i <= $jumlah_halaman; $i++) : ?>
-                        <li class="page-item<?= $i == $halaman_aktif ? ' active' : '' ?>">
-                          <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $i; ?><?php if (!empty($search_project)) { echo '&search=' . $search_project; } ?>"><?= $i ?></a>
-                        </li>
-                      <?php endfor; ?>
+                        <!-- Tampilkan tautan halaman -->
+                        <?php for ($i = 1; $i <= $jumlah_halaman; $i++) : ?>
+                          <li class="page-item<?= $i == $halaman_aktif ? ' active' : '' ?>">
+                            <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $i; ?><?php if (!empty($search_project)) {
+                                                                                                                  echo '&search=' . $search_project;
+                                                                                                                } ?>"><?= $i ?></a>
+                          </li>
+                        <?php endfor; ?>
 
-                      <!-- Tampilkan tautan "Next" jika bukan di halaman terakhir -->
-                      <?php if ($halaman_aktif < $jumlah_halaman) : ?>
-                        <li class="page-item">
-                          <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $nextPage; ?><?php if (!empty($search_project)) { echo '&search=' . $search_project; } ?>">Next</a>
-                        </li>
-                      <?php else : ?>
-                        <li class="page-item disabled">
-                          <span class="page-link">Next</span>
-                        </li>
+                        <!-- Tampilkan tautan "Next" jika bukan di halaman terakhir -->
+                        <?php if ($halaman_aktif < $jumlah_halaman) : ?>
+                          <li class="page-item">
+                            <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $nextPage; ?><?php if (!empty($search_project)) {
+                                                                                                                        echo '&search=' . $search_project;
+                                                                                                                      } ?>">Next</a>
+                          </li>
+                        <?php else : ?>
+                          <li class="page-item disabled">
+                            <span class="page-link">Next</span>
+                          </li>
+                        <?php endif; ?>
                       <?php endif; ?>
-                    <?php endif; ?>
                     </ul>
                   </div>
                 </div>
