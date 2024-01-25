@@ -46,9 +46,8 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     <?php include "head.inc.php"; ?>
     <title>OLAMS - Leave Detail</title>
 
-    <!-- Tambahkan link untuk HTML2PDF dan DataTables CSS -->
+    <!-- Tambahkan link untuk HTML2PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.0/html2pdf.bundle.js"></script>
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
 </head>
 
 <body>
@@ -61,31 +60,43 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                     <h1 class="h1 mb-3"><strong>Leave Detail</strong></h1>
                     <div class="card">
                         <div class="card-body">
-                            <!-- Add the table for leave details similar to the report page -->
-                            <table class="table" id="leaveDetailsTable">
-                                <thead>
-                                    <tr>
-                                        <th>Full Name</th>
-                                        <th>Division</th>
-                                        <th>Reason</th>
-                                        <th>Category</th>
-                                        <th>Start Date</th>
-                                        <th>Finish Date</th>
-                                        <th>Sent by Admin</th>
-                                        <th>Status Updated At</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
+                            <table class="table">
                                 <tbody>
                                     <tr>
+                                        <td><strong>Full Name</strong></td>
                                         <td><?= $leaveDetails['name'] ?></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Division</strong></td>
                                         <td><?= $leaveDetails['division_name'] ?></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Reason</strong></td>
                                         <td><?= $leaveDetails['reason'] ?></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Category</strong></td>
                                         <td><?= $leaveDetails['category'] ?></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Start Date</strong></td>
                                         <td><?= date('d-M-Y H:i', strtotime($leaveDetails['start_date'])) ?></td>
+
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Finish Date</strong></td>
                                         <td><?= date('d-M-Y H:i', strtotime($leaveDetails['finish_date'])) ?></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Sent by Admin</strong></td>
                                         <td><?= $leaveDetails['sent_by_admin'] ? date('d-M-Y H:i', strtotime($leaveDetails['sent_by_admin'])) : '-' ?></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Status Updated At</strong></td>
                                         <td><?= $leaveDetails['status_updated_at'] ? date('d-M-Y H:i', strtotime($leaveDetails['status_updated_at'])) : '-' ?></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Status</strong></td>
                                         <td><?= $leaveDetails['status'] ?></td>
                                     </tr>
                                 </tbody>
@@ -93,11 +104,16 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                             
                             <!-- Tambahkan tombol Print dan Export PDF -->
                             <div class="mt-3">
-                                <button class="btn btn-primary btn-sm" onclick="window.print()">Print</button>
-                                <button class="btn btn-danger btn-sm ms-2" onclick="exportPDF()">Export PDF</button>
+                                <div class="float-end">
+                                    <button id="printButton" class="btn btn-primary btn-sm" onclick="toggleButtons(false); window.print()">Print</button>
+                                    <button id="exportPDFButton" class="btn btn-danger btn-sm ms-2" onclick="exportPDF()">Export PDF</button>
+                                </div>
+                                <a id="backButton" href="leavelist.php" class="btn btn-warning btn-sm ms-2">Back</a>
+                                 <!-- Tulisan tanda tangan -->
+                                <div id="signature" class="signature text-end mt-3" style="display: none;">
+                                    Tanda tangan: [Nama Anda]
+                                </div>
                             </div>
-
-                            <a href="leavelist.php" class="btn btn-warning btn-sm ms-2">Back</a>
                         </div>
                     </div>
                 </div>
@@ -108,20 +124,38 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
 
     <?php include "script.inc.php"; ?>
 
-    <!-- Tambahkan script untuk DataTables -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
     <script>
         // Function untuk export PDF
         function exportPDF() {
+            toggleButtons(false); // Sembunyikan tombol sebelum memulai eksport PDF
             var element = document.body; // Element yang akan di-export ke PDF
-            html2pdf(element);
-        } 
+            html2pdf(element, {
+                margin: 10,
+                filename: 'leave_detail.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            }).then(function () {
+                toggleButtons(true); // Tampilkan kembali tombol setelah eksport PDF selesai
+            });
+        }
 
-        // Inisialisasi DataTable pada table leaveDetailsTable
-        $(document).ready(function() {
-            $('#leaveDetailsTable').DataTable();
-        });
+        // Function untuk menampilkan atau menyembunyikan tombol
+        function toggleButtons(show) {
+            var printButton = document.getElementById('printButton');
+            var exportPDFButton = document.getElementById('exportPDFButton');
+            var backButton = document.getElementById('backButton');
+
+            if (show) {
+                printButton.style.display = 'block';
+                exportPDFButton.style.display = 'block';
+                backButton.style.display = 'block';
+            } else {
+                printButton.style.display = 'none';
+                exportPDFButton.style.display = 'none';
+                backButton.style.display = 'none';
+            }
+        }
     </script>
 </body>
 
