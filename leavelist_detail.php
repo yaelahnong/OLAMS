@@ -48,6 +48,9 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
 
     <!-- Tambahkan link untuk HTML2PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.0/html2pdf.bundle.js"></script>
+    <!-- Tambahkan link untuk jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+
 </head>
 
 <body>
@@ -101,17 +104,17 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                                     </tr>
                                 </tbody>
                             </table>
-                            
+
                             <!-- Tambahkan tombol Print dan Export PDF -->
                             <div class="mt-3">
                                 <div class="float-end">
-                                    <button id="printButton" class="btn btn-primary btn-sm" onclick="toggleButtons(false); window.print()">Print</button>
+                                    <button id="printButton" class="btn btn-primary btn-sm" onclick="printDocument()">Print</button>
                                     <button id="exportPDFButton" class="btn btn-danger btn-sm ms-2" onclick="exportPDF()">Export PDF</button>
                                 </div>
                                 <a id="backButton" href="leavelist.php" class="btn btn-warning btn-sm ms-2">Back</a>
-                                 <!-- Tulisan tanda tangan -->
+                                <!-- Tulisan tanda tangan -->
                                 <div id="signature" class="signature text-end mt-3" style="display: none;">
-                                    Tanda tangan: [Nama Anda]
+                                    Tanda tangan
                                 </div>
                             </div>
                         </div>
@@ -125,19 +128,29 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     <?php include "script.inc.php"; ?>
 
     <script>
-        // Function untuk export PDF
+        var exportingPDF = false;
+
+        // Function untuk export PDF menggunakan jsPDF
         function exportPDF() {
-            toggleButtons(false); // Sembunyikan tombol sebelum memulai eksport PDF
-            var element = document.body; // Element yang akan di-export ke PDF
-            html2pdf(element, {
+            toggleButtons(false);
+
+            var element = document.body;
+
+            // Buat instance jsPDF
+            var pdf = new jsPDF();
+
+            // Konversi elemen HTML ke format PDF
+            pdf.fromHTML(element, {
                 margin: 10,
-                filename: 'leave_detail.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            }).then(function () {
-                toggleButtons(true); // Tampilkan kembali tombol setelah eksport PDF selesai
+                pagesplit: true
             });
+
+            // Simpan atau tampilkan PDF
+            // pdf.save('leave_detail.pdf'); // Untuk menyimpan PDF
+            window.open(pdf.output('bloburl'), '_blank'); // Untuk menampilkan di jendela baru
+
+            // Kembalikan tampilan tombol setelah pemrosesan selesai
+            toggleButtons(true);
         }
 
         // Function untuk menampilkan atau menyembunyikan tombol
@@ -147,15 +160,59 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
             var backButton = document.getElementById('backButton');
 
             if (show) {
-                printButton.style.display = 'block';
-                exportPDFButton.style.display = 'block';
-                backButton.style.display = 'block';
+                printButton.style.display = 'inline-block';
+                exportPDFButton.style.display = 'inline-block';
+                backButton.style.display = 'inline-block';
             } else {
                 printButton.style.display = 'none';
                 exportPDFButton.style.display = 'none';
                 backButton.style.display = 'none';
             }
         }
+
+        // Function untuk beforePrint
+        function beforePrint() {
+            var signatureElement = document.getElementById('signature');
+            signatureElement.style.display = 'block';
+        }
+
+        // Function untuk afterPrint
+        function afterPrint() {
+            var signatureElement = document.getElementById('signature');
+            signatureElement.style.display = 'none';
+
+            if (!exportingPDF) {
+                // Jika bukan ekspor PDF, kembalikan tampilan tombol setelah pencetakan selesai
+                toggleButtons(true);
+            }
+        }
+
+        // Function untuk printing
+        function printDocument() {
+            toggleButtons(false);
+
+            var element = document.body;
+
+            // Show signature before printing
+            beforePrint();
+
+            window.print();
+        }
+
+        // Attach beforePrint and afterPrint events
+        if (window.matchMedia) {
+            var mediaQueryList = window.matchMedia('print');
+            mediaQueryList.addListener(function (mql) {
+                if (mql.matches) {
+                    beforePrint();
+                } else {
+                    afterPrint();
+                }
+            });
+        }
+
+        // Attach onafterprint event for browsers that support it
+        window.onafterprint = afterPrint;
     </script>
 </body>
 
