@@ -75,6 +75,19 @@ mysqli_stmt_execute($stmt2);
 $result2 = mysqli_stmt_get_result($stmt2);
 $data = mysqli_fetch_all($result2, MYSQLI_ASSOC);
 
+$currentDate = date('Y-m-d');
+
+foreach ($data as $row) {
+    $finishDate = date('Y-m-d', strtotime($row['finish_date']));
+    if ($currentDate > $finishDate) {
+        $projectId = $row['project_id'];
+        $updateQuery = "UPDATE m_projects SET is_deleted = 'Y', deleted_at = NOW() WHERE project_id = ?";
+        $stmtUpdate = mysqli_prepare($conn, $updateQuery);
+        mysqli_stmt_bind_param($stmtUpdate, 'i', $projectId);
+        mysqli_stmt_execute($stmtUpdate);
+        mysqli_stmt_close($stmtUpdate);
+    }
+}
 
 ?>
 <!DOCTYPE html>
@@ -152,9 +165,7 @@ $data = mysqli_fetch_all($result2, MYSQLI_ASSOC);
                       <?php if ($jumlah_semua_data > $limit) : ?>
                         <?php if ($halaman_aktif > 1) : ?>
                           <li class="page-item">
-                            <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $prevPage; ?><?php if (!empty($search_project)) {
-                                                                                                                        echo '&search=' . $search_project;
-                                                                                                                      } ?>">Previous</a>
+                            <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $prevPage; ?><?php if (!empty($search_project)) {echo '&search=' . $search_project;} ?>">Previous</a>
                           </li>
                         <?php else : ?>
                           <li class="page-item disabled">
@@ -165,18 +176,14 @@ $data = mysqli_fetch_all($result2, MYSQLI_ASSOC);
                         <!-- Tampilkan tautan halaman -->
                         <?php for ($i = 1; $i <= $jumlah_halaman; $i++) : ?>
                           <li class="page-item<?= $i == $halaman_aktif ? ' active' : '' ?>">
-                            <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $i; ?><?php if (!empty($search_project)) {
-                                                                                                                  echo '&search=' . $search_project;
-                                                                                                                } ?>"><?= $i ?></a>
+                            <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $i; ?><?php if (!empty($search_project)) {echo '&search=' . $search_project;} ?>"><?= $i ?></a>
                           </li>
                         <?php endfor; ?>
 
                         <!-- Tampilkan tautan "Next" jika bukan di halaman terakhir -->
                         <?php if ($halaman_aktif < $jumlah_halaman) : ?>
                           <li class="page-item">
-                            <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $nextPage; ?><?php if (!empty($search_project)) {
-                                                                                                                        echo '&search=' . $search_project;
-                                                                                                                      } ?>">Next</a>
+                            <a class="page-link" href="<?= cleanValue($_SERVER['PHP_SELF']) . '?page=' . $nextPage; ?><?php if (!empty($search_project)) {echo '&search=' . $search_project;} ?>">Next</a>
                           </li>
                         <?php else : ?>
                           <li class="page-item disabled">

@@ -33,6 +33,9 @@ $userData = mysqli_prepare($conn, $userQuery);
 mysqli_stmt_execute($userData);
 $userData = mysqli_stmt_get_result($userData);
 $userOptions = mysqli_fetch_all($userData, MYSQLI_ASSOC);
+
+$selectedStartMonth = isset($_GET['filter_from_month']) ? $_GET['filter_from_month'] : date('m');
+$selectedEndMonth = isset($_GET['filter_to_month']) ? $_GET['filter_to_month'] : date('m');
 ?>
 
 
@@ -41,6 +44,7 @@ $userOptions = mysqli_fetch_all($userData, MYSQLI_ASSOC);
 
 <head>
     <?php include "head.inc.php"; ?>
+    <!-- <link rel="stylesheet" href="library/DataTables/datatables.css"> -->
     <title>OLAMS - Report</title>
 </head>
 
@@ -55,26 +59,68 @@ $userOptions = mysqli_fetch_all($userData, MYSQLI_ASSOC);
                     <div class="row">
                         <div class="col-12">
                             <div class="card">
+                                <div class="row">
+                                    <div class="col-md-9">
+                                        <div class="d-flex align-items-center">
+                                            <form action="<?= cleanValue($_SERVER['PHP_SELF']); ?>" method="get" class="d-flex">
+                                                <label for="inputFromMonth" class="mt-3 mx-4">From</label>
+                                                <select name="filter_from_month" id="inputFromMonth" class="form-select form-control mt-2 mb-5">
+                                                    <option value="">Select Month</option>
+                                                    <option value="01" <?php echo ($selectedStartMonth == '01') ? 'selected' : ''; ?>>January</option>
+                                                    <option value="02" <?php echo ($selectedStartMonth == '02') ? 'selected' : ''; ?>>February</option>
+                                                    <option value="03" <?php echo ($selectedStartMonth == '03') ? 'selected' : ''; ?>>March</option>
+                                                    <option value="04" <?php echo ($selectedStartMonth == '04') ? 'selected' : ''; ?>>April</option>
+                                                    <option value="05" <?php echo ($selectedStartMonth == '05') ? 'selected' : ''; ?>>May</option>
+                                                    <option value="06" <?php echo ($selectedStartMonth == '06') ? 'selected' : ''; ?>>June</option>
+                                                    <option value="07" <?php echo ($selectedStartMonth == '07') ? 'selected' : ''; ?>>July</option>
+                                                    <option value="08" <?php echo ($selectedStartMonth == '08') ? 'selected' : ''; ?>>August</option>
+                                                    <option value="09" <?php echo ($selectedStartMonth == '09') ? 'selected' : ''; ?>>September</option>
+                                                    <option value="10" <?php echo ($selectedStartMonth == '10') ? 'selected' : ''; ?>>October</option>
+                                                    <option value="11" <?php echo ($selectedStartMonth == '11') ? 'selected' : ''; ?>>November</option>
+                                                    <option value="12" <?php echo ($selectedStartMonth == '12') ? 'selected' : ''; ?>>December</option>
+                                                </select>
+                                                <label for="inputToMonth" class="mt-3 mx-4">To</label>
+                                                <select name="filter_to_month" id="inputToMonth" class="form-select form-control mt-2 mb-5">
+                                                    <option value="">Select Month</option>
+                                                    <option value="01" <?php echo ($selectedEndMonth == '01') ? 'selected' : ''; ?>>January</option>
+                                                    <option value="02" <?php echo ($selectedEndMonth == '02') ? 'selected' : ''; ?>>February</option>
+                                                    <option value="03" <?php echo ($selectedEndMonth == '03') ? 'selected' : ''; ?>>March</option>
+                                                    <option value="04" <?php echo ($selectedEndMonth == '04') ? 'selected' : ''; ?>>April</option>
+                                                    <option value="05" <?php echo ($selectedEndMonth == '05') ? 'selected' : ''; ?>>May</option>
+                                                    <option value="06" <?php echo ($selectedEndMonth == '06') ? 'selected' : ''; ?>>June</option>
+                                                    <option value="07" <?php echo ($selectedEndMonth == '07') ? 'selected' : ''; ?>>July</option>
+                                                    <option value="08" <?php echo ($selectedEndMonth == '08') ? 'selected' : ''; ?>>August</option>
+                                                    <option value="09" <?php echo ($selectedEndMonth == '09') ? 'selected' : ''; ?>>September</option>
+                                                    <option value="10" <?php echo ($selectedEndMonth == '10') ? 'selected' : ''; ?>>October</option>
+                                                    <option value="11" <?php echo ($selectedEndMonth == '11') ? 'selected' : ''; ?>>November</option>
+                                                    <option value="12" <?php echo ($selectedEndMonth == '12') ? 'selected' : ''; ?>>December</option>
+                                                </select>
+                                                <button type="submit" class="btn btn-sm btn-primary mb-5 mt-2 mx-2">Search</button>
+                                                <a class="btn btn-sm btn-warning mb-5 mt-2 mx-2 t-white" href="<?php echo cleanValue($_SERVER['PHP_SELF']); ?>">Reset</a>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="table-responsive">
                                     <table id="reportOvertimes" class="table mb-0 mt-3 d-nowarp">
                                         <thead>
                                             <tr>
-                                                <th class="non-orderable">Nama</th>
+                                                <td class="non-orderable">Name Project</td>
                                                 <?php foreach ($projectOptions as $project) : ?>
-                                                    <th colspan="3" class="text-center"><?php echo $project['project_name'] ?></th>
+                                                    <td colspan="3" class="text-center"><?php echo $project['project_name'] ?></td>
                                                 <?php endforeach; ?>
-                                                <th colspan="3" class="text-center">TOTAL</th>
+                                                <td colspan="3" class="text-center">TOTAL</td>
                                             </tr>
                                             <tr>
-                                                <th scope="col"></th>
+                                                <td scope="col">Name</td>
                                                 <?php foreach ($projectOptions as $project) : ?>
-                                                    <th scope="col">Normal</th>
-                                                    <th scope="col">Holiday</th>
-                                                    <th scope="col" style="min-width: 90px;">On Duty</th>
+                                                    <td scope="col">Normal</td>
+                                                    <td scope="col">Holiday</td>
+                                                    <td scope="col" style="min-width: 90px;">On Duty</td>
                                                 <?php endforeach; ?>
-                                                <th scope="col">Normal</th>
-                                                <th scope="col">Holiday</th>
-                                                <th scope="col" style="min-width: 90px;">On Duty</th>
+                                                <td scope="col">Normal</td>
+                                                <td scope="col">Holiday</td>
+                                                <td scope="col" style="min-width: 90px;">On Duty</td>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -83,26 +129,22 @@ $userOptions = mysqli_fetch_all($userData, MYSQLI_ASSOC);
                                                     <tr>
                                                         <td><?php echo $employee['name'] ?></td>
                                                         <?php
-                                                        // Inisialisasi nilai total normal, holiday, dan on duty
                                                         $totalNormalDays = 0;
                                                         $totalHolidayDays = 0;
                                                         $totalOnDutyDays = 0;
                                                         ?>
                                                         <?php foreach ($projectOptions as $project) : ?>
                                                             <?php
-                                                            // Query untuk mengambil data overtimes sesuai user_id, project_id, dan kategori tertentu
-                                                            $overtimeQuery = "SELECT category, status FROM overtimes WHERE user_id = ? AND project_id = ? AND category IN ('Weekday', 'Weekend')";
+                                                            $overtimeQuery = "SELECT category, status FROM overtimes WHERE user_id = ? AND project_id = ? AND category IN ('Weekday', 'Weekend') AND MONTH(start_date) BETWEEN ? AND ?";
                                                             $overtimeData = mysqli_prepare($conn, $overtimeQuery);
-                                                            mysqli_stmt_bind_param($overtimeData, "ii", $employee['user_id'], $project['project_id']);
+                                                            mysqli_stmt_bind_param($overtimeData, "iiii", $employee['user_id'], $project['project_id'], $selectedStartMonth, $selectedEndMonth);
                                                             mysqli_stmt_execute($overtimeData);
                                                             $overtimeResult = mysqli_stmt_get_result($overtimeData);
 
-                                                            // Inisialisasi nilai normal, holiday, dan on duty untuk proyek tertentu
                                                             $normalDays = 0;
                                                             $holidayDays = 0;
                                                             $onDutyDays = 0;
 
-                                                            // Loop through hasil overtimes
                                                             while ($overtime = mysqli_fetch_assoc($overtimeResult)) {
                                                                 if ($overtime['category'] == 'Weekday' && $overtime['status'] == 'Approved') {
                                                                     $normalDays++;
@@ -111,21 +153,18 @@ $userOptions = mysqli_fetch_all($userData, MYSQLI_ASSOC);
                                                                 }
                                                             }
 
-                                                            // Query untuk mengambil data duty_overtimes sesuai user_id, project_id, dan status tertentu
-                                                            $dutyOvertimeQuery = "SELECT status FROM duty_overtimes WHERE user_id = ? AND project_id = ?";
+                                                            $dutyOvertimeQuery = "SELECT status FROM duty_overtimes WHERE user_id = ? AND project_id = ? AND MONTH(start_date) BETWEEN ? AND ?";
                                                             $dutyOvertimeData = mysqli_prepare($conn, $dutyOvertimeQuery);
-                                                            mysqli_stmt_bind_param($dutyOvertimeData, "ii", $employee['user_id'], $project['project_id']);
+                                                            mysqli_stmt_bind_param($dutyOvertimeData, "iiii", $employee['user_id'], $project['project_id'], $selectedStartMonth, $selectedEndMonth);
                                                             mysqli_stmt_execute($dutyOvertimeData);
                                                             $dutyOvertimeResult = mysqli_stmt_get_result($dutyOvertimeData);
 
-                                                            // Loop through hasil duty_overtimes
                                                             while ($dutyOvertime = mysqli_fetch_assoc($dutyOvertimeResult)) {
                                                                 if ($dutyOvertime['status'] == 'Approved') {
                                                                     $onDutyDays++;
                                                                 }
                                                             }
 
-                                                            // Tambahkan ke total
                                                             $totalNormalDays += $normalDays;
                                                             $totalHolidayDays += $holidayDays;
                                                             $totalOnDutyDays += $onDutyDays;
