@@ -64,7 +64,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       $finishDateErr = "Finish Date cannot be earlier than Start Date.";
     }
 
-    // ...
+    // Validasi tambahan untuk kategori "Annual"
+    if ($category == "Annual") {
+      $minAdvanceDays = 14; // Minimum advance days for Annual leave
+
+      $currentDate = strtotime(date('Y-m-d'));
+      $leaveStartDate = strtotime($startDate);
+
+      // Hitung selisih hari antara tanggal pengajuan dan tanggal mulai cuti
+      $advanceDays = ceil(($leaveStartDate - $currentDate) / (60 * 60 * 24));
+
+      if ($advanceDays < $minAdvanceDays) {
+        $startDateErr = "For Annual leave, leave request must be made at least $minAdvanceDays days in advance.";
+      }
+    }
 
     // Validasi nama dan tanggal sebelum penyisipan
     if (empty($fullnameErr) && empty($divisionErr) && empty($reasonErr) && empty($categoryErr) && empty($startDateErr) && empty($finishDateErr)) {
