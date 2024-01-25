@@ -151,10 +151,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                     $newStatus = ($_POST['submit'] === "Rejected") ? 'Rejected' : 'Approved';
                     if ($type === "Urgent") {
                         $updateQuery = "UPDATE overtimes SET status = ?, status_updated_by = ?, status_updated_at = NOW() WHERE overtime_id = ?";
+                    } elseif ($type === "Normal" && $_POST['submit'] === "Check") {
+                        $updateQuery = "UPDATE overtimes SET checked_by_leader_at = NOW(), checked_by_leader = ?, updated_by = ? WHERE overtime_id = ?";
                     } elseif ($type === "Normal" && $_POST['submit'] === "Rejected") {
                         $updateQuery = "UPDATE overtimes SET status = ?, checked_by_leader = ?, checked_by_leader_at = NOW(), status_updated_by = ?, status_updated_at = NOW() WHERE overtime_id = ?";
-                    } else {
-                        $updateQuery = "UPDATE overtimes SET checked_by_leader_at = NOW(), checked_by_leader = ?, updated_by = ? WHERE overtime_id = ?";
                     }
                 } elseif ($user_role === 3) { // Jika peran adalah "admin"
                     $newStatus = ($_POST['submit'] === "Rejected") ? 'Rejected' : 'Approved';
@@ -171,7 +171,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                         mysqli_stmt_bind_param($updateStatement, "sii", $newStatus, $user_id, $overtimeId);
                     } elseif ($user_role === 2 && $type === "Urgent") {
                         mysqli_stmt_bind_param($updateStatement, "sii", $newStatus, $user_id, $overtimeId);
-                    } elseif ($user_role === 2 && $type === "Normal") {
+                    } elseif ($user_role === 2 && $type === "Normal" && $_POST['submit'] === "Check") {
+                        mysqli_stmt_bind_param($updateStatement, "iii",$user_id, $user_id, $overtimeId);
+                    } elseif ($user_role === 2 && $type === "Normal" && $_POST['submit'] === "Rejected") {
                         mysqli_stmt_bind_param($updateStatement, "siii", $newStatus, $user_id, $user_id, $overtimeId);
                     } else {
                         mysqli_stmt_bind_param($updateStatement, "iii", $user_id, $user_id, $overtimeId);
@@ -375,7 +377,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                                                 <?php if ($value['type'] == 'Urgent') : ?>
                                                                     <td><button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['status_updated_by'] ? "{$value['status']} leader" : "Pending" ?></button></td>
                                                                 <?php else : ?>
-                                                                    <td><button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['checked_by_leader'] ? "{$value['status']}" : "Pending" ?></button></td>
+                                                                    <td><button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['checked_by_leader'] ? "{$value['status']} Leader" : "Pending" ?></button></td>
                                                                 <?php endif; ?>
                                                                 <td>
                                                                     <button class="btn btn-sm text-white <?= $statusClass ?>" disabled><?= $value['submitted_by_admin'] ? "{$value['status']} supervisor" : "{$value['status']} supervisor" ?></button>
