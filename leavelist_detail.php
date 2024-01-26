@@ -104,19 +104,23 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                                     </tr>
                                 </tbody>
                             </table>
-
-                            <!-- Tambahkan tombol Print dan Export PDF -->
-                            <div class="mt-3">
-                                <div class="float-end">
-                                    <button id="printButton" class="btn btn-primary btn-sm" onclick="printDocument()">Print</button>
-                                    <button id="exportPDFButton" class="btn btn-danger btn-sm ms-2" onclick="exportPDF()">Export PDF</button>
+                            <?php
+                            if ($_SESSION["role_id"] === 3 || $_SESSION["role_id"] === 4) : ?>
+                                <!-- Tambahkan tombol Print dan Export PDF -->
+                                <div class="mt-3">
+                                    <div class="float-end">
+                                        <button id="exportPDFButton" class="btn btn-danger btn-sm ms-2" onclick="exportPDF()">Export PDF</button>
+                                        <button id="printButton" class="btn btn-primary btn-sm" onclick="printDocument()">Print</button>
+                                    </div>
+                                    <a id="backButton" href="leavelist.php" class="btn btn-warning btn-sm ms-2">Back</a>
+                                    <!-- Tulisan tanda tangan -->
+                                    <div id="signature" class="signature text-end mt-3" style="display: none;">
+                                        Tanda tangan
+                                    </div>
                                 </div>
+                            <?php else : ?>
                                 <a id="backButton" href="leavelist.php" class="btn btn-warning btn-sm ms-2">Back</a>
-                                <!-- Tulisan tanda tangan -->
-                                <div id="signature" class="signature text-end mt-3" style="display: none;">
-                                    Tanda tangan
-                                </div>
-                            </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -202,7 +206,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
         // Attach beforePrint and afterPrint events
         if (window.matchMedia) {
             var mediaQueryList = window.matchMedia('print');
-            mediaQueryList.addListener(function (mql) {
+            mediaQueryList.addListener(function(mql) {
                 if (mql.matches) {
                     beforePrint();
                 } else {
